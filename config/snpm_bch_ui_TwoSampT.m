@@ -26,6 +26,14 @@ DesHelp = {'',...
 	  'stuff.',...
 	  };
 
+% Group memberships
+group_memb         = cfg_entry;
+group_memb.tag     = 'group_memb';
+group_memb.name    = 'Group membership';%Name displayed in the batch tree
+group_memb.help    = {'Enter subject index: (A/B)'};
+group_memb.strtype = 's'; % string
+group_memb.num     = [1 Inf]; % Expected format  
+  
 % Number of Covariates
 cv_none         = cfg_const;
 cv_none.tag     = 'cv_none';
@@ -55,4 +63,4 @@ covariate.values  = {cv_none cov_Val };
 
 
 %% Executable Branch
-snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{covariate});
+snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{group_memb covariate});

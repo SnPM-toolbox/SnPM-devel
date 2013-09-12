@@ -112,57 +112,132 @@ iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iCond GrpCnt';	% PlugIn variables to save in cfg file
 rand('seed',sum(100*clock));	% Initialise random number generator
 
-%-Get filenames and iCond, the condition labels
-%=======================================================================
-P = spm_select(Inf,'image','Select all scans');
-nScan = size(P,1);
-
-%-Get the condition (group) labels
-%=======================================================================
-while(1)
-    tmp=['Enter subject index: (A/B) [',int2str(nScan),']'];
-    iCond = spm_input(tmp,'+1','s');
-    %-Convert A/B notation to +/-1 vector - assume A-B is of interest
-    iCond = abs(upper(iCond(~isspace(iCond))));
-    iCond = iCond-min(iCond); iCond = -iCond/max([1,iCond])*2+1;
-    %-Check validity of iCond
-    if sum(iCond==-1)+sum(iCond==1)~=nScan
-        fprintf(2,'%cMore than 2 types of indicies entered',7)
-    elseif length(iCond)~=nScan
-	fprintf(2,'%cEnter indicies for exactly %d scans',7,nScan)
-    else
-	break	
-    end	
+% If not in BATCH mode then build the job tree by interacting with the user
+if ~BATCH
+    %-Get filenames and iCond, the condition labels
+    %=======================================================================
+    P = spm_select(Inf,'image','Select all scans');
+    nScan = size(P,1);
+    job.P = str2cell(P);
+    
+    %-Get the condition (group) labels
+    %=======================================================================
+    while(1)
+        tmp=['Enter subject index: (A/B) [',int2str(nScan),']'];
+        iCond = spm_input(tmp,'+1','s');
+        %-Convert A/B notation to +/-1 vector - assume A-B is of interest
+        iCond = abs(upper(iCond(~isspace(iCond))));
+        iCond = iCond-min(iCond); iCond = -iCond/max([1,iCond])*2+1;
+        %-Check validity of iCond
+        if sum(iCond==-1)+sum(iCond==1)~=nScan
+            fprintf(2,'%cMore than 2 types of indicies entered',7)
+        elseif length(iCond)~=nScan
+            fprintf(2,'%cEnter indicies for exactly %d scans',7,nScan)
+        else
+            break	
+        end	
+    end
+    job.group_memb_binary = iCond;
+    
+    %-Get confounding covariates
+    %-----------------------------------------------------------------------
+    G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
+    g = spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
+    if (g == 6), 
+        g = spm_input('# of confounding covariates','+1'); 
+    end
+    
+    while size(Gc,2) < g
+      nGcs = size(Gc,2);
+      d = spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
+      if (size(d,1) == 1), 
+          d = d'; 
+      end
+      if size(d,1) == q
+        %-Save raw covariates for printing later on
+        Gc = [Gc,d];
+% Center later on         
+%         %-Always Centre the covariate
+%         bCntr = 1;	    
+%         if bCntr, 
+%             d  = d - ones(q,1)*mean(d); str=''; 
+%         else 
+%             str = 'r'; 
+%         end
+%         G = [G, d];
+        dnames = [str,'ConfCov#',int2str(nGcs+1)];
+        for i = nGcs+1:nGcs+size(d,1)
+          dnames = str2mat(dnames,['ConfCov#',int2str(i)]); 
+        end
+        Gcnames = str2mat(Gcnames,dnames);
+      end
+    end
+    %-Strip off blank line from str2mat concatenations
+    if size(Gc,2), Gcnames(1,:)=[]; end
+    %-Since no FxC interactions these are the same
+    Gnames = Gcnames;
+    % Store Raw (uncentered) covarariates values in job
+    job.covariate.cov_Val(:) = G;
+    
+    %-Does the user want to use approximate permutation?
+    %-------------------------------------------------------
+    job.approxPerm = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond_mx),...
+							'+1','y/n')=='y';
+                        
+    if ~job.approxPerm
+        nPiCond_mx = round(exp(gammaln(nScan+1)-gammaln(nScan-nFlip+1)-gammaln(nFlip+1)));
+        tmp = 0;
+        while ((tmp>nPiCond_mx) | (tmp==0) )
+            tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond_mx),'+0');
+            tmp = floor(max([0,tmp]));
+        end
+        
+        job.nPerm = tmp;
+    end
+                        
 end
-nFlip = sum(iCond==-1);
 
-%-Get confounding covariates
+nScan = size(job.P,1);
+
+%-Convert group memberships letters into +1/-1 (group_memb exists for BATCH 
+% only ), to be deleted or moved later on
 %-----------------------------------------------------------------------
-G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
-g = spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
-if (g == 6), g = spm_input('# of confounding covariates','+1'); end
-while size(Gc,2) < g
-  nGcs = size(Gc,2);
-  d = spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
-  if (size(d,1) == 1), d = d'; end
-  if size(d,1) == q
-    %-Save raw covariates for printing later on
-    Gc = [Gc,d];
-    %-Always Centre the covariate
-    bCntr = 1;	    
-    if bCntr, d  = d - ones(q,1)*mean(d); str=''; else, str='r'; end
-    G = [G, d];
-    dnames = [str,'ConfCov#',int2str(nGcs+1)];
-    for i = nGcs+1:nGcs+size(d,1)
-      dnames = str2mat(dnames,['ConfCov#',int2str(i)]); end
-    Gcnames = str2mat(Gcnames,dnames);
-  end
+if isfield(job, 'group_memb')
+    iCond = abs(upper(job.group_memb(~isspace(job.group_memb))));
+    iCond = iCond-min(iCond); 
+    iCond = -iCond/max([1,iCond])*2+1;
+    job.group_memb_binary = iCond;
 end
-%-Strip off blank line from str2mat concatenations
-if size(Gc,2), Gcnames(1,:)=[]; end
-%-Since no FxC interactions these are the same
-Gnames = Gcnames;
 
+%-Center confounding covariates
+%-----------------------------------------------------------------------
+if isfield(job.covariate,'cov_Val')
+    %d = job.covariate.cov_Val(:);
+    if (size(job.covariate.cov_Val,1) == 1), 
+        job.covariate.cov_Val = job.covariate.cov_Val'; 
+    end
+    nGcs = size(Gc,2);
+    q = nScan;
+    if size(job.covariate.cov_Val(:),1) ~= q
+      error('Covariate [%d,1] does not match number of subjects [%d]',...
+            size(job.covariate,1),nScan)
+    else
+      % Center column by colmun
+      job.covariate.cov_Val_ctr = job.covariate.cov_Val - repmat(mean(job.covariate.cov_Val), q,1);
+      Gcnames = strcat('ConfCov#',int2str([1:nGcs]'));
+    end
+end
+  
+
+%-Link job structure with variables used by snpm processing function
+%(create a snpm_run_XXX function to map these or Remove this step 
+% completely by prefixing the variables by job. everywhere in the code?)
+% Probably first solution is cleaner
+%----------------------------------------------------------------------
+iCond = job.group_memb_binary;
+% Gc = job.covariate.cov_Val_ctr;
+P = strvcat (job.P);
+nFlip = sum(iCond==-1);
 
 %-Compute permutations of conditions
 %=======================================================================
@@ -170,14 +245,16 @@ Gnames = Gcnames;
 %-----------------------------------------------------------------------
 %-NB: m-Choose-n = exp(gammaln(m+1)-gammaln(m-n+1)-gammaln(n+1))
 nPiCond_mx = round(exp(gammaln(nScan+1)-gammaln(nScan-nFlip+1)-gammaln(nFlip+1)));
-bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond_mx),...
-							'+1','y/n')=='y';
+if job.nPerm >= nPiCond_mx
+    bAproxTst=0;
+%         nPiCond = nPiCond_mx;
+    fprintf('Running fewer permutations than originally requested.\n')
+else
+    bAproxTst=1;
+%         nPiCond = job.nPerm;
+end
 if (bAproxTst)
-  tmp = 0;
-  while ((tmp>nPiCond_mx) | (tmp==0) )
-    tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond_mx),'+0');
-    tmp = floor(max([0,tmp]));
-  end
+  tmp = job.nPerm;
   nPiCond=tmp;
   if (tmp==nPiCond_mx), bAproxTst=0; end
 else
