@@ -305,7 +305,7 @@ nScan = size(P,1);
 %-Ask about variance smoothing & volumetric computation
 %-----------------------------------------------------------------------
 if BATCH
-  vFHWM = job.vFWHM;
+  vFWHM = job.vFWHM;
 else
   vFWHM = spm_input('FWHM(mm) for Variance smooth','+1','e',0);
 end
