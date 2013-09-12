@@ -118,7 +118,7 @@ if ~BATCH
     %=======================================================================
     P = spm_select(Inf,'image','Select all scans');
     nScan = size(P,1);
-    job.P = str2cell(P);
+    job.P = cellstr(P);
     
     %-Get the condition (group) labels
     %=======================================================================
@@ -147,15 +147,15 @@ if ~BATCH
         g = spm_input('# of confounding covariates','+1'); 
     end
     
-    while size(Gc,2) < g
-      nGcs = size(Gc,2);
-      d = spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
+    while size(G,2) < g
+      nGs = size(G,2);
+      d = spm_input(sprintf('[%d] - Covariate %d',[q,nGs + 1]),'0');
       if (size(d,1) == 1), 
           d = d'; 
       end
       if size(d,1) == q
         %-Save raw covariates for printing later on
-        Gc = [Gc,d];
+%         Gc = [Gc,d];
 % Center later on         
 %         %-Always Centre the covariate
 %         bCntr = 1;	    
@@ -164,28 +164,34 @@ if ~BATCH
 %         else 
 %             str = 'r'; 
 %         end
-%         G = [G, d];
-        dnames = [str,'ConfCov#',int2str(nGcs+1)];
-        for i = nGcs+1:nGcs+size(d,1)
+        G = [G, d];
+        dnames = [str,'ConfCov#',int2str(nGs+1)];
+        for i = nGs+1:nGs+size(d,1)
           dnames = str2mat(dnames,['ConfCov#',int2str(i)]); 
         end
-        Gcnames = str2mat(Gcnames,dnames);
+        Gnames = str2mat(Gnames,dnames);
       end
     end
     %-Strip off blank line from str2mat concatenations
-    if size(Gc,2), Gcnames(1,:)=[]; end
+    if size(G,2), Gnames(1,:)=[]; end
     %-Since no FxC interactions these are the same
-    Gnames = Gcnames;
-    % Store Raw (uncentered) covarariates values in job
-    job.covariate.cov_Val(:) = G;
+    Gnames = Gnames;
+    if g > 0
+        % Store Raw (uncentered) covarariates values in job
+        job.covariate.cov_Val(:) = G;
+    else
+        % TODO check
+        job.covariate.cov_none = 1;
+    end
     
     %-Does the user want to use approximate permutation?
     %-------------------------------------------------------
+    nFlip = sum(iCond==-1);
+    nPiCond_mx = round(exp(gammaln(nScan+1)-gammaln(nScan-nFlip+1)-gammaln(nFlip+1)));
     job.approxPerm = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond_mx),...
 							'+1','y/n')=='y';
                         
-    if ~job.approxPerm
-        nPiCond_mx = round(exp(gammaln(nScan+1)-gammaln(nScan-nFlip+1)-gammaln(nFlip+1)));
+    if job.approxPerm
         tmp = 0;
         while ((tmp>nPiCond_mx) | (tmp==0) )
             tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond_mx),'+0');
@@ -193,6 +199,8 @@ if ~BATCH
         end
         
         job.nPerm = tmp;
+    else
+        job.nPerm = nPiCond_mx;
     end
                         
 end
