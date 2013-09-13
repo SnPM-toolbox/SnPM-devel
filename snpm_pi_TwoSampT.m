@@ -165,6 +165,7 @@ if ~BATCH
 %             str = 'r'; 
 %         end
         G = [G, d];
+        str = '';
         dnames = [str,'ConfCov#',int2str(nGs+1)];
         for i = nGs+1:nGs+size(d,1)
           dnames = str2mat(dnames,['ConfCov#',int2str(i)]); 
@@ -178,7 +179,7 @@ if ~BATCH
     Gnames = Gnames;
     if g > 0
         % Store Raw (uncentered) covarariates values in job
-        job.covariate.cov_Val(:) = G;
+        job.covariate.cov_Val = G;
     else
         % TODO check
         job.covariate.cov_none = 1;
@@ -233,6 +234,9 @@ if isfield(job.covariate,'cov_Val')
       % Center column by colmun
       job.covariate.cov_Val_ctr = job.covariate.cov_Val - repmat(mean(job.covariate.cov_Val), q,1);
       Gcnames = strcat('ConfCov#',int2str([1:nGcs]'));
+      
+      % variable G must store centered covariate
+      G = job.covariate.cov_Val_ctr;
     end
 end
   
