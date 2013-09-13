@@ -75,13 +75,14 @@ function assert_check(batchResDir, interResDir, interNewResDir)
     assertEqual(spm_read_vols(spm_vol(batch_tmap)), spm_read_vols(spm_vol(inter_tmap)))
     assertEqual(spm_read_vols(spm_vol(batch_filtmap)), spm_read_vols(spm_vol(inter_filtmap)))
     
-    % Equality of new interactive with "ground truth" from previous snpm
-    % version
-    inter_new_tmap = spm_select('FPList', interNewResDir, '^snpmT\+\.img');
-    inter_new_filtmap = spm_select('FPList', interNewResDir, '^SnPMt_filtered_10none\.img');
-    
-    assertEqual(spm_read_vols(spm_vol(inter_new_tmap)), spm_read_vols(spm_vol(inter_tmap)))
-    assertEqual(spm_read_vols(spm_vol(inter_new_filtmap)), spm_read_vols(spm_vol(inter_filtmap)))
+    % Useless, do not keep spm2-like interface
+%     % Equality of new interactive with "ground truth" from previous snpm
+%     % version
+%     inter_new_tmap = spm_select('FPList', interNewResDir, '^snpmT\+\.img');
+%     inter_new_filtmap = spm_select('FPList', interNewResDir, '^SnPMt_filtered_10none\.img');
+%     
+%     assertEqual(spm_read_vols(spm_vol(inter_new_tmap)), spm_read_vols(spm_vol(inter_tmap)))
+%     assertEqual(spm_read_vols(spm_vol(inter_new_filtmap)), spm_read_vols(spm_vol(inter_filtmap)))
 end
 
 % Must *not* have "test" in the name of this generic function

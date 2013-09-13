@@ -100,11 +100,7 @@ end
 
 %-Get filenames and iCond, the condition labels
 %=======================================================================
-if BATCH
-    P = strvcat (job.P);
-else
-    P = spm_select(Inf,'image','Select all scans');
-end
+P = strvcat (job.P);
 nScan = size(P,1);
 
 iCond = ones(1,nScan);
@@ -113,74 +109,36 @@ nFlip = 0;
 %-Get confounding covariates
 %-----------------------------------------------------------------------
 G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
-if BATCH
-  if numel(job.mcov) > 0 %isfield(job.covariate,'cov_Val')
-      for i = 1:numel(job.mcov)
-        d = job.mcov(i).c;
-        if (size(d,1) == 1), 
-            d = d'; 
-        end
-        nGcs = size(Gc,2);
-        if size(d,1) ~= q
-            error(sprintf('Covariate [%d,1] does not match number of subjects [%d]',...
-                size(job.mcov(i).c,1),nScan))
-        else
-            %-Save raw covariates for printing later on
-            Gc = [Gc,d];
-            % Center
-            d  = d - ones(q,1)*mean(d); str=''; 
-            G = [G, d];
-            dnames = [str,'ConfCov#',int2str(nGcs+1)];
-            for j = nGcs+1:nGcs+size(d,1)
-                dnames = str2mat(dnames,['ConfCov#',int2str(j)]); 
-            end
-            Gcnames = str2mat(Gcnames,dnames);
-        end 
-        %-Strip off blank line from str2mat concatenations
-        if size(Gc,2), 
-            Gcnames(1,:)=[]; 
-        end
-      end
-  end
-else
-  g = spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
-  if (g == 6), 
-    g = spm_input('# of confounding covariates','+1'); 
-  end
-  while size(Gc,2) < g
-    nGcs = size(Gc,2);
-    d = spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
+if numel(job.mcov) > 0 %isfield(job.covariate,'cov_Val')
+  for i = 1:numel(job.mcov)
+    d = job.mcov(i).c;
     if (size(d,1) == 1), 
-      d = d'; 
+        d = d'; 
     end
-    if size(d,1) == q
-      %-Save raw covariates for printing later on
-      Gc = [Gc,d];
-      %-Always Centre the covariate
-      bCntr = 1;	    
-      if bCntr, 
-	d  = d - ones(q,1)*mean(d); str=''; 
-      else, 
-	str='r'; 
-      end
-      G = [G, d];
-      dnames = [str,'ConfCov#',int2str(nGcs+1)];
-      for i = nGcs+1:nGcs+size(d,1)
-	dnames = str2mat(dnames,['ConfCov#',int2str(i)]); 
-      end
-      Gcnames = str2mat(Gcnames,dnames);
+    nGcs = size(Gc,2);
+    if size(d,1) ~= q
+        error(sprintf('Covariate [%d,1] does not match number of subjects [%d]',...
+            size(job.mcov(i).c,1),nScan))
+    else
+        %-Save raw covariates for printing later on
+        Gc = [Gc,d];
+        % Center
+        d  = d - ones(q,1)*mean(d); str=''; 
+        G = [G, d];
+        dnames = [str,'ConfCov#',int2str(nGcs+1)];
+        for j = nGcs+1:nGcs+size(d,1)
+            dnames = str2mat(dnames,['ConfCov#',int2str(j)]); 
+        end
+        Gcnames = str2mat(Gcnames,dnames);
+    end 
+    %-Strip off blank line from str2mat concatenations
+    if size(Gc,2), 
+        Gcnames(1,:)=[]; 
     end
-  end
-  %-Strip off blank line from str2mat concatenations
-  if size(Gc,2), 
-    Gcnames(1,:)=[]; 
   end
 end
 %-Since no FxC interactions these are the same
 Gnames = Gcnames;
-
-
-
 
 
 %-Compute permutations of subjects (we'll call them scans)
@@ -189,31 +147,15 @@ Gnames = Gcnames;
 %-----------------------------------------------------------------------
 nPiCond_mx = 2^nScan;
 fprintf('\nNOTE: Number of possible permutations for this design is %d\n',nPiCond_mx)
-if BATCH
-  if job.nPerm >= nPiCond_mx
+if job.nPerm >= nPiCond_mx
     bAproxTst=0;
-    nPiCond = nPiCond_mx;
-    fprintf('Running fewer permutations than originally requested.\n')
-  else
+    if job.nPerm > nPiCond_mx
+        nPiCond = nPiCond_mx;
+        fprintf('Running fewer permutations than originally requested.\n')
+    end
+else
     bAproxTst=1;
     nPiCond = job.nPerm;
-  end
-  
-else
-
-bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond_mx),...
-							'+1','y/n')=='y';
-if (bAproxTst)
-  tmp = 0;
-  while ((tmp>nPiCond_mx) | (tmp==0) )
-    tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond_mx),'+0');
-    tmp = floor(max([0,tmp]));
-  end
-  nPiCond=tmp;
-  if (tmp==nPiCond_mx), bAproxTst=0; end
-else
-  nPiCond=nPiCond_mx;
-end
 end
 snpm_check_nperm(nPiCond,nPiCond_mx);
 
