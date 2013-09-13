@@ -110,7 +110,10 @@
 nCond    = 2;			% Number of conditions (groups)
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iCond GrpCnt';	% PlugIn variables to save in cfg file
-rand('seed',sum(100*clock));	% Initialise random number generator
+global TEST;
+if isempty(TEST) || ~TEST % When testing the code we need a fixed seed
+    rand('seed',sum(100*clock));	% Initialise random number generator
+end
 
 % If not in BATCH mode then build the job tree by interacting with the user
 if ~BATCH
