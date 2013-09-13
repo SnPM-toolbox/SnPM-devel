@@ -150,6 +150,7 @@ if ~BATCH
         g = spm_input('# of confounding covariates','+1'); 
     end
     
+    job.mcov = struct('c', {}, 'cname', {});
     while size(G,2) < g
       nGs = size(G,2);
       d = spm_input(sprintf('[%d] - Covariate %d',[q,nGs + 1]),'0');
@@ -170,6 +171,8 @@ if ~BATCH
         G = [G, d];
         str = '';
         dnames = [str,'ConfCov#',int2str(nGs+1)];
+        
+        job.mcov(end+1).c = d;
         for i = nGs+1:nGs+size(d,1)
           dnames = str2mat(dnames,['ConfCov#',int2str(i)]); 
         end
@@ -180,13 +183,13 @@ if ~BATCH
     if size(G,2), Gnames(1,:)=[]; end
     %-Since no FxC interactions these are the same
     Gnames = Gnames;
-    if g > 0
-        % Store Raw (uncentered) covarariates values in job
-        job.covariate.cov_Val = G;
-    else
-        % TODO check
-        job.covariate.cov_none = 1;
-    end
+%     if g > 0
+%         % Store Raw (uncentered) covarariates values in job
+%         job.covariate.cov_Val = G;
+%     else
+%         % TODO check
+%         job.covariate.cov_none = 1;
+%     end
     
     %-Does the user want to use approximate permutation?
     %-------------------------------------------------------
@@ -223,24 +226,29 @@ end
 
 %-Center confounding covariates
 %-----------------------------------------------------------------------
-if isfield(job.covariate,'cov_Val')
-    %d = job.covariate.cov_Val(:);
-    if (size(job.covariate.cov_Val,1) == 1), 
-        job.covariate.cov_Val = job.covariate.cov_Val'; 
+G = []; Gnames = '';
+if numel(job.mcov) > 0%isfield(job.covariate,'cov_Val')
+    for i = 1:numel(job.mcov)
+        %d = job.covariate.cov_Val(:);
+        if (size(job.mcov(i).c,1) == 1), 
+            job.mcov(i).c = job.mcov(i).c'; 
+        end
+        nGcs = size(Gc,2);
+        q = nScan;
+        if size(job.mcov(i).c(:),1) ~= q
+          error('Covariate [%d,1] does not match number of subjects [%d]',...
+                size(job.covariate,1),nScan)
+        else
+          % Center column by colmun
+          job.mcov(i).c_ctr = job.mcov(i).c - ones(q,1)*mean(job.mcov(i).c);
+          Gcnames = str2mat(Gcnames,'ConfCov#',int2str([1:nGcs]'));
+
+          % variable G must store centered covariate
+          d = job.mcov(i).c_ctr;
+          G = [G, d];
+        end
     end
-    nGcs = size(Gc,2);
-    q = nScan;
-    if size(job.covariate.cov_Val(:),1) ~= q
-      error('Covariate [%d,1] does not match number of subjects [%d]',...
-            size(job.covariate,1),nScan)
-    else
-      % Center column by colmun
-      job.covariate.cov_Val_ctr = job.covariate.cov_Val - repmat(mean(job.covariate.cov_Val), q,1);
-      Gcnames = strcat('ConfCov#',int2str([1:nGcs]'));
-      
-      % variable G must store centered covariate
-      G = job.covariate.cov_Val_ctr;
-    end
+    Gnames = Gcnames;
 end
   
 
@@ -250,7 +258,7 @@ end
 % Probably first solution is cleaner
 %----------------------------------------------------------------------
 iCond = job.group_memb_binary;
-% Gc = job.covariate.cov_Val_ctr;
+% Gc = job.mcov(i).c_ctr;
 P = strvcat (job.P);
 nFlip = sum(iCond==-1);
 

@@ -17,12 +17,26 @@ end
 function matlabbatch = twosample_1_batch(matlabbatch)
 end
 
-% With one covariate
+% With 1 covariate
 function test_twosample_cov()
     generic_for_all();
 end
 function matlabbatch = twosample_cov_batch(matlabbatch)
-    matlabbatch{1}.cfg_snpm.Design.TwoSampT.covariate.cov_Val = [1 5 2 21 0 3 6 14 8 5];
+    matlabbatch{1}.cfg_snpm.Design.TwoSampT.mcov.c = [1 5 2 21 0 3 6 14 8 5];
+    matlabbatch{1}.cfg_snpm.Design.TwoSampT.mcov.cname = 'Age';
+end
+
+% With 3 covariates
+function test_twosample_cov3()
+    generic_for_all();
+end
+function matlabbatch = twosample_cov3_batch(matlabbatch)
+    matlabbatch{1}.cfg_snpm.Design.TwoSampT.mcov(1).c = [1 5 2 21 0 3 6 14 8 5];
+    matlabbatch{1}.cfg_snpm.Design.TwoSampT.mcov(1).cname = 'Age';
+    matlabbatch{1}.cfg_snpm.Design.TwoSampT.mcov(2).c = [1 3 5 7 3 5 11 7 8 4];
+    matlabbatch{1}.cfg_snpm.Design.TwoSampT.mcov(2).cname = 'Height';
+    matlabbatch{1}.cfg_snpm.Design.TwoSampT.mcov(3).c = [-1 0.5 0.6 -0.1 2 1 1.5 0.5 1 -1];
+    matlabbatch{1}.cfg_snpm.Design.TwoSampT.mcov(3).cname = 'Width';
 end
 
 % With variance smoothing
