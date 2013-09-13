@@ -114,20 +114,33 @@ nFlip = 0;
 %-----------------------------------------------------------------------
 G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
 if BATCH
-  if isfield(job.covariate,'cov_Val')
-    d = job.covariate.cov_Val(:);
-    if (size(d,1) == 1), d = d'; end
-    nGcs = size(Gc,2);
-    if size(d,1) ~= q
-      error(sprintf('Covariate [%d,1] does not match number of subjects [%d]',...
-		    size(job.covariate,1),nScan))
-    else
-      Gc = [d];
-      % Center
-      d  = d - ones(q,1)*mean(d); str=''; 
-      G = [d];
-      Gcnames = strcat('ConfCov#',int2str([1:nGcs]'));
-    end
+  if numel(job.mcov) > 0 %isfield(job.covariate,'cov_Val')
+      for i = 1:numel(job.mcov)
+        d = job.mcov(i).c;
+        if (size(d,1) == 1), 
+            d = d'; 
+        end
+        nGcs = size(Gc,2);
+        if size(d,1) ~= q
+            error(sprintf('Covariate [%d,1] does not match number of subjects [%d]',...
+                size(job.mcov(i).c,1),nScan))
+        else
+            %-Save raw covariates for printing later on
+            Gc = [Gc,d];
+            % Center
+            d  = d - ones(q,1)*mean(d); str=''; 
+            G = [G, d];
+            dnames = [str,'ConfCov#',int2str(nGcs+1)];
+            for j = nGcs+1:nGcs+size(d,1)
+                dnames = str2mat(dnames,['ConfCov#',int2str(j)]); 
+            end
+            Gcnames = str2mat(Gcnames,dnames);
+        end 
+        %-Strip off blank line from str2mat concatenations
+        if size(Gc,2), 
+            Gcnames(1,:)=[]; 
+        end
+      end
   end
 else
   g = spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
