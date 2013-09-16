@@ -73,7 +73,7 @@
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'CovInt';		% PlugIn variables to save in cfg file
 
-
+global TEST;
 
 %-Get filenames of scans
 %-----------------------------------------------------------------------
@@ -144,7 +144,9 @@ if bAproxTst
 	%-Approximate test :
 	% Build up random subset of all (within nSubj) permutations
 	%===============================================================
-	rand('seed',sum(100*clock))	%-Initialise random number generator
+    if isempty(TEST) || ~TEST % When testing the code we need a fixed seed
+        rand('seed',sum(100*clock))	%-Initialise random number generator
+    end
 	PiCond      = zeros(nPiCond,nSubj);
 	PiCond(1,:) = 1+rem([0:nSubj-1],nSubj);
 	for i = 2:nPiCond
@@ -200,7 +202,9 @@ if ~all(all(sum(PiCond,2)== (nSubj+1)*nSubj/2 ))
 %-Convert to full permutations from permutations within blocks
 nPiCond = size(PiCond,1);
 %-Randomise order of PiConds (except first) to allow interim analysis
-rand('seed',sum(100*clock))	%-Initialise random number generator
+if isempty(TEST) || ~TEST % When testing the code we need a fixed seed
+    rand('seed',sum(100*clock))	%-Initialise random number generator
+end
 PiCond=[PiCond(1,:);PiCond(randperm(nPiCond-1)+1,:)];
 %-Check first permutation is null permutation
 if ~all(PiCond(1,:)==[1:nSubj])
