@@ -1,4 +1,4 @@
-function [snpmui] = snpm_bch_ui(DesignName,DesignFile,DesignHelp,DesignItems)
+function [snpmui] = snpm_bch_ui(DesignName,DesignFile,DesignHelp,DesignItems,removeScansNode)
 %  Set up common parameters to be set for all analyses.
 % INPUT
 %  DesignName  - Short, one-line description of design (string)
@@ -57,7 +57,6 @@ scans.tag     = 'P';       % The name appearing in the harvested job structure. 
 scans.filter  = 'image';      
 scans.num     = [1 Inf];     % Number of inputs required (2D-array with exactly one row and one column)
 scans.help    = {'','Model will be fit to these images.'}; % help text displayed
-
 
 % SnPM specific options
 % ---------------------------------------------------------------------
@@ -486,8 +485,11 @@ globalm.help    = {
                    ''
 }';
 
-
-snpmui_pre = {DesNm DesFile dir scans};
+if ~exist('removeScansNode', 'var') || ~removeScansNode
+    snpmui_pre = {DesNm DesFile dir scans};
+else
+    snpmui_pre = {DesNm DesFile dir};
+end
 %snpmui_pre = {dir scans};
 snpmui_des = DesignItems; 
 snpmui_post = {nPerm vFWHM bVolm ST masking globalc globalm };

@@ -28,23 +28,19 @@ DesHelp = {'',...
   
 %% Questions
 
-%Number of Subjects
-N_sub            = cfg_entry;
-N_sub.name       = 'Enter Number of Subjects';
-N_sub.tag        = 'N_sub';
-N_sub.strtype    = 'e';
-N_sub.val        = {};
-N_sub.num        = [1 1];
-N_sub.help       = {'Number of subjects'}; 
+% Reuse flexible factorial component of SPM to get the design files and
+% associated conditions
+factorial_design = spm_cfg_factorial_design();
+sub_files = factorial_design.val{2}.values{end}.val{2}.val{1};
 
-%Replications of Conditions
-rep_cond            = cfg_entry;
-rep_cond.name       = 'Replications of Conditions';
-rep_cond.tag        = 'rep_cond';
-rep_cond.strtype    = 'e';
-rep_cond.val        = {};
-rep_cond.num        = [1 1];
-rep_cond.help       = {'This is the covariate value'}; 
+% We expect exactly two files per subject
+sub_files.values{1}.val{1}.num = [2 2];
+sub_files.values{1}.val{1}.help = {'Select scans'};
+% We need to define the order of the two conditions
+sub_files.values{1}.val{2}.num = [1 2];
+sub_files.values{1}.val{2}.name = 'Scan index';
+sub_files.values{1}.val{2}.help = {'Enter scan index: (1 2|2 1)'};
+sub_files.values{1}.val{2}.tag = 'scindex';
 
 %% Executable Branch
-snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{N_sub rep_cond});
+snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{ sub_files }, true);
