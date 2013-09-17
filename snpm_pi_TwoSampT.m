@@ -151,10 +151,7 @@ for i = 1:g
             str='r'; 
         end
         G = [G, d];
-        dnames = [str,'ConfCov#',int2str(nGcs+1)];
-        for j = nGcs+1:nGcs+size(d,1)
-            dnames = str2mat(dnames,['ConfCov#',int2str(j)]); 
-        end
+        dnames = job.mcov(i).cname;
         Gcnames = str2mat(Gcnames,dnames);
     end
 end

@@ -110,32 +110,34 @@ nFlip = 0;
 %-----------------------------------------------------------------------
 G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
 if numel(job.mcov) > 0 %isfield(job.covariate,'cov_Val')
-  for i = 1:numel(job.mcov)
-    d = job.mcov(i).c;
-    if (size(d,1) == 1), 
-        d = d'; 
-    end
-    nGcs = size(Gc,2);
-    if size(d,1) ~= q
-        error(sprintf('Covariate [%d,1] does not match number of subjects [%d]',...
-            size(job.mcov(i).c,1),nScan))
-    else
-        %-Save raw covariates for printing later on
-        Gc = [Gc,d];
-        % Center
-        d  = d - ones(q,1)*mean(d); str=''; 
-        G = [G, d];
-        dnames = [str,'ConfCov#',int2str(nGcs+1)];
-        for j = nGcs+1:nGcs+size(d,1)
-            dnames = str2mat(dnames,['ConfCov#',int2str(j)]); 
+    for i = 1:numel(job.mcov)
+        d = job.mcov(i).c;
+        if (size(d,1) == 1), 
+            d = d'; 
         end
-        Gcnames = str2mat(Gcnames,dnames);
-    end 
+        nGcs = size(Gc,2);
+        if size(d,1) ~= q
+            error(sprintf('Covariate [%d,1] does not match number of subjects [%d]',...
+                size(job.mcov(i).c,1),nScan))
+        else
+            %-Save raw covariates for printing later on
+            Gc = [Gc,d];
+            % Center
+            d  = d - ones(q,1)*mean(d); str=''; 
+            G = [G, d];
+            dnames = job.mcov(i).cname;
+    %         dnames = [str,'ConfCov#',int2str(nGcs+1)];
+    %         for j = nGcs+1:nGcs+size(d,1)
+    %             dnames = str2mat(dnames,['ConfCov#',int2str(j)]); 
+    %         end
+            Gcnames = str2mat(Gcnames,dnames);
+            aa=1
+        end 
+    end
     %-Strip off blank line from str2mat concatenations
     if size(Gc,2), 
         Gcnames(1,:)=[]; 
     end
-  end
 end
 %-Since no FxC interactions these are the same
 Gnames = Gcnames;

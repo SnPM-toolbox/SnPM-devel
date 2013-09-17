@@ -55,9 +55,9 @@ end
 function matlabbatch = twosample_approx_batch(matlabbatch)
     global testDataDir;
     matlabbatch{1}.cfg_snpm.Design.TwoSampT.P(end+1:end+3) = {
-         fullfile(testDataDir, 'su_control11', 'cn_categ', 'con_0001.img,1')
-         fullfile(testDataDir, 'su_control12', 'cn_categ', 'con_0001.img,1')
-         fullfile(testDataDir, 'su_control13', 'cn_categ', 'con_0001.img,1')
+         fullfile(testDataDir, 'su_control11', 'cn_sess1', 'con_0001.img,1')
+         fullfile(testDataDir, 'su_control12', 'cn_sess1', 'con_0001.img,1')
+         fullfile(testDataDir, 'su_control13', 'cn_sess1', 'con_0001.img,1')
          };
     matlabbatch{1}.cfg_snpm.Design.TwoSampT.group_memb = 'A A A A A B B B B B A A B';
     matlabbatch{1}.cfg_snpm.Design.TwoSampT.nPerm = 100;
@@ -110,16 +110,16 @@ end
 function matlabbatch = create_basis_matlabbatch(batchResDir,testDataDir)
     matlabbatch{1}.cfg_snpm.Design.TwoSampT.dir = {batchResDir};
     matlabbatch{1}.cfg_snpm.Design.TwoSampT.P = {
-                                                 fullfile(testDataDir, 'su_control01', 'cn_categ', 'con_0001.img,1')
-                                                 fullfile(testDataDir, 'su_control02', 'cn_categ', 'con_0001.img,1')
-                                                 fullfile(testDataDir, 'su_control03', 'cn_categ', 'con_0001.img,1')
-                                                 fullfile(testDataDir, 'su_control04', 'cn_categ', 'con_0001.img,1')
-                                                 fullfile(testDataDir, 'su_control05', 'cn_categ', 'con_0001.img,1')
-                                                 fullfile(testDataDir, 'su_control06', 'cn_categ', 'con_0001.img,1')
-                                                 fullfile(testDataDir, 'su_control07', 'cn_categ', 'con_0001.img,1')
-                                                 fullfile(testDataDir, 'su_control08', 'cn_categ', 'con_0001.img,1')
-                                                 fullfile(testDataDir, 'su_control09', 'cn_categ', 'con_0001.img,1')
-                                                 fullfile(testDataDir, 'su_control10', 'cn_categ', 'con_0001.img,1')
+                                                 fullfile(testDataDir, 'su_control01', 'cn_sess1', 'con_0001.img,1')
+                                                 fullfile(testDataDir, 'su_control02', 'cn_sess1', 'con_0001.img,1')
+                                                 fullfile(testDataDir, 'su_control03', 'cn_sess1', 'con_0001.img,1')
+                                                 fullfile(testDataDir, 'su_control04', 'cn_sess1', 'con_0001.img,1')
+                                                 fullfile(testDataDir, 'su_control05', 'cn_sess1', 'con_0001.img,1')
+                                                 fullfile(testDataDir, 'su_control06', 'cn_sess1', 'con_0001.img,1')
+                                                 fullfile(testDataDir, 'su_control07', 'cn_sess1', 'con_0001.img,1')
+                                                 fullfile(testDataDir, 'su_control08', 'cn_sess1', 'con_0001.img,1')
+                                                 fullfile(testDataDir, 'su_control09', 'cn_sess1', 'con_0001.img,1')
+                                                 fullfile(testDataDir, 'su_control10', 'cn_sess1', 'con_0001.img,1')
                                                  };
     matlabbatch{1}.cfg_snpm.Design.TwoSampT.group_memb = 'A A A A A B B B B B';
     
