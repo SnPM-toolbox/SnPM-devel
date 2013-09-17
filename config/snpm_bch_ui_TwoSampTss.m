@@ -18,13 +18,11 @@ rev = '$Rev: 1716 $'; %#ok
 
 DesNm = 'SingleSub: Two Sample T test; 2 conditions, replications';
 DesFile = mfilename;
-DesHelp = {'',...
-	  'stuff.',...
+DesHelp = {'Create design and permutation matrix appropriate for single subject, two condition activation (with replication) experiments.',...
 	  '',...
-	  'stuff ',...
-	  '    stuff',...
-	  'stuff.',...
-	  };
+      'Number of permutations. There are nScan-choose-nRepl possible permutations, where nScan is the number of scans and nRepl is the number of replications (nScan = 2*nRepl). In Matlab, use the nchoosek command to check the number of permutations, as in nchoosek(nScan,nRepl).',...
+      ...%Matlab doesn''t have a choose function but you can use this expression prod(1:nScan)/prod(1:nRepl)^2',...
+      };
 
 %% Questions
 
@@ -37,6 +35,15 @@ ReplC.val        = {};
 ReplC.num        = [1 1];
 ReplC.help       = {'This is the Number of replications'}; 
 
+% We need to define the order of the conditions
+cond            = cfg_entry;
+cond.name       = 'Condition index';
+cond.tag        = 'condidx';
+cond.strtype    = 'i';
+cond.val        = {};
+cond.num        = [1 Inf];
+cond.help = {'Enter conditions indices: (1/2)'};
+
 % Exchangability Blocks
 ex_blk            = cfg_entry;
 ex_blk.name       = 'Size of Exchangability Block';
@@ -47,4 +54,4 @@ ex_blk.num        = [1 1];
 ex_blk.help       = {'This is the number of subjects'};
 
 %% Executable Branch
-snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{ReplC ex_blk});
+snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{ReplC cond ex_blk});
