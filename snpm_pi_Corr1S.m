@@ -78,6 +78,7 @@
 
 %-Initialisation
 %-----------------------------------------------------------------------
+global TEST;
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'CovInt Xblk';	% PlugIn variables to save in cfg file
 
@@ -85,15 +86,15 @@ sDesSave = 'CovInt Xblk';	% PlugIn variables to save in cfg file
 
 %-Get filenames of scans
 %-----------------------------------------------------------------------
-P     = spm_select(Inf,'image','Select scans in time order');
+P     = strvcat(job.P);%spm_select(Inf,'image','Select scans in time order');
 nScan = size(P,1);
 
 %-Get covariate
 %-----------------------------------------------------------------------
 CovInt = [];
 while ~all(size(CovInt)==[nScan,1])
-	CovInt = spm_input(sprintf('Enter covariate values [%d]',nScan),'+1');
-	CovInt = CovInt(:);
+	CovInt = job.CovInt(:);% spm_input(sprintf('Enter covariate values [%d]',nScan),'+1');
+	%CovInt = CovInt(:);
 end
 
 %-Centre covariate if required
@@ -109,7 +110,7 @@ Xblk     = tmp( floor(tmp)==ceil(tmp) & tmp>1 );
 tmp      = int2str(Xblk(1));
 for i=2:length(Xblk), tmp=str2mat(tmp,int2str(Xblk(i))); end
 if length(Xblk)>1
-  Xblk     = spm_input('Size of exchangability block','+0','b',tmp,Xblk);
+  Xblk     = job.xblock;%spm_input('Size of exchangability block','+0','b',tmp,Xblk);
 end
 nXblk    = (nScan/Xblk);
 iXblk    = meshgrid(1:nXblk,1:Xblk); iXblk = iXblk(:)';
@@ -118,18 +119,19 @@ iXblk    = meshgrid(1:nXblk,1:Xblk); iXblk = iXblk(:)';
 %-Work out how many perms, and ask about approximate tests
 %-----------------------------------------------------------------------
 %-NB: n! == gamma(n+1)
-nPiCond = round(exp(nXblk*gammaln(Xblk+1)));
-bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond),...
-							'+1','y/n')=='y';
-if bAproxTst
-    tmp = 0;
-    while ((tmp>nPiCond) | (tmp==0) )
-	tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond),'+0');
-	tmp = floor(max([0,tmp]));
+nPiCond_mx = round(exp(nXblk*gammaln(Xblk+1)));
+% bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond),...
+% 							'+1','y/n')=='y';
+if job.nPerm >= nPiCond_mx
+    bAproxTst=0;
+    if job.nPerm > nPiCond_mx
+        fprintf('Running fewer permutations than originally requested.\n')
+        nPiCond = nPiCond_mx;
     end
-    if (tmp==nPiCond), bAproxTst=0; else, nPiCond=tmp; end
+else
+    bAproxTst=1;
+    nPiCond = job.nPerm;
 end
-
 
 %-Compute permutations of conditions
 %=======================================================================
@@ -138,7 +140,9 @@ if bAproxTst
 	%-Approximate test :
 	% Build up random subset of all (within Xblk) permutations
 	%===============================================================
-	rand('seed',sum(100*clock))	%-Initialise random number generator
+    if isempty(TEST) || ~TEST
+        rand('seed',sum(100*clock))	%-Initialise random number generator
+    end
 	PiCond      = zeros(nPiCond,nScan);
 	PiCond(1,:) = 1+rem([0:Xblk*nXblk-1],Xblk);
 	for i = 2:nPiCond

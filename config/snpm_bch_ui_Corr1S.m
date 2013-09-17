@@ -24,6 +24,15 @@ DesHelp = {'Create design and permutation matrix appropriate for single-subject,
 
 %% Questions
 
+%Enter Covariate Value
+CovInt            = cfg_entry;
+CovInt.name       = 'Covariate';
+CovInt.tag        = 'CovInt';
+CovInt.strtype    = 'e';
+CovInt.val        = {};
+CovInt.num        = [1 Inf];
+CovInt.help       = {'This is the variable to correlate with the imaging data.'}; 
+
 %Size of echangability block
 xblock            = cfg_entry;
 xblock.name       = 'Size of Exchangability Block';
@@ -62,4 +71,4 @@ covariate.values  = {cv_none cov_Val };
 
 
 %% Executable Branch
-snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{xblock covariate});
+snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{CovInt xblock covariate});
