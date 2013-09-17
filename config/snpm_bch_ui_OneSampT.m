@@ -10,7 +10,7 @@ function snpmui = snpm_bch_ui_OneSampT
 % Copyright (C) 2007 Freiburg Brain Imaging
 
 % Volkmar Glauche
-% $Id: Thomas Nichols, Emma Thomas $
+% $Id: Thomas Nichols, Emma Thomas, Camille Maumet $
 
 
 snpm_defaults
@@ -19,40 +19,11 @@ rev = '$Rev: 1716 $';
 
 DesNm = 'MultiSub: One Sample T test on diffs/contrasts';
 DesFile = mfilename;
-DesHelp = {'',...
-	  'stuff.',...
-	  '',...
-	  'stuff ',...
-	  '    stuff',...
-	  'stuff.',...
+DesHelp = {'Create design and permutation matrix appropriate for one group analyses where there is just *one* scan per subject.  This plug in effects a one-sample t-test.',...
+    '',...
+    'A common use of this plug is for random effects analysis of contrast images.  For this analysis we only need to assume, under the null hypothesis,  that each of the images are exchangeble and the contrast images have mean zero, symmetrically distributed data at each voxel. (Exchangeability follows from independence of different subjects.)',...
 	  };
   
-% cv_none         = cfg_const;
-% cv_none.tag     = 'cv_none';
-% cv_none.name    = 'None';
-% cv_none.val     = {1};
-% cv_none.help    = {'Covariate value = none'};
-% 
-% cov_Val         = cfg_entry;
-% cov_Val.tag     = 'cov_Val';
-% cov_Val.name    = 'Enter Number of Covariate';%arbitary name
-% cov_Val.help    = {'Help'};
-% cov_Val.strtype = 'e';
-% cov_Val.num     = [Inf 1];
-% 
-% cv_one         = cfg_branch;
-% cv_one.tag     = 'cv_one';
-% cv_one.name    = 'Enter Different Covariate Value';
-% cv_one.val     = {cov_Val};
-% cv_one.help    = {'Help'};
-% 
-% covariate         = cfg_choice;
-% covariate.tag     = 'covariate';
-% covariate.name    = 'Covariate'; %arbitary name
-% covariate.val     = {cv_none };
-% covariate.help    = {'Help'};
-% covariate.values  = {cv_none cov_Val };
-
 % ---------------------------------------------------------------------
 % c Vector
 % ---------------------------------------------------------------------
