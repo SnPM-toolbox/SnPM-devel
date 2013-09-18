@@ -210,7 +210,9 @@ if ~all(all(PiCond*spm_DesMtx(iXblk)== (Xblk+1)*Xblk/2 ))
 nPiCond = size(PiCond,1);
 PiCond = PiCond + meshgrid((iXblk-1)*Xblk,1:nPiCond);
 %-Randomise order of PiConds (except first) to allow interim analysis
-rand('seed',sum(100*clock))	%-Initialise random number generator
+if isempty(TEST) || ~TEST
+    rand('seed',sum(100*clock))	%-Initialise random number generator
+end
 PiCond=[PiCond(1,:);PiCond(randperm(nPiCond-1)+1,:)];
 %-Check first permutation is null permutation
 if ~all(PiCond(1,:)==[1:nScan])

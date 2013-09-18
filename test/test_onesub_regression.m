@@ -29,6 +29,15 @@ function matlabbatch = onesub_regression_var_batch(matlabbatch)
     matlabbatch{1}.cfg_snpm.Design.Corr1S.vFWHM = [8.5 8.5 8.5];
 end
 
+% With approximate test
+function test_onesub_regression_approx()
+    rand('seed',200);
+    generic_for_all();
+end
+function matlabbatch = onesub_regression_approx_batch(matlabbatch)
+    matlabbatch{1}.cfg_snpm.Design.Corr1S.nPerm = 50;
+end
+
 function assert_check(batchResDir, interResDir, interNewResDir)
     % Compare t-maps and filtered maps
     batch_tmap = spm_select('FPList', batchResDir, '^snpmT\+\.img');
