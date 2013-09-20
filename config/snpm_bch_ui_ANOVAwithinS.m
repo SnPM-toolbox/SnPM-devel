@@ -18,53 +18,55 @@ rev = '$Rev: 1716 $'; %#ok
 
 DesNm = 'Within Subject ANOVA, k diffs/contrasts per subject';
 DesFile = mfilename;
-DesHelp = {'',...
-	  'stuff.',...
-	  '',...
-	  'stuff ',...
-	  '    stuff',...
-	  'stuff.',...
+DesHelp = {'Create design and permutation matrix appropriate for one group analyses where there are multiple scans per subject, and where each scan is itself a difference image or contrast image.  This plug in effects a within subject ANOVA.',...
+    '',...
+    'A common use of this PlugIn is for an F test for a set of contrasts. For each subject, we have k contrasts jointly expressing some effect of interest.  Under the null hypothesis we assume that the data for each subject is unpeturbed by multiplication by -1.  That is, under the null hypothesis the multivariate measurements are all mean zero and symmetrically distributed.  We assume exchangeability between subjects (just as we usually assume independent subjects) but *do* *not* assume that the k values for each subject are independent.',...
+    '',...
+    'The PlugIn tests for the presence of *any* effect among the k contrasts.  That is, it tests the null hypothesis that all of the effects are mean zero.',...
+    '',...
+    'Number of permutations. There are 2^(nSubj-1) possible permutations, where nSubj is the total number of subjects. Intuitively, each subject can be assigned to +1 or -1, so we should have 2^nSubj possible permutations. However, since we are doing an F test and all +1''s and all -1''s would give us the same F statistic. To avoid the redundance, therefore we explicitly assign the first subject to +1 group.',...
+    '',...
+    'It is recommended that at least 7 or 8 subjects are used; with only 6 subjects, the permutation distribution will only have 2^5 = 32 elements and the smallest p-value will be 1/32=0.03125.',...
 	  };
 
 %% Questions
+% ---------------------------------------------------------------------
+% scans Scans
+% ---------------------------------------------------------------------
+scans         = cfg_files;
+scans.tag     = 'scans';
+scans.name    = 'Scans';
+scans.help    = {'Select the images to be analysed.  They must all have the same image dimensions, orientation, voxel size etc.'};
+scans.filter = 'image';
+scans.ufilter = '.*';
+scans.num     = [1 Inf];
+% ---------------------------------------------------------------------
+% fsubject Subject
+% ---------------------------------------------------------------------
+fsubject         = cfg_branch;
+fsubject.tag     = 'fsubject';
+fsubject.name    = 'Subject';
+fsubject.val     = {scans};
+fsubject.help    = {'Enter data and conditions for a new subject'};
+% ---------------------------------------------------------------------
+% generic Subjects
+% ---------------------------------------------------------------------
+generic1         = cfg_repeat;
+generic1.tag     = 'generic';
+generic1.name    = 'Subjects';
+generic1.help    = {''};
+generic1.values  = {fsubject };
+generic1.num     = [1 Inf];
 
 
-% Scans per Subject
-scans_sub            = cfg_entry;
-scans_sub.name       = 'Scans per subject';
-scans_sub.tag        = 'Anovawithin_scans';
-scans_sub.strtype    = 'i';
-scans_sub.val        = {};
-scans_sub.num        = [1 1];
-scans_sub.help       = {'This is the number of subjects'};
-
-% Covariate Value
-cv_none         = cfg_const;
-cv_none.tag     = 'cv_none';
-cv_none.name    = 'None';
-cv_none.val     = {1};
-cv_none.help    = {'Covariate value = none'};
-
-cov_Val         = cfg_entry;
-cov_Val.tag     = 'cov_Val';
-cov_Val.name    = 'Covariate';%arbitary name
-cov_Val.help    = {'Help'};
-cov_Val.strtype = 'e';
-cov_Val.num     = [1 Inf];
-
-cv_one         = cfg_branch;
-cv_one.tag     = 'cv_one';
-cv_one.name    = 'Enter Different Covariate Value';
-cv_one.val     = {cov_Val};
-cv_one.help    = {'Help'};
-
-covariate         = cfg_choice;
-covariate.tag     = 'covariate';
-covariate.name    = 'Covariate Value'; %arbitary name
-covariate.val     = {cv_none };
-covariate.help    = {'Help'};
-covariate.values  = {cv_none cov_Val };
-
+% % Scans per Subject
+% scans_sub            = cfg_entry;
+% scans_sub.name       = 'Scans per subject';
+% scans_sub.tag        = 'Anovawithin_scans';
+% scans_sub.strtype    = 'i';
+% scans_sub.val        = {};
+% scans_sub.num        = [1 1];
+% scans_sub.help       = {'This is the number of subjects'};
 
 %% Executable Branch
-snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{covariate});
+snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{generic1}, true);
