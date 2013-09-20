@@ -1183,7 +1183,7 @@ if length(strmatch('MIPtable',Report))>0
 	    'YTickLabel','',...
 	    'YLim',	[0,size(CONT,1)]+0.5	)
   else
-    h = bar(CONT(1,:));  if MLver=='7', h=get(h,'children'); end
+    h = bar(CONT(1,:));  if str2num(MLver)>=7, h=get(h,'children'); end
     set(h,'FaceColor',[1 1 1]*.8)
     tX = get(h,'Xdata'); tY = get(h,'Ydata');
     set(gca,'Xlim',[min(tX(:)) max(tX(:))]) 
