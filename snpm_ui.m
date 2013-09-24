@@ -404,11 +404,13 @@ sGloNorm=deblank(sGloNorm(iGloNorm,:));
 
 %-Get value to be assigned to grand mean:
 %-----------------------------------------------------------------------
-if iGloNorm==2
-  iGMsca=1;	%-grand mean scaling implicit in PropSca GloNorm
-else
+if iGloNorm==2 % Proportional scaling
+  iGMsca = 2;%CHANGED from 1 to 2	%-grand mean scaling implicit in PropSca GloNorm
+  % TODO: must be set otherwise prop scaling alone in Batch mode lead to error  
+  % job.globalm.gmsca.gmscv = ; % By default use mean
+else % No global normalisation or ANCOVA
   if BATCH
-    iGMsca = 1 + isfield(job.globalm.gmsca,'gmsca_no');
+    iGMsca = 1 + isfield(job.globalm.gmsca,'gmsca_yes');
   else
     tmp = []; for i = 1:length(iGMsca), tmp = [tmp, eval(iGMsca(i))]; end
     iGMsca = spm_input('grand mean scaling','+1','m',...
@@ -416,18 +418,25 @@ else
   end
 end
 
-if (iGMsca==1)
-  if (iGloNorm==2)
+if (iGMsca==2) % CHANGED from 1 to 2 as should not ask for a value if grand mean scaling is not required.
+  if (iGloNorm==2) % Proportional scaling
     str = 'PropSca global mean to';
   else
     str = [strrep(sGMsca(iGMsca,:),'scaling of','scale'),' to'];
   end
   if BATCH
-    GM = job.globalm.gmsca.gmscv;
+      % As in SPM:
+      switch char(fieldnames(job.globalm.gmsca))
+          case 'gmsca_yes',
+              % Proportionally scale to this value
+              GM = job.globalm.gmsca.gmsca_yes.gmscv;
+          case 'gmsca_no',
+              GM = 50;
+      end
   else
     GM = spm_input(str,'+1','r',50,1);
   end
-elseif (iGMsca==2)
+elseif (iGMsca==1) % No grand mean scaling
   GM = 0;
 end
 
@@ -435,11 +444,13 @@ end
 %-Get globals
 %-----------------------------------------------------------------------
 if BATCH
-  if (iGloNorm==1) & (iGMsca==2)
+  if (iGloNorm==1) && (iGMsca==1)
     % No need for globals, omit
     iGXcalc = 1;
   elseif isfield(job.globalc,'g_omit')
-    iGXcalc=1;
+    %iGXcalc=1;
+    % Global needed and none requested, force iGXcalc to grand mean (3)
+    iGXcalc=3;
   elseif isfield(job.globalc,'g_user')
     iGXcalc=2;
     GX = job.globalc.g_user{1}(:);
@@ -452,7 +463,7 @@ if BATCH
     iGXcalc=3;
   end
 else
-  if (iGloNorm==1) & (iGMsca==2)
+  if (iGloNorm==1) & (iGMsca==1) % CHANGED from 2 to 1, if grand mean scaling then no value is required
     % No need for globals, omit
     iGXcalc = 1;
   else

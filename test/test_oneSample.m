@@ -67,7 +67,38 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
                  };
             testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.nPerm = 100;
         end
+        
+        function test_onesample_propscaling(testCase)
+            testCase.testName = 'onesample_propscaling';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.globalm.glonorm = 2;
+        end
+        
+        function test_onesample_propscaling_to_user(testCase)
+            testCase.testName = 'onesample_propscaling_to_user';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.globalm.glonorm = 2;
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.globalm.gmsca.gmsca_yes.gmscv = 145;
+        end
 
+        function test_onesample_grandmean_145(testCase)
+            testCase.testName = 'onesample_grandmean_145';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.globalm.gmsca.gmsca_yes.gmscv = 145;
+        end
+        
+        function test_onesample_grandmean_50(testCase)
+            testCase.testName = 'onesample_grandmean_50';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.globalm.gmsca.gmsca_yes.gmscv = 50;
+        end
+        
+        function test_onesample_ancova(testCase)
+            testCase.testName = 'onesample_ancova';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.globalm.glonorm = 3;
+        end
+        
     end
     
     methods
