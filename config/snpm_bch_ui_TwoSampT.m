@@ -26,40 +26,35 @@ DesHelp = {'Create design and permutation matrix appropriate for two group analy
             '',...
 	  };
 
-% Group memberships
-group_memb         = cfg_entry;
-group_memb.tag     = 'group_memb';
-group_memb.name    = 'Group membership';%Name displayed in the batch tree
-group_memb.help    = {'Enter subject index: (A/B)'};
-group_memb.strtype = 's'; % string
-group_memb.num     = [1 Inf]; % Expected format  
+  % Similar to SPM two-sample t-test
+% ---------------------------------------------------------------------
+% scans1 Group 1 scans
+% ---------------------------------------------------------------------
+scans1         = cfg_files;
+scans1.tag     = 'scans1';
+scans1.name    = 'Group 1 scans';
+scans1.help    = {'Select the images from sample 1.  They must all have the same image dimensions, orientation, voxel size etc.'};
+scans1.filter = 'image';
+scans1.ufilter = '.*';
+scans1.num     = [1 Inf];
+% ---------------------------------------------------------------------
+% scans2 Group 2 scans
+% ---------------------------------------------------------------------
+scans2         = cfg_files;
+scans2.tag     = 'scans2';
+scans2.name    = 'Group 2 scans';
+scans2.help    = {'Select the images from sample 2.  They must all have the same image dimensions, orientation, voxel size etc.'};
+scans2.filter = 'image';
+scans2.ufilter = '.*';
+scans2.num     = [1 Inf];  
   
-% % Number of Covariates
-% cv_none         = cfg_const;
-% cv_none.tag     = 'cv_none';
-% cv_none.name    = 'None';
-% cv_none.val     = {1};
-% cv_none.help    = {'Covariate value = none'};
-% 
-% cov_Val         = cfg_entry;
-% cov_Val.tag     = 'cov_Val';
-% cov_Val.name    = 'Covariate';%arbitary name
-% cov_Val.help    = {'Help'};
-% cov_Val.strtype = 'e';
-% cov_Val.num     = [1 Inf];
-% 
-% cv_one         = cfg_branch;
-% cv_one.tag     = 'cv_one';
-% cv_one.name    = 'Enter Different Covariate Value';
-% cv_one.val     = {cov_Val};
-% cv_one.help    = {'Help'};
-% 
-% covariate         = cfg_choice;
-% covariate.tag     = 'covariate';
-% covariate.name    = 'Covariate Value'; %arbitary name
-% covariate.val     = {cv_none };
-% covariate.help    = {'Help'};
-% covariate.values  = {cv_none cov_Val };
+% % Group memberships
+% group_memb         = cfg_entry;
+% group_memb.tag     = 'group_memb';
+% group_memb.name    = 'Group membership';%Name displayed in the batch tree
+% group_memb.help    = {'Enter subject index: (A/B)'};
+% group_memb.strtype = 's'; % string
+% group_memb.num     = [1 Inf]; % Expected format  
 
 % ---------------------------------------------------------------------
 % c Vector
@@ -99,4 +94,4 @@ generic.values  = {mcov };
 generic.num     = [0 Inf];
 
 %% Executable Branch
-snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{group_memb generic});
+snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{scans1, scans2, generic}, true);

@@ -117,17 +117,18 @@ end
 
 %-Get filenames and iCond, the condition labels
 %=======================================================================
-P = strvcat (job.P);
+P = strvcat (strvcat(job.scans1), strvcat(job.scans2));
 nScan = size(P,1);
+iCond = [ones(1,numel(job.scans1)), -ones(1,numel(job.scans2))];
 
 %-Get the condition (group) labels
 %=======================================================================
 %-Convert group memberships letters into +1/-1 (group_memb exists for BATCH 
 % only ), to be deleted or moved later on
 %-----------------------------------------------------------------------
-iCond = abs(upper(job.group_memb(~isspace(job.group_memb))));
-iCond = iCond-min(iCond); 
-iCond = -iCond/max([1,iCond])*2+1;
+% iCond = abs(upper(job.group_memb(~isspace(job.group_memb))));
+% iCond = iCond-min(iCond); 
+% iCond = -iCond/max([1,iCond])*2+1;
 nFlip = sum(iCond==-1);
 
 %-Get and center confounding covariates
