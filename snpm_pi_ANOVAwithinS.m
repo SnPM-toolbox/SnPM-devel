@@ -106,16 +106,22 @@
 
 %-Initialisation
 %-----------------------------------------------------------------------
+global TEST;
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iRepl sHCform_Mtx';		        % PlugIn variables to save in cfg file
-rand('seed',sum(100*clock));	% Initialise random number generator
+if isempty(TEST) || ~TEST
+    rand('seed',sum(100*clock));	% Initialise random number generator
+end
 
 %-Get number of subjects
-nSubj    = spm_input('# subjects','+1');
+nSubj    = size(job.fsubject,2);%spm_input('# subjects','+1');
 if (nSubj==1), error('Use single subject plug for single subjects'); end    
 
 %-Get number of scans per subject - nSubj x nRepl design
-nRepl    = spm_input('# scans per subject','+1');
+nRepl    =  unique(arrayfun(@(x) numel(x.scans), job.fsubject));%spm_input('# scans per subject','+1');
+if numel(nRepl) > 1
+    error('All subjects must have the same number of replications')
+end
 
 
 %-Get filenames and iCond, the condition labels
@@ -124,8 +130,8 @@ P     = [];
 iRepl = [];
 iSubj = [];
 for subj=1:nSubj
-    tmp = ['Subject ',int2str(subj),': Select scans in time order'];
-    P = str2mat(P,spm_select(nRepl,'image',tmp));
+    %tmp = ['Subject ',int2str(subj),': Select scans in time order'];
+    P = str2mat(P, str2mat(job.fsubject(subj).scans)); %str2mat(P,spm_select(nRepl,'image',tmp));
     iRepl = [iRepl, 1:nRepl];
     iSubj = [iSubj, subj*ones(1,nRepl)];
 end
@@ -165,19 +171,18 @@ G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nSubj;
 %=======================================================================
 %-Compute permutations for a single exchangability block
 %-----------------------------------------------------------------------
-nPiCond = 2^(nSubj-1);
+nPiCond_mx = 2^(nSubj-1);
 % Note: here nPiCond is half of its usual value. The reason is we are
 % calculating F stat.
-
-bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond),...
-							'+1','y/n')=='y';
-if (bAproxTst)
-  tmp = 0;
-  while ((tmp>nPiCond) | (tmp==0) )
-    tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond),'+0');
-    tmp = floor(max([0,tmp]));
-  end
-  if (tmp==nPiCond), bAproxTst=0; else, nPiCond=tmp; end
+if job.nPerm >= nPiCond_mx
+    bAproxTst=0;
+    if job.nPerm > nPiCond_mx
+        fprintf('Running fewer permutations than originally requested.\n')
+        nPiCond = nPiCond_mx;
+    end
+else
+    bAproxTst=1;
+    nPiCond = job.nPerm;
 end
 
 %-Two methods for computing permutations, random and exact; exact
