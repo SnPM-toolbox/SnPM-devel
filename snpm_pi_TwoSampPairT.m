@@ -109,32 +109,38 @@ nCond    = 2;			% Number of conditions
 nStud    = 2;			% Number of groups
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iStud iCond nSubj'; % PlugIn variables to save in cfg file
-rand('seed',sum(100*clock));	% Initialise random number generator
+global TEST;
+if isempty(TEST) || ~TEST
+    rand('seed',sum(100*clock));	% Initialise random number generator
+end
 iStudC   = [];			% +1/-1 version of iStud
 
 %-Get filenames and iStud, the subject group labels
 %=======================================================================
 P = '';
 for stud=1:nStud
-    tmp = sprintf('# of subjects in group %d ?',stud);
-    nSubj = spm_input(tmp,'+0');
+    %tmp = sprintf('# of subjects in group %d ?',stud);
+    nSubj = numel(job.(['scans' num2str(stud)]).fsubject); %numel() %spm_input(tmp,'+0');
     for subj=1:nSubj    
-	tmp = sprintf('Select scans, group %d, subj %d ',stud,subj);
-	tP = spm_select(2,'image',tmp);
+	%tmp = sprintf('Select scans, group %d, subj %d ',stud,subj);
+	tP = job.(['scans' num2str(stud)]).fsubject(subj).scans; %spm_select(2,'image',tmp);
 	% get condition label	
-	Cond = [];    
-	while(isempty(Cond))
-	    tmp='Enter scan index: (AB|BA)';
-	    tmpCond = upper(spm_input(tmp,'+0','s'));
-	    if (strcmp(tmpCond,'AB'))
-		Cond = [+1 -1];
-	    elseif (strcmp(tmpCond,'BA'))
-		Cond = [-1 +1];
-	    else	    
-		fprintf(2,'%cEnter either AB or BA',7);
-	    end	    
-	end
-	P = str2mat(P,tP);
+	%Cond = [];    
+% 	while(isempty(Cond))
+% 	    tmp='Enter scan index: (AB|BA)';
+% 	    tmpCond = upper(spm_input(tmp,'+0','s'));
+% 	    if (strcmp(tmpCond,'AB'))
+% 		Cond = [+1 -1];
+% 	    elseif (strcmp(tmpCond,'BA'))
+% 		Cond = [-1 +1];
+% 	    else	    
+% 		fprintf(2,'%cEnter either AB or BA',7);
+% 	    end	    
+% 	end
+    tmpCond = job.(['scans' num2str(stud)]).fsubject(subj).scindex;%
+    tmpCond = tmpCond-min(tmpCond);
+    Cond = -(tmpCond/max([1,tmpCond])*2-1);
+	P = str2mat(P,str2mat(tP));
 	% update indicators	
 	iCond = [iCond, Cond];
 	iSubj = [iSubj, subj*ones(1,nCond)];
@@ -154,8 +160,8 @@ nScan   = nSubj*nCond;
 %-Get confounding covariates
 %-----------------------------------------------------------------------
 G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
-g = spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
-if (g == 6), g = spm_input('# of confounding covariates','+1'); end
+g = numel(job.mcov);%spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
+%if (g == 6), g = spm_input('# of confounding covariates','+1'); end
 while size(Gc,2) < g
   nGcs = size(Gc,2);
   d = spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
@@ -185,20 +191,29 @@ Gnames = Gcnames;
 %-----------------------------------------------------------------------
 %-NB: m-Choose-n = exp(gammaln(m+1)-gammaln(m-n+1)-gammaln(n+1))
 nPiStud_mx = round(exp(gammaln(nSUBJ+1)-gammaln(nSUBJ-nFlip+1)-gammaln(nFlip+1)));
-bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiStud_mx),...
-							'+1','y/n')=='y';
-if (bAproxTst)
-  tmp = 0;
-  while ((tmp>nPiStud_mx) | (tmp==0) )
-    tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiStud_mx),'+0');
-    tmp = floor(max([0,tmp]));
-  end
-  nPiStud=tmp;
-  if (tmp==nPiStud_mx), bAproxTst=0; end
+if job.nPerm >= nPiStud_mx
+    bAproxTst=0;
+    if job.nPerm > nPiStud_mx
+        fprintf('Running fewer permutations than originally requested.\n')
+        nPiStud = nPiStud_mx;
+    end
 else
-  nPiStud=nPiStud_mx;
-end
-snpm_check_nperm(nPiCond,nPiCond_mx);
+    bAproxTst=1;
+    nPiStud = job.nPerm;
+end                            
+%                             
+% if (bAproxTst)
+% %   tmp = 0;
+% %   while ((tmp>nPiStud_mx) | (tmp==0) )
+% %     tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiStud_mx),'+0');
+% %     tmp = floor(max([0,tmp]));
+% %   end
+%   nPiStud=tmp;
+%   if (tmp==nPiStud_mx), bAproxTst=0; end
+% else
+%   nPiStud=nPiStud_mx;
+% end
+snpm_check_nperm(nPiStud,nPiStud_mx);
 
 %-Two methods for computing permutations, random and exact; exact
 % is efficient, but a memory hog; Random is slow but requires little
