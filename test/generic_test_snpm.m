@@ -58,16 +58,25 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             end
                 
             batch_tmap = spm_select('FPList', testCase.batchResDir, statMapRegexp);
-            batch_beta = spm_select('FPList', testCase.batchResDir, '^beta_0001\.hdr');
+            batch_beta = cellstr(spm_select('FPList', testCase.batchResDir, '^beta_00\d\d\.hdr'));
             batch_filtmap = spm_select('FPList', testCase.batchResDir, '^SnPM_filtered_10none.*\.nii');
 
             % Maps obtained with the interactive execution
             inter_tmap = spm_select('FPList', testCase.interResDir, statMapRegexp);
-            inter_beta = spm_select('FPList', testCase.interResDir, '^beta_0001\.hdr');
+            inter_beta = cellstr(spm_select('FPList', testCase.interResDir, '^beta_00\d\d\.hdr'));
             inter_filtmap = spm_select('FPList', testCase.interResDir, '^SnPMt_filtered_10none\.img');
 
             testCase.verifyEqual(spm_read_vols(spm_vol(batch_tmap)), spm_read_vols(spm_vol(inter_tmap)), 'AbsTol', 10^-10)
-            testCase.verifyEqual(spm_read_vols(spm_vol(batch_beta)), spm_read_vols(spm_vol(inter_beta)), 'AbsTol', 10^-10)
+            if numel(batch_beta) ~= numel(inter_beta)
+                error(['Number of betas are not equal between batch (',...
+                        num2str(numel(batch_beta)),...
+                        ') and interactive mode ',...
+                        num2str(numel(inter_beta))   ]);
+            else
+                for i = 1:numel(inter_beta)
+                    testCase.verifyEqual(spm_read_vols(spm_vol(batch_beta{i})), spm_read_vols(spm_vol(inter_beta{i})), 'AbsTol', 10^-10)
+                end
+            end          
             testCase.verifyEqual(spm_read_vols(spm_vol(batch_filtmap)), spm_read_vols(spm_vol(inter_filtmap)), 'AbsTol', 10^-10)
             
             clear global TEST;
