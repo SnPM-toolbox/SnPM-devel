@@ -14,7 +14,6 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
                      fullfile(testCase.testDataDir, 'su_control05', 'cn_sess1', 'con_0001.img,1')
                      };
         end
-        
     end
 
     methods (Test)
@@ -27,20 +26,20 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
         function test_onesample_cov(testCase)
             testCase.testName = 'onesample_cov';
             
-            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.mcov.c = [1 5 2 21 0];
-            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.mcov.cname = 'age';
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.cov.c = [1 5 2 21 0];
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.cov.cname = 'age';
         end
 
         % With 3 covariates
         function test_onesample_cov3(testCase)
             testCase.testName = 'onesample_cov3';
             
-            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.mcov(1).c = [1 1 2 3 1];
-            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.mcov(1).cname = 'age';
-            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.mcov(2).c = [0 21 15 18 3];
-            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.mcov(2).cname = 'height';
-            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.mcov(3).c = [-1 -0.5 -1 1 0];
-            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.mcov(3).cname = 'width';
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.cov(1).c = [1 1 2 3 1];
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.cov(1).cname = 'age';
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.cov(2).c = [0 21 15 18 3];
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.cov(2).cname = 'height';
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.cov(3).c = [-1 -0.5 -1 1 0];
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.cov(3).cname = 'width';
         end
 
         % With variance smoothing
@@ -68,12 +67,16 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
             testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.nPerm = 100;
         end
         
+        % Global normalisation, normalisation: Proportional scaling scaled 
+        % to default value (50)
         function test_onesample_propscaling(testCase)
             testCase.testName = 'onesample_propscaling';
             
             testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.globalm.glonorm = 2;
         end
         
+        % Global normalisation, normalisation: Proportional scaling scale 
+        % to user-defined value
         function test_onesample_propscaling_to_user(testCase)
             testCase.testName = 'onesample_propscaling_to_user';
             
@@ -81,18 +84,21 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
             testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.globalm.gmsca.gmsca_yes.gmscv = 145;
         end
 
+        % Global normalisation: overall grand mean scaling to 145
         function test_onesample_grandmean_145(testCase)
             testCase.testName = 'onesample_grandmean_145';
             
             testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.globalm.gmsca.gmsca_yes.gmscv = 145;
         end
         
+        % Global normalisation: overall grand mean scaling to 50
         function test_onesample_grandmean_50(testCase)
             testCase.testName = 'onesample_grandmean_50';
             
             testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.globalm.gmsca.gmsca_yes.gmscv = 50;
         end
         
+        % Global normalisation, normalisation: ANCOVA
         function test_onesample_ancova(testCase)
             testCase.testName = 'onesample_ancova';
             
@@ -109,6 +115,38 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
             testCase.batchResDir = fullfile(testCase.parentDataDir, 'results', 'batch', testCase.testName);
             testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), 'interactive', testCase.testName);
             testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.dir = {testCase.batchResDir};
+        end
+        
+        function create_spm_batch(testCase)
+            batch = testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT;
+            testCase.spmDir = strrep(batch.dir{1}, 'batch', 'spm');
+            batch.dir = {testCase.spmDir};
+            if ~exist(testCase.spmDir, 'dir')
+                mkdir(testCase.spmDir);
+            else
+                % Remove SPM.mat to avoid interactive window asking if
+                % model can be overwritten
+                delete(fullfile(testCase.spmDir, 'SPM.mat'));
+            end
+            
+            
+            batch.des.t1.scans = batch.P;
+            batch = rmfield(batch, 'P');
+            
+            testCase.spmBatch{1}.spm.stats.factorial_design = batch;
+            
+            % If grand mean scaling then we should calculate mean (otherwise error?)
+            if (  isfield(testCase.spmBatch{1}.spm.stats.factorial_design, 'globalm') &&...
+                  isfield(testCase.spmBatch{1}.spm.stats.factorial_design.globalm, 'gmsca') &&...
+                  isfield(testCase.spmBatch{1}.spm.stats.factorial_design.globalm.gmsca, 'gmsca_yes')) &&...
+               ( ~isfield(testCase.spmBatch{1}.spm.stats.factorial_design, 'globalc') ||...
+                  isfield(testCase.spmBatch{1}.spm.stats.factorial_design.globalc, 'g_omit'))
+                    testCase.spmBatch{1}.spm.stats.factorial_design.globalc.g_mean = 1;
+                    if isfield(testCase.spmBatch{1}.spm.stats.factorial_design.globalc, 'g_omit')
+                        testCase.spmBatch{1}.spm.stats.factorial_design.globalc = ...
+                            rmfield(testCase.spmBatch{1}.spm.stats.factorial_design.globalc, 'g_omit');
+                    end
+            end
         end
     end
 end

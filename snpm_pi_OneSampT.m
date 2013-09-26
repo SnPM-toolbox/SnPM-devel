@@ -109,23 +109,23 @@ nFlip = 0;
 %-Get confounding covariates
 %-----------------------------------------------------------------------
 G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
-if numel(job.mcov) > 0 %isfield(job.covariate,'cov_Val')
-    for i = 1:numel(job.mcov)
-        d = job.mcov(i).c;
+if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
+    for i = 1:numel(job.cov)
+        d = job.cov(i).c;
         if (size(d,1) == 1), 
             d = d'; 
         end
         nGcs = size(Gc,2);
         if size(d,1) ~= q
             error(sprintf('Covariate [%d,1] does not match number of subjects [%d]',...
-                size(job.mcov(i).c,1),nScan))
+                size(job.cov(i).c,1),nScan))
         else
             %-Save raw covariates for printing later on
             Gc = [Gc,d];
             % Center
             d  = d - ones(q,1)*mean(d); str=''; 
             G = [G, d];
-            dnames = job.mcov(i).cname;
+            dnames = job.cov(i).cname;
     %         dnames = [str,'ConfCov#',int2str(nGcs+1)];
     %         for j = nGcs+1:nGcs+size(d,1)
     %             dnames = str2mat(dnames,['ConfCov#',int2str(j)]); 

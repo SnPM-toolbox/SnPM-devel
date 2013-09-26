@@ -46,11 +46,11 @@ cname.num     = [1 Inf];
 % ---------------------------------------------------------------------
 % mcov Covariate
 % ---------------------------------------------------------------------
-mcov         = cfg_branch;
-mcov.tag     = 'mcov';
-mcov.name    = 'Covariate';
-mcov.val     = {c cname };
-mcov.help    = {'Add a new covariate to your experimental design'};
+cov         = cfg_branch;
+cov.tag     = 'cov';
+cov.name    = 'Covariate';
+cov.val     = {c cname };
+cov.help    = {'Add a new covariate to your experimental design'};
 % ---------------------------------------------------------------------
 % generic Covariates
 % ---------------------------------------------------------------------
@@ -58,7 +58,7 @@ generic         = cfg_repeat;
 generic.tag     = 'generic';
 generic.name    = 'Covariates';
 generic.help    = {'Covariates'};
-generic.values  = {mcov };
+generic.values  = {cov };
 generic.num     = [0 Inf];
 
 

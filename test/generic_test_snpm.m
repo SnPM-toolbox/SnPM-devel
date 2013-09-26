@@ -6,6 +6,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         batchResDir;
         parentDataDir;
         matlabbatch;
+        spmBatch;
+        spmDir;
         interResDir;
         testName;
         stattype;
@@ -42,6 +44,18 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{3}.cfg_snpm.Infer.Thr.Vox.VoxSig.Pth = 0.10;
             testCase.matlabbatch{3}.cfg_snpm.Infer.Tsign = 1;
             testCase.matlabbatch{3}.cfg_snpm.Infer.WriteFiltImg.name = 'SnPM_filtered_10none.nii';
+            
+            
+            % SPM batch
+            testCase.spmBatch{2}.spm.stats.fmri_est.spmmat(1) = cfg_dep;
+            testCase.spmBatch{2}.spm.stats.fmri_est.spmmat(1).tname = 'Select SPM.mat';
+            testCase.spmBatch{2}.spm.stats.fmri_est.spmmat(1).tgt_spec{1}(1).name = 'filter';
+            testCase.spmBatch{2}.spm.stats.fmri_est.spmmat(1).tgt_spec{1}(1).value = 'mat';
+            testCase.spmBatch{2}.spm.stats.fmri_est.spmmat(1).tgt_spec{1}(2).name = 'strtype';
+            testCase.spmBatch{2}.spm.stats.fmri_est.spmmat(1).tgt_spec{1}(2).value = 'e';
+            testCase.spmBatch{2}.spm.stats.fmri_est.spmmat(1).sname = 'Factorial design specification: SPM.mat File';
+            testCase.spmBatch{2}.spm.stats.fmri_est.spmmat(1).src_exbranch = substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
+            testCase.spmBatch{2}.spm.stats.fmri_est.spmmat(1).src_output = substruct('.','spmmat');
         end 
     end
     
@@ -60,6 +74,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             batch_tmap = spm_select('FPList', testCase.batchResDir, statMapRegexp);
             batch_beta = cellstr(spm_select('FPList', testCase.batchResDir, '^beta_00\d\d\.hdr'));
             batch_filtmap = spm_select('FPList', testCase.batchResDir, '^SnPM_filtered_10none.*\.nii');
+            
+            spm_beta = cellstr(spm_select('FPList', testCase.spmDir, '^beta_00\d\d\.hdr'));
 
             % Maps obtained with the interactive execution
             inter_tmap = spm_select('FPList', testCase.interResDir, statMapRegexp);
@@ -74,6 +90,10 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                         num2str(numel(inter_beta))   ]);
             else
                 for i = 1:numel(inter_beta)
+                    % The beta files must be equal with the one obtained by
+                    % SPM (absolute tolerance lowered to 10^-4)
+                    testCase.verifyEqual(spm_read_vols(spm_vol(batch_beta{i})), spm_read_vols(spm_vol(spm_beta{i})), 'AbsTol', 10^-4)
+                    
                     testCase.verifyEqual(spm_read_vols(spm_vol(batch_beta{i})), spm_read_vols(spm_vol(inter_beta{i})), 'AbsTol', 10^-10)
                 end
             end          
@@ -84,8 +104,10 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         
         function complete_batch_and_run(testCase)
             testCase.complete_batch();
-            
             spm_jobman('run', testCase.matlabbatch);
+            
+            testCase.create_spm_batch();
+            spm_jobman('run', testCase.spmBatch);
         end 
     end
     
