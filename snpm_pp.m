@@ -481,100 +481,99 @@ alph_FWE  = NaN;   % FWE rate of a specified u threshold
 alph_FDR  = NaN;   % FDR rate of a specified alpha_ucp
   
 if BATCH
-  bSpatEx = isfield(job.Thr,'Clus');
-  if ~bSpatEx
-    % Voxel-wise inference
-    tmp = fieldnames(job.Thr.Vox.VoxSig);
-    switch tmp{1}
-     case 'Pth'
-      alpha_ucp = BoundCheck(job.Thr.Vox.VoxSig.Pth,[0 1],'Invalid Uncorrected P');
-      alph_FDR  = snpm_P_FDR(alpha_ucp,[],'P',[],sSnPMucp');
-     case 'TFth'
-      u         = BoundCheck(job.Thr.Vox.VoxSig.TFth,[0 Inf],'Negative Threshold!');
-      alph_FWE  = sum(MaxT > u -tol) / nPermReal;
-     case 'FDRth'
-      alph_FDR  = BoundCheck(job.Thr.Vox.VoxSig.FDRth,[0 1],'Invalid FDR level');
-      alpha_ucp = snpm_uc_FDR(alph_FDR,[],'P',[],sSnPMucp');
-     case 'FWEth'
-      alph_FWE  = BoundCheck(job.Thr.Vox.VoxSig.FWEth,[0 1],'Invalid FWE level');
-      iFWE      = ceil((1-alph_FWE)*nPermReal);
-      if alph_FWE<1
-	C_MaxT=StMaxT(iFWE);
-      else
-	C_MaxT = 0;
-      end
-      u = C_MaxT;
-    end
-  else
-    % Cluster-wise inference
-    if exist(fullfile(CWD,'SnPM_ST.mat'))~=2 & exist(fullfile(CWD,'STCS.mat'))~=2
-      error(['ERROR: Cluster-wise inference requested, but no cluster information saved.\n',...
-	     'Re-configure analysis changing "Cluster inference" to "Yes" and re-run.\n'])
-    end
-    %%% Sort out the cluster-forming threshold
-    if pU_ST_Ut==-1  % No threshold was set in snpm_ui.
-      if isnan(job.Thr.Clus.CFth)
-          error('ERROR: Cluster-forming threshold set to NaN in results with "slow" cluster inference method used in compoutation.  \nRe-run results specifying a cluster-forming threshold.\n')
-      end
-      % Save original ST_Ut
-      ST_Ut_0 = ST_Ut;
-      CFth=job.Thr.Clus.CFth;
-      if (CFth<=0)
-          error('ERROR: Cluster-forming threshold must be strictly positive.\nRe-run results with a cluster-forming threshold greater than 0.\n')
-      end
-      if bVarSm
-        %-If using pseudo-statistics then can't use (uncorrected) 
-        % upper tail p-values to specify primary threshold
-        if (CFth<1)
-            error(sprintf('ERROR: Cluster-forming threshold specified as a P-value (%g), but uncorrected P-values are unavailable for the pseudo t (smoothed variance t-test).  \nRe-run results with a cluster-forming threshold greater than 1.\n',ST_Ut))
-        end
-        if (CFth>=ST_Ut-tol)
-            error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STprop in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
-        end
-        else
-        %-Statistic image is t with df degrees of freedom
-        p_ST_Ut  = STalpha;
-        if (CFth < 1)
-            pCFth = CFth;
-            CFth = spm_invTcdf(1-CFth,df);
-        else
-            pCFth = NaN;
-            if (abs(CFth-ST_Ut)<=tol)
-                CFth=ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
-            end
-        end
-
-        if (CFth < ST_Ut) %(CFth>=ST_Ut-tol)
-            if isnan(pCFth) % statistic-value cluster-forming threshold
-                error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
+    bSpatEx = isfield(job.Thr,'Clus');
+    if ~bSpatEx
+        % Voxel-wise inference
+        tmp = fieldnames(job.Thr.Vox.VoxSig);
+        switch tmp{1}
+        case 'Pth'
+            alpha_ucp = BoundCheck(job.Thr.Vox.VoxSig.Pth,[0 1],'Invalid Uncorrected P');
+            alph_FDR  = snpm_P_FDR(alpha_ucp,[],'P',[],sSnPMucp');
+        case 'TFth'
+            u         = BoundCheck(job.Thr.Vox.VoxSig.TFth,[0 Inf],'Negative Threshold!');
+            alph_FWE  = sum(MaxT > u -tol) / nPermReal;
+        case 'FDRth'
+            alph_FDR  = BoundCheck(job.Thr.Vox.VoxSig.FDRth,[0 1],'Invalid FDR level');
+            alpha_ucp = snpm_uc_FDR(alph_FDR,[],'P',[],sSnPMucp');
+        case 'FWEth'
+            alph_FWE  = BoundCheck(job.Thr.Vox.VoxSig.FWEth,[0 1],'Invalid FWE level');
+            iFWE      = ceil((1-alph_FWE)*nPermReal);
+            if alph_FWE<1
+                C_MaxT=StMaxT(iFWE);
             else
-                error(sprintf('ERROR: Cluster-forming threshold of P=%0.4f (T=%0.2f) specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming P-value threshold of %0.2f or lower.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',pCFth,CFth,ST_Ut,p_ST_Ut))
+                C_MaxT = 0;
+            end
+            u = C_MaxT;
+        end
+    else
+        % Cluster-wise inference
+        if exist(fullfile(CWD,'SnPM_ST.mat'))~=2 & exist(fullfile(CWD,'STCS.mat'))~=2
+            error(['ERROR: Cluster-wise inference requested, but no cluster information saved.\n',...
+            'Re-configure analysis changing "Cluster inference" to "Yes" and re-run.\n'])
+        end
+        %%% Sort out the cluster-forming threshold
+        if pU_ST_Ut==-1  % No threshold was set in snpm_ui.
+            if isnan(job.Thr.Clus.CFth)
+                error('ERROR: Cluster-forming threshold set to NaN in results with "slow" cluster inference method used in compoutation.  \nRe-run results specifying a cluster-forming threshold.\n')
+            end
+            % Save original ST_Ut
+            ST_Ut_0 = ST_Ut;
+            CFth=job.Thr.Clus.CFth;
+            if (CFth<=0)
+                error('ERROR: Cluster-forming threshold must be strictly positive.\nRe-run results with a cluster-forming threshold greater than 0.\n')
+            end
+            if bVarSm
+                %-If using pseudo-statistics then can't use (uncorrected) 
+                % upper tail p-values to specify primary threshold
+                if (CFth<1)
+                    error(sprintf('ERROR: Cluster-forming threshold specified as a P-value (%g), but uncorrected P-values are unavailable for the pseudo t (smoothed variance t-test).  \nRe-run results with a cluster-forming threshold greater than 1.\n',ST_Ut))
+                end
+                if (CFth>=ST_Ut-tol)
+                    error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STprop in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
+                end
+            else
+                %-Statistic image is t with df degrees of freedom
+                p_ST_Ut  = STalpha;
+                if (CFth < 1)
+                    pCFth = CFth;
+                    CFth = spm_invTcdf(1-CFth,df);
+                else
+                    pCFth = NaN;
+                    if (abs(CFth-ST_Ut)<=tol)
+                    CFth=ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
+                    end
+                end
+
+                if (CFth < ST_Ut) %(CFth>=ST_Ut-tol)
+                    if isnan(pCFth) % statistic-value cluster-forming threshold
+                        error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
+                    else
+                        error(sprintf('ERROR: Cluster-forming threshold of P=%0.4f (T=%0.2f) specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming P-value threshold of %0.2f or lower.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',pCFth,CFth,ST_Ut,p_ST_Ut))
+                    end
+                end
+            end
+            if (abs(CFth-ST_Ut)<=tol)
+                CFth = ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
+            end
+                ST_Ut = CFth;
+        else % Threshold *was* set in snpm_ui.
+            if ~isnan(job.Thr.Clus.CFth)
+                error(sprintf('ERROR: Cluster-forming threshold of T=%0.2f was already set during analysis configuration; hence, in results, cluster-forming threshold must be left as "NaN".\nRe-run results with cluster-forming threshold set to NaN.\n',ST_Ut))
             end
         end
-      end
-      if (abs(CFth-ST_Ut)<=tol)
-        CFth = ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
-      end
-      ST_Ut = CFth;
-  else % Threshold *was* set in snpm_ui.
-    if ~isnan(job.Thr.Clus.CFth)
-        error(sprintf('ERROR: Cluster-forming threshold of T=%0.2f was already set during analysis configuration; hence, in results, cluster-forming threshold must be left as "NaN".\nRe-run results with cluster-forming threshold set to NaN.\n',ST_Ut))
-    end
-  end
-    u=ST_Ut; % Flag use of a statistic-value threshold
-    % Inference details...
-    tmp = fieldnames(job.Thr.Clus.ClusSig);
-    switch tmp{1}
-     case 'Cth'
-      C_STCS = job.Thr.Clus.ClusSig.Cth;
-     case 'PthC'
-      alpha_ucp = BoundCheck(job.Thr.Clus.ClusSig.PthC,[0 1],'Invalid uncorrected P(k)');
-     case 'FWEthC'
-      alph_FWE  = BoundCheck(job.Thr.Clus.ClusSig.FWEthC,[0 1],'Invalid FWE level (cluster-level inference)');
-      iFWE      = ceil((1-alph_FWE)*nPermReal);
-    end
-
-  end % END: Cluster-wise inference
+        u=ST_Ut; % Flag use of a statistic-value threshold
+        % Inference details...
+        tmp = fieldnames(job.Thr.Clus.ClusSig);
+        switch tmp{1}
+            case 'Cth'
+                C_STCS = job.Thr.Clus.ClusSig.Cth;
+            case 'PthC'
+                alpha_ucp = BoundCheck(job.Thr.Clus.ClusSig.PthC,[0 1],'Invalid uncorrected P(k)');
+            case 'FWEthC'
+                alph_FWE  = BoundCheck(job.Thr.Clus.ClusSig.FWEthC,[0 1],'Invalid FWE level (cluster-level inference)');
+                iFWE      = ceil((1-alph_FWE)*nPermReal);
+        end
+    end % END: Cluster-wise inference
 
 else  % GUI, interative inference specification
 

@@ -29,6 +29,29 @@ classdef test_twoSample < matlab.unittest.TestCase & generic_test_snpm
         function test_twosample_1(testCase)
             testCase.testName = 'twosample_1';
         end
+        
+        % No covariate, no variance smoothing and cluster stat
+        function test_twosample_cluster(testCase)
+            testCase.testName = 'twosample_cluster';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.bVolm = 1;
+            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.ST.ST_later = -1;
+            
+            % Test FDR, FWE et uncorrected T thresh as well
+            additional_results(testCase);
+            additional_cluster_results(testCase);
+        end
+
+        % No covariate, no variance smoothing and cluster stat with
+        % pre-defined height threshold
+        function test_twosample_cluster_predefined(testCase)
+            testCase.testName = 'twosample_cluster_predefined';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.bVolm = 1;
+            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.ST.ST_U = 0.1;
+            
+            additional_predifined_cluster_results(testCase);
+        end
 
         % With 1 covariate
         function test_twosample_cov(testCase)
