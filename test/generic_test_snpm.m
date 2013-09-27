@@ -12,6 +12,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         testName;
         stattype;
         compaWithSpm;
+        numBetas;
     end
     
     methods (TestMethodSetup)
@@ -96,7 +97,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                         ') and interactive mode ',...
                         num2str(numel(inter_beta))   ]);
             else
-                for i = 1:numel(inter_beta)
+                for i = 1:testCase.numBetas
                     
                     if testCase.compaWithSpm
                         % The beta files must be equal with the one obtained by
@@ -113,7 +114,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                             end
                         end
 
-                        testCase.verifyEqual(spm_read_vols(spm_vol(batch_beta{i})), spm_read_vols(spm_vol(spm_beta{corresIndex})), 'AbsTol', 10^-1)
+                        testCase.verifyEqual(spm_read_vols(spm_vol(batch_beta{i})), spm_read_vols(spm_vol(spm_beta{corresIndex})), 'AbsTol', 10^-2)
                     end
                     
                     testCase.verifyEqual(spm_read_vols(spm_vol(batch_beta{i})), spm_read_vols(spm_vol(inter_beta{i})), 'AbsTol', 10^-10)

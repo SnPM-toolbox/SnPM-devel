@@ -6,6 +6,8 @@ classdef test_twoSample < matlab.unittest.TestCase & generic_test_snpm
     
     methods (TestMethodSetup)
         function create_basis_matlabbatch(testCase)
+            testCase.numBetas = 2;
+            
             testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.scans1 = {...
                  fullfile(testCase.testDataDir, 'su_control01', 'cn_sess1', 'con_0001.img,1'),...
                  fullfile(testCase.testDataDir, 'su_control02', 'cn_sess1', 'con_0001.img,1'),...
@@ -79,6 +81,44 @@ classdef test_twoSample < matlab.unittest.TestCase & generic_test_snpm
                  };
              
             testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.nPerm = 100;
+        end
+        
+        % Global normalisation, normalisation: Proportional scaling scaled 
+        % to default value (50)
+        function test_twosample_propscaling(testCase)
+            testCase.testName = 'twosample_propscaling';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.globalm.glonorm = 2;
+        end
+        
+        % Global normalisation, normalisation: Proportional scaling scale 
+        % to user-defined value
+        function test_twosample_propscaling_to_user(testCase)
+            testCase.testName = 'twosample_propscaling_to_user';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.globalm.glonorm = 2;
+            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.globalm.gmsca.gmsca_yes.gmscv = 145;
+        end
+
+        % Global normalisation: overall grand mean scaling to 145
+        function test_twosample_grandmean_145(testCase)
+            testCase.testName = 'twosample_grandmean_145';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.globalm.gmsca.gmsca_yes.gmscv = 145;
+        end
+        
+        % Global normalisation: overall grand mean scaling to 50
+        function test_twosample_grandmean_50(testCase)
+            testCase.testName = 'twosample_grandmean_50';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.globalm.gmsca.gmsca_yes.gmscv = 50;
+        end
+        
+        % Global normalisation, normalisation: ANCOVA
+        function test_twosample_ancova(testCase)
+            testCase.testName = 'twosample_ancova';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.globalm.glonorm = 3;
         end
     end
     

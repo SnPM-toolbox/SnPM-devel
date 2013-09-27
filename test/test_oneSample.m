@@ -6,6 +6,8 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
     
     methods (TestMethodSetup)
         function create_basis_matlabbatch(testCase)
+            testCase.numBetas = 1;
+            
             testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.P = {
                      fullfile(testCase.testDataDir, 'su_control01', 'cn_sess1', 'con_0001.img,1')
                      fullfile(testCase.testDataDir, 'su_control02', 'cn_sess1', 'con_0001.img,1')
