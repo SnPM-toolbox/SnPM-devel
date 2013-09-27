@@ -499,7 +499,7 @@ if BATCH
       alph_FWE  = BoundCheck(job.Thr.Vox.VoxSig.FWEth,[0 1],'Invalid FWE level');
       iFWE      = ceil((1-alph_FWE)*nPermReal);
       if alph_FWE<1
-	C_MaxT=MaxT(iFWE);
+	C_MaxT=StMaxT(iFWE);
       else
 	C_MaxT = 0;
       end
@@ -513,7 +513,7 @@ if BATCH
     end
     %%% Sort out the cluster-forming threshold
     if pU_ST_Ut==-1  % No threshold was set in snpm_ui.
-      if is.nan(job.Thr.Clus.CFth)
+      if isnan(job.Thr.Clus.CFth)
 	error('ERROR: Cluster-forming threshold set to NaN in results with "slow" cluster inference method used in compoutation.  \nRe-run results specifying a cluster-forming threshold.\n')
       end
       % Save original ST_Ut
@@ -532,15 +532,19 @@ if BATCH
 	  error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STprop in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
 	end
       else
-	%-Statistic image is t with df degrees of freedom
-	p_ST_Ut  = STalpha;
-	if (CFth < 1)
-	  pCFth = CFth;
-	  CFth = spm_invTcdf(1-CFth,df);
-	else
-	  pCFth = NaN;
-	end
-	if (CFth>=ST_Ut-tol)
+        %-Statistic image is t with df degrees of freedom
+        p_ST_Ut  = STalpha;
+        if (CFth < 1)
+            pCFth = CFth;
+            CFth = spm_invTcdf(1-CFth,df);
+        else
+            pCFth = NaN;
+            if (abs(CFth-ST_Ut)<=tol)
+              CFth=ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
+            end
+        end
+    
+	if (CFth < ST_Ut) %(CFth>=ST_Ut-tol)
 	  if isnan(pCFth) % statistic-value cluster-forming threshold
 	    error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
 	  else

@@ -304,11 +304,7 @@ nScan = size(P,1);
 
 %-Ask about variance smoothing & volumetric computation
 %-----------------------------------------------------------------------
-if BATCH
-  vFWHM = job.vFWHM;
-else
-  vFWHM = spm_input('FWHM(mm) for Variance smooth','+1','e',0);
-end
+vFWHM = job.vFWHM;
 if length(vFWHM)==1
 	vFWHM = vFWHM * ones(1,3);
 elseif length(vFWHM)==2
@@ -324,36 +320,16 @@ if bVarSm
 end
 
 %-Decide upon volumetric operation
-if BATCH
-  bVolm = job.bVolm;
-  if ~bVolm & (vFWHM(3)~=0)
-    warning(sprintf(['Working volumetrically because of smoothing in z (%g).\n'... 
-		     'May run out of memory.'],vFWHM(3)));
-    bVolm=1;
-  end
-else
-  if (nScan <= nMax4DefVol)
-    bVolm=1;
-  elseif (vFWHM(3)~=0)
-    fprintf(['%cWARNING: Working volumetrically because of smoothing '... 
-	     'in z (%g),\nbut more than %d scans analyzed.\nMay run out'...
-	     'of memory.\n'],7,vFWHM(3),nScan);
-    bVolm=1;
-  else
-    bVolm = spm_input(...
-	sprintf('%d scans: Work volumetrically?',nScan),...
-	'+1','y/n',[1,0],1);
-  end
+bVolm = job.bVolm;
+if ~bVolm & (vFWHM(3)~=0)
+warning(sprintf(['Working volumetrically because of smoothing in z (%g).\n'... 
+         'May run out of memory.'],vFWHM(3)));
+bVolm=1;
 end
 
 %-Ask about collecting Supra-Threshold cluster statistics
 %-----------------------------------------------------------------------
-if BATCH
-  bST = ~isfield(job.ST,'ST_none');
-else
-  bST = spm_input('Collect Supra-Threshold stats?','+1','y/n',[1,0],2);
-end
-
+bST = ~isfield(job.ST,'ST_none');
 
 % Add: get primary threshold for STC analysis if requested
 if bST
@@ -361,21 +337,9 @@ if bST
     warning(sprintf('Note:  Cannot define threshold now, because not working volumetrically\n'));
     pU_ST_Ut=-1; % Define the threshold later
   else
-    if BATCH
-      pU_ST_Ut = ~isfield(job.ST,'ST_later');
-    else
-      pU_ST_Ut = spm_input('Define the thresh now?','+1','y/n',[1,0],2);
-    end
+    pU_ST_Ut = ~isfield(job.ST,'ST_later');
     if pU_ST_Ut    % Define the threshold right now
-      if BATCH
-	pU_ST_Ut = job.ST.ST_U;
-      else
-	if bVarSm
-	  pU_ST_Ut = spm_input(sprintf('Clus-def thresh (pseudo t)'), '+0');
-	else
-	  pU_ST_Ut = spm_input(sprintf('Clus-def thresh (t>1 or p<1)'), '+0');
-	end
-      end
+        pU_ST_Ut = job.ST.ST_U;
     else
       pU_ST_Ut=-1; % Define the threshold later
     end
@@ -387,18 +351,7 @@ end
 
 %-Global normalization options
 %-----------------------------------------------------------------------
-if BATCH
-  iGloNorm = job.globalm.glonorm;
-else
-  tmp = []; for i = 1:length(iGloNorm), tmp = [tmp, eval(iGloNorm(i))]; end
-  if length(iGloNorm)>1
-    %-User has a choice from the options in iGloNorm.
-    iGloNorm=spm_input('Select global normalisation','+1','m', ...
-		       sGloNorm(tmp,:),tmp,1);
-  else
-    iGloNorm = tmp;
-  end
-end
+iGloNorm = job.globalm.glonorm;
 sGloNorm=deblank(sGloNorm(iGloNorm,:));
 
 
@@ -409,13 +362,7 @@ if iGloNorm==2 % Proportional scaling
   % TODO: must be set otherwise prop scaling alone in Batch mode lead to error  
   % job.globalm.gmsca.gmscv = ; % By default use mean
 else % No global normalisation or ANCOVA
-  if BATCH
     iGMsca = 1 + isfield(job.globalm.gmsca,'gmsca_yes');
-  else
-    tmp = []; for i = 1:length(iGMsca), tmp = [tmp, eval(iGMsca(i))]; end
-    iGMsca = spm_input('grand mean scaling','+1','m',...
-		       sGMsca(tmp,:),tmp,1);
-  end
 end
 
 if (iGMsca==2) % CHANGED from 1 to 2 as should not ask for a value if grand mean scaling is not required.
@@ -424,17 +371,13 @@ if (iGMsca==2) % CHANGED from 1 to 2 as should not ask for a value if grand mean
   else
     str = [strrep(sGMsca(iGMsca,:),'scaling of','scale'),' to'];
   end
-  if BATCH
-      % As in SPM:
-      switch char(fieldnames(job.globalm.gmsca))
-          case 'gmsca_yes',
-              % Proportionally scale to this value
-              GM = job.globalm.gmsca.gmsca_yes.gmscv;
-          case 'gmsca_no',
-              GM = 50;
-      end
-  else
-    GM = spm_input(str,'+1','r',50,1);
+  % As in SPM:
+  switch char(fieldnames(job.globalm.gmsca))
+      case 'gmsca_yes',
+          % Proportionally scale to this value
+          GM = job.globalm.gmsca.gmsca_yes.gmscv;
+      case 'gmsca_no',
+          GM = 50;
   end
 elseif (iGMsca==1) % No grand mean scaling
   GM = 0;
@@ -443,105 +386,50 @@ end
 
 %-Get globals
 %-----------------------------------------------------------------------
-if BATCH
-  if (iGloNorm==1) && (iGMsca==1)
+if (iGloNorm==1) && (iGMsca==1)
     % No need for globals, omit
     iGXcalc = 1;
-  elseif isfield(job.globalc,'g_omit')
+elseif isfield(job.globalc,'g_omit')
     %iGXcalc=1;
     % Global needed and none requested, force iGXcalc to grand mean (3)
     iGXcalc=3;
-  elseif isfield(job.globalc,'g_user')
+elseif isfield(job.globalc,'g_user')
     iGXcalc=2;
     GX = job.globalc.g_user{1}(:);
     rg = GX;
     if length(GX) ~= nScan
-      error(['User-specified globals length [%d] doesn''t match number of' ...
-	     ' scans [%d]'],length(GX),nScan);
+        error(['User-specified globals length [%d] doesn''t match number of' ...
+            ' scans [%d]'],length(GX),nScan);
     end
-  elseif isfield(job.globalc,'g_mean')
+elseif isfield(job.globalc,'g_mean')
     iGXcalc=3;
-  end
-else
-  if (iGloNorm==1) & (iGMsca==1) % CHANGED from 2 to 1, if grand mean scaling then no value is required
-    % No need for globals, omit
-    iGXcalc = 1;
-  else
-    tmp = []; for i = 1:length(iGXcalc), tmp = [tmp, eval(iGXcalc(i))]; end
-    if length(iGXcalc)>1
-      iGXcalc = spm_input('Select global calcuation','+1','m', ...
-			  sGXcalc(tmp,:),tmp);
-    else
-      iGXcalc = tmp;
-    end
-  end
-  if iGXcalc==2	 %-Get user specified globals
-    GX = spm_input('globals','+0','r',[],[nScan]);
-    rg = GX;
-  end
 end
 sGXcalc=deblank(sGXcalc(iGXcalc,:));
 
 
 %-Get threshold defining voxels to analyse
 %-----------------------------------------------------------------------
-if BATCH
-  if isfield(job.masking.tm,'tm_none')
+if isfield(job.masking.tm,'tm_none')
     iTHRESH=1;
     THRESH = -Inf;
     sThresh = 'None';
-  elseif isfield(job.masking.tm,'tmr')
+elseif isfield(job.masking.tm,'tmr')
     iTHRESH=2;
     THRESH=job.masking.tm.tmr;
     sThresh=sprintf('Relative (%g)',THRESH);
-  elseif isfield(job.masking.tm,'tma')
+elseif isfield(job.masking.tm,'tma')
     iTHRESH=3;
     THRESH=job.masking.tm.tma;
     sThresh = sprintf('Absolute (%g)',THRESH);
-  end
-else
-  str = 'none|relative|absolute'; 
-  %-glob:absolute is absolute fraction of global.
-  iTHRESH = spm_input('Threshold masking','+1','b',str,1:3);
-  if (iTHRESH==1)
-    THRESH = -Inf;
-    sThresh = 'None';
-  elseif (iTHRESH==2)
-    THRESH = spm_input('Relative threshold ?','0','e',0.8);
-    sThresh = sprintf('Relative (%g)',THRESH);
-  elseif (iTHRESH==3)
-    THRESH = spm_input('Absolute threshold ?','0','e');
-    sThresh = sprintf('Absolute (%g)',THRESH);
-  end
 end
 
 %-Implicit Masking - Batch only!
 %-----------------------------------------------------------------------
-if BATCH
-  ImMASKING=job.masking.im;
-else
-  ImMASKING=1;
-end
+ImMASKING=job.masking.im;
 
 %-Get analysis mask
 %-----------------------------------------------------------------------
-if BATCH
-  MASK = job.masking.em{1};
-else
-  iMASK = spm_input('Analysis mask?','+1','y/n',[1,0],2);
-  if (iMASK)
-    MASK = spm_select(1,'image','Select analysis mask');
-  else
-    MASK = '';
-  end
-end
-
-
-%-The interactive parts of snpm_ui are now finished
-%-----------------------------------------------------------------------
-if ~BATCH
-  set(Finter,'Name','Thank You','Pointer','Watch')
-end
+MASK = job.masking.em{1};
 
 %=======================================================================
 %-Computation

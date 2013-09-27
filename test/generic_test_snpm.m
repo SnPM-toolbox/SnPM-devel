@@ -13,9 +13,14 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         stattype;
         compaWithSpm;
         numBetas;
+        inter_map;
+        batch_map;
+        tolerance;
+        mapName;
     end
     
     methods (TestMethodSetup)
+        
         function setGlobals(testCase)
             global TEST;
             TEST = true;
@@ -40,6 +45,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{2}.cfg_snpm.snpm_bch_cp.snpmcfg(1).src_output = substruct('.','SnPMcfg');
 
             % Results   
+            % Uncorrected voxel-wise p<0.1
             testCase.matlabbatch{3}.cfg_snpm.Infer.SnPMmat(1) = cfg_dep;
             testCase.matlabbatch{3}.cfg_snpm.Infer.SnPMmat(1).tname = 'SnPM.mat results file';
             testCase.matlabbatch{3}.cfg_snpm.Infer.SnPMmat(1).tgt_spec = {};
@@ -79,7 +85,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                 
             batch_tmap = spm_select('FPList', testCase.batchResDir, statMapRegexp);
             batch_beta = cellstr(spm_select('FPList', testCase.batchResDir, '^beta_00\d\d\.hdr'));
-            batch_filtmap = spm_select('FPList', testCase.batchResDir, '^SnPM_filtered_10none.*\.nii');
+            batch_ip = cellstr(spm_select('FPList', testCase.batchResDir, '^lP.*.hdr'));
+            batch_filtmap = cellstr(spm_select('FPList', testCase.batchResDir, '^SnPMt?_filtered_.*\.nii'));
             
             if testCase.compaWithSpm
                 spm_beta = cellstr(spm_select('FPList', testCase.spmDir, '^beta_00\d\d\.hdr'));
@@ -88,39 +95,63 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             % Maps obtained with the interactive execution
             inter_tmap = spm_select('FPList', testCase.interResDir, statMapRegexp);
             inter_beta = cellstr(spm_select('FPList', testCase.interResDir, '^beta_00\d\d\.hdr'));
-            inter_filtmap = spm_select('FPList', testCase.interResDir, '^SnPMt_filtered_10none\.img');
-
-            testCase.verifyEqual(spm_read_vols(spm_vol(batch_tmap)), spm_read_vols(spm_vol(inter_tmap)), 'AbsTol', 10^-10)
-            if numel(batch_beta) ~= numel(inter_beta)
-                error(['Number of betas are not equal between batch (',...
-                        num2str(numel(batch_beta)),...
-                        ') and interactive mode ',...
-                        num2str(numel(inter_beta))   ]);
-            else
+            inter_ip = cellstr(spm_select('FPList', testCase.interResDir, '^lP.*.hdr'));
+            inter_filtmap = cellstr(spm_select('FPList', testCase.interResDir, '^SnPMt_filtered_.*\.img'));
+            
+            % Compare t-maps
+            testCase.inter_map = inter_tmap;
+            testCase.batch_map = batch_tmap;
+            testCase.tolerance = 10^-10;
+            testCase.mapName = 'tmap';
+            testCase.compare_batch_with_inter();
+            
+            % Compare beta maps
+            testCase.inter_map = inter_beta(1:testCase.numBetas);
+            testCase.batch_map = batch_beta(1:testCase.numBetas);
+            testCase.tolerance = 10^-10;
+            testCase.mapName = 'beta';
+            testCase.compare_batch_with_inter();
+            
+            % Compare BATCH beta maps with SPM betas
+            % The beta files must be equal with the one obtained by
+            % SPM (absolute tolerance lowered to 10^-4)
+            if testCase.compaWithSpm
+                % Find SPM beta corresponding to each BATCH beta
+                spmBetaIndices = NaN*ones(1, testCase.numBetas);
                 for i = 1:testCase.numBetas
-                    
-                    if testCase.compaWithSpm
-                        % The beta files must be equal with the one obtained by
-                        % SPM (absolute tolerance lowered to 10^-4)
-
-                        % Find corresponding beta in SPM (not necessairily in the same order)
-                        corresIndex = 1;
-                        minDiff = Inf;
-                        for j = 1:numel(spm_beta)
-                            currDiff = nansum(nansum(nansum(abs(spm_read_vols(spm_vol(batch_beta{i}))-spm_read_vols(spm_vol(spm_beta{j}))))));
-                            if (currDiff < minDiff)
-                                corresIndex = j;
-                                minDiff = currDiff;
-                            end
+                    % Find corresponding beta in SPM (not necessairily in the same order)
+                    corresIndex = 1;
+                    minDiff = Inf;
+                    for j = 1:numel(spm_beta)
+                        currDiff = nansum(nansum(nansum(abs(spm_read_vols(spm_vol(batch_beta{i}))-spm_read_vols(spm_vol(spm_beta{j}))))));
+                        if (currDiff < minDiff)
+                            corresIndex = j;
+                            minDiff = currDiff;
                         end
-
-                        testCase.verifyEqual(spm_read_vols(spm_vol(batch_beta{i})), spm_read_vols(spm_vol(spm_beta{corresIndex})), 'AbsTol', 10^-2)
                     end
-                    
-                    testCase.verifyEqual(spm_read_vols(spm_vol(batch_beta{i})), spm_read_vols(spm_vol(inter_beta{i})), 'AbsTol', 10^-10)
+                    spmBetaIndices(i) = corresIndex;
                 end
-            end          
-            testCase.verifyEqual(spm_read_vols(spm_vol(batch_filtmap)), spm_read_vols(spm_vol(inter_filtmap)), 'AbsTol', 10^-10)
+                
+                testCase.inter_map = inter_beta(1:testCase.numBetas);
+                testCase.batch_map = spm_beta(spmBetaIndices);
+                testCase.tolerance = 10^-3;
+                testCase.mapName = 'beta, SPM';
+                testCase.compare_batch_with_inter();
+            end
+            
+            % Compare IP maps
+            testCase.inter_map = inter_ip;
+            testCase.batch_map = batch_ip;
+            testCase.tolerance = 10^-10;
+            testCase.mapName = 'lP';
+            testCase.compare_batch_with_inter();
+            
+            % Compare filtered maps
+            testCase.inter_map = inter_filtmap;
+            testCase.batch_map = batch_filtmap;
+            testCase.tolerance = 10^-10;
+            testCase.mapName = 'filtered map';
+            testCase.compare_batch_with_inter();
             
             clear global TEST;
         end
@@ -166,5 +197,109 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         function complete_batch(testCase)
         end 
         
+        function additional_results(testCase)
+            % Rename uncorrected p<0.1
+            testCase.matlabbatch{end}.cfg_snpm.Infer.WriteFiltImg.name = 'SnPMt_filtered_vox_unc_p10.nii';
+            
+            % Uncorrected voxel-wise TorF > 1.6
+            testCase.matlabbatch{end+1}.cfg_snpm.Infer.SnPMmat(1) = cfg_dep;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tname = 'SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tgt_spec = {};
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1});
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_output = substruct('.','SnPM');
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Vox.VoxSig.TFth = 1.6;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.WriteFiltImg.name = 'SnPMt_filtered_vox_unc_t16.nii';
+            
+            % FWE voxel-wise p<0.5
+            testCase.matlabbatch{end+1}.cfg_snpm.Infer.SnPMmat(1) = cfg_dep;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tname = 'SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tgt_spec = {};
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1});
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_output = substruct('.','SnPM');
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Vox.VoxSig.FWEth = 0.5;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.WriteFiltImg.name = 'SnPMt_filtered_vox_fwe_p50.nii'; 
+            
+            % FDR voxel-wise p<0.5
+            testCase.matlabbatch{end+1}.cfg_snpm.Infer.SnPMmat(1) = cfg_dep;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tname = 'SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tgt_spec = {};
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1});
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_output = substruct('.','SnPM');
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Vox.VoxSig.FDRth = 0.5;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.WriteFiltImg.name = 'SnPMt_filtered_vox_fdr_p50.nii';  
+        end
+        
+        function additional_cluster_results(testCase)
+            % Uncorrected (cluster forming u>4) cluster-wise p<0.1
+            testCase.matlabbatch{end+1}.cfg_snpm.Infer.SnPMmat(1) = cfg_dep;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tname = 'SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tgt_spec = {};
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1});
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_output = substruct('.','SnPM');
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Clus.CFth = 4;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Clus.ClusSig.PthC = 0.1;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.WriteFiltImg.name = 'SnPMt_filtered_clus_4_unc_p10.nii';
+            
+            % Uncorrected (cluster forming u>4) cluster-wise k>6
+            testCase.matlabbatch{end+1}.cfg_snpm.Infer.SnPMmat(1) = cfg_dep;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tname = 'SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tgt_spec = {};
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1});
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_output = substruct('.','SnPM');
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Clus.CFth = 4;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Clus.ClusSig.Cth = 6;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.WriteFiltImg.name = 'SnPMt_filtered_clus_4_unc_k6.nii';
+            
+            % FWE (cluster forming u>4) cluster-wise p<0.5
+            testCase.matlabbatch{end+1}.cfg_snpm.Infer.SnPMmat(1) = cfg_dep;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tname = 'SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tgt_spec = {};
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1});
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_output = substruct('.','SnPM');
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Clus.CFth = 4;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Clus.ClusSig.FWEthC = 0.5;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.WriteFiltImg.name = 'SnPMt_filtered_clus_4_fwe_p50.nii'; 
+            
+            % FWE (cluster forming u>5) cluster-wise p<0.5
+            testCase.matlabbatch{end+1}.cfg_snpm.Infer.SnPMmat(1) = cfg_dep;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tname = 'SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tgt_spec = {};
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1});
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_output = substruct('.','SnPM');
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Clus.CFth = 5;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Clus.ClusSig.FWEthC = 0.5;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.WriteFiltImg.name = 'SnPMt_filtered_clus_5_fwe_p50.nii';  
+        end
+        
+        function compare_batch_with_inter(testCase)
+            if ~iscell(testCase.inter_map)
+                testCase.inter_map = {testCase.inter_map};
+            end
+            if ~iscell(testCase.batch_map)
+                testCase.batch_map = {testCase.batch_map};
+            end
+            
+            if numel(testCase.inter_map) ~= numel(testCase.batch_map)
+                error(['Number of ' testCase.mapName ' maps are not equal between batch (',...
+                        num2str(numel(testCase.batch_map)),...
+                        ') and interactive mode ',...
+                        num2str(numel(testCase.inter_map))   ]);
+            else
+                for i = 1:numel(testCase.inter_map)
+                    testCase.verifyEqual(...
+                        spm_read_vols(spm_vol(testCase.batch_map{i})), ...
+                        spm_read_vols(spm_vol(testCase.inter_map{i})), ...
+                        'AbsTol', testCase.tolerance, [testCase.batch_map{i}])
+                end
+            end
+        end
     end
 end
+

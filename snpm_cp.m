@@ -747,7 +747,7 @@ if ~bVolm,
 end
 
 %-Setup progress bar
-if bWin & ~bVolm
+if bWin && ~bVolm
   spm_progress_bar('Init',zdim,'Looping over (perms within) planes...','Plane')
 elseif bWin
   spm_progress_bar('Init',nPerm,'Volumetric mode...','Permutation')

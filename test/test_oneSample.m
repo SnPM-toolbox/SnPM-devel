@@ -19,9 +19,24 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
     end
 
     methods (Test)
-        % No covariate, no variance smoothing
+        % No covariate, no variance smoothing, no cluster stat
         function test_onesample_1(testCase)
             testCase.testName = 'onesample_1';
+            
+            % Test FDR, FWE et uncorrected T thresh as well
+            additional_results(testCase);
+        end
+        
+        % No covariate, no variance smoothing and cluster stat
+        function test_onesample_cluster(testCase)
+            testCase.testName = 'onesample_cluster';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.bVolm = 1;
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.ST.ST_later = -1;
+            
+            % Test FDR, FWE et uncorrected T thresh as well
+            additional_results(testCase);
+            additional_cluster_results(testCase);
         end
 
         % With 1 covariate
@@ -105,6 +120,31 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
             testCase.testName = 'onesample_ancova';
             
             testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.globalm.glonorm = 3;
+        end
+        
+        % Work slice by slice
+        function test_onesample_slice(testCase)
+            testCase.compaWithSpm = false;
+            
+            testCase.testName = 'onesample_slice';
+            
+            rand('seed',200);
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.P(end+1:end+12) = {
+                 fullfile(testCase.testDataDir, 'su_control06', 'cn_sess1', 'con_0001.img,1')
+                 fullfile(testCase.testDataDir, 'su_control07', 'cn_sess1', 'con_0001.img,1')
+                 fullfile(testCase.testDataDir, 'su_control08', 'cn_sess1', 'con_0001.img,1')
+                 fullfile(testCase.testDataDir, 'su_control09', 'cn_sess1', 'con_0001.img,1')
+                 fullfile(testCase.testDataDir, 'su_control10', 'cn_sess1', 'con_0001.img,1')
+                 fullfile(testCase.testDataDir, 'su_control11', 'cn_sess1', 'con_0001.img,1')
+                 fullfile(testCase.testDataDir, 'su_control12', 'cn_sess1', 'con_0001.img,1')
+                 fullfile(testCase.testDataDir, 'su_control13', 'cn_sess1', 'con_0001.img,1')
+                 fullfile(testCase.testDataDir, 'su_control01', 'cn_sess2', 'con_0001.img,1')
+                 fullfile(testCase.testDataDir, 'su_control01', 'cn_sess3', 'con_0001.img,1')
+                 fullfile(testCase.testDataDir, 'su_control01', 'cn_sess4', 'con_0001.img,1')
+                 fullfile(testCase.testDataDir, 'su_control02', 'cn_sess2', 'con_0001.img,1')
+                 };
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.nPerm = 100;
+            testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT.bVolm = 0;
         end
         
     end

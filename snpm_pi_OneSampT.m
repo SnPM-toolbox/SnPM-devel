@@ -170,7 +170,7 @@ snpm_check_nperm(nPiCond,nPiCond_mx);
 %-If user wants all perms, then random method would seem to take an
 % absurdly long time, so exact is used.
 
-if nScan<=12 | ~bAproxTst                    % exact method
+if nScan<=12 || ~bAproxTst                    % exact method
 
     %-Generate all labellings of nScan scans as +/- 1
     PiCond=[];
