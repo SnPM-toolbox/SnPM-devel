@@ -134,10 +134,10 @@ nFlip = sum(iCond==-1);
 %-Get and center confounding covariates
 %-----------------------------------------------------------------------
 G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
-g = numel(job.mcov);
+g = numel(job.cov);
 for i = 1:g
     nGcs = size(Gc,2);
-    d = job.mcov(i).c;%spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
+    d = job.cov(i).c;%spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
     if (size(d,1) == 1), 
         d = d'; 
     end
@@ -152,7 +152,7 @@ for i = 1:g
             str='r'; 
         end
         G = [G, d];
-        dnames = job.mcov(i).cname;
+        dnames = job.cov(i).cname;
         Gcnames = str2mat(Gcnames,dnames);
     end
 end

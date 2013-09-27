@@ -118,35 +118,12 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
         end
         
         function create_spm_batch(testCase)
-            batch = testCase.matlabbatch{1}.cfg_snpm.Design.OneSampT;
-            testCase.spmDir = strrep(batch.dir{1}, 'batch', 'spm');
-            batch.dir = {testCase.spmDir};
-            if ~exist(testCase.spmDir, 'dir')
-                mkdir(testCase.spmDir);
-            else
-                % Remove SPM.mat to avoid interactive window asking if
-                % model can be overwritten
-                delete(fullfile(testCase.spmDir, 'SPM.mat'));
-            end
+            factoDesign = testCase.spmBatch{1}.spm.stats.factorial_design;
             
+            factoDesign.des.t1.scans = factoDesign.P;
+            factoDesign = rmfield(factoDesign, 'P');
             
-            batch.des.t1.scans = batch.P;
-            batch = rmfield(batch, 'P');
-            
-            testCase.spmBatch{1}.spm.stats.factorial_design = batch;
-            
-            % If grand mean scaling then we should calculate mean (otherwise error?)
-            if (  isfield(testCase.spmBatch{1}.spm.stats.factorial_design, 'globalm') &&...
-                  isfield(testCase.spmBatch{1}.spm.stats.factorial_design.globalm, 'gmsca') &&...
-                  isfield(testCase.spmBatch{1}.spm.stats.factorial_design.globalm.gmsca, 'gmsca_yes')) &&...
-               ( ~isfield(testCase.spmBatch{1}.spm.stats.factorial_design, 'globalc') ||...
-                  isfield(testCase.spmBatch{1}.spm.stats.factorial_design.globalc, 'g_omit'))
-                    testCase.spmBatch{1}.spm.stats.factorial_design.globalc.g_mean = 1;
-                    if isfield(testCase.spmBatch{1}.spm.stats.factorial_design.globalc, 'g_omit')
-                        testCase.spmBatch{1}.spm.stats.factorial_design.globalc = ...
-                            rmfield(testCase.spmBatch{1}.spm.stats.factorial_design.globalc, 'g_omit');
-                    end
-            end
+            testCase.spmBatch{1}.spm.stats.factorial_design = factoDesign;
         end
     end
 end
