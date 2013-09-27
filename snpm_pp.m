@@ -431,7 +431,7 @@ if bNeg
   % Here, nPermReal has already been doubled if bhPerms=1
   SnPMucp = 1+1/nPermReal-SnPMucp;
 end  
-  sSnPMucp = sort(SnPMucp);
+sSnPMucp = sort(SnPMucp);
 
 
 
@@ -514,24 +514,24 @@ if BATCH
     %%% Sort out the cluster-forming threshold
     if pU_ST_Ut==-1  % No threshold was set in snpm_ui.
       if isnan(job.Thr.Clus.CFth)
-	error('ERROR: Cluster-forming threshold set to NaN in results with "slow" cluster inference method used in compoutation.  \nRe-run results specifying a cluster-forming threshold.\n')
+          error('ERROR: Cluster-forming threshold set to NaN in results with "slow" cluster inference method used in compoutation.  \nRe-run results specifying a cluster-forming threshold.\n')
       end
       % Save original ST_Ut
       ST_Ut_0 = ST_Ut;
       CFth=job.Thr.Clus.CFth;
       if (CFth<=0)
-	error('ERROR: Cluster-forming threshold must be strictly positive.\nRe-run results with a cluster-forming threshold greater than 0.\n')
+          error('ERROR: Cluster-forming threshold must be strictly positive.\nRe-run results with a cluster-forming threshold greater than 0.\n')
       end
       if bVarSm
-	%-If using pseudo-statistics then can't use (uncorrected) 
-	% upper tail p-values to specify primary threshold
-	if (CFth<1)
-	  error(sprintf('ERROR: Cluster-forming threshold specified as a P-value (%g), but uncorrected P-values are unavailable for the pseudo t (smoothed variance t-test).  \nRe-run results with a cluster-forming threshold greater than 1.\n',ST_Ut))
-	end
-	if (CFth>=ST_Ut-tol)
-	  error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STprop in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
-	end
-      else
+        %-If using pseudo-statistics then can't use (uncorrected) 
+        % upper tail p-values to specify primary threshold
+        if (CFth<1)
+            error(sprintf('ERROR: Cluster-forming threshold specified as a P-value (%g), but uncorrected P-values are unavailable for the pseudo t (smoothed variance t-test).  \nRe-run results with a cluster-forming threshold greater than 1.\n',ST_Ut))
+        end
+        if (CFth>=ST_Ut-tol)
+            error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STprop in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
+        end
+        else
         %-Statistic image is t with df degrees of freedom
         p_ST_Ut  = STalpha;
         if (CFth < 1)
@@ -540,27 +540,27 @@ if BATCH
         else
             pCFth = NaN;
             if (abs(CFth-ST_Ut)<=tol)
-              CFth=ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
+                CFth=ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
             end
         end
-    
-	if (CFth < ST_Ut) %(CFth>=ST_Ut-tol)
-	  if isnan(pCFth) % statistic-value cluster-forming threshold
-	    error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
-	  else
-	    error(sprintf('ERROR: Cluster-forming threshold of P=%0.4f (T=%0.2f) specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming P-value threshold of %0.2f or lower.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',pCFth,CFth,ST_Ut,p_ST_Ut))
-	  end
-	end
+
+        if (CFth < ST_Ut) %(CFth>=ST_Ut-tol)
+            if isnan(pCFth) % statistic-value cluster-forming threshold
+                error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
+            else
+                error(sprintf('ERROR: Cluster-forming threshold of P=%0.4f (T=%0.2f) specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming P-value threshold of %0.2f or lower.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',pCFth,CFth,ST_Ut,p_ST_Ut))
+            end
+        end
       end
       if (abs(CFth-ST_Ut)<=tol)
-	CFth = ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
+        CFth = ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
       end
       ST_Ut = CFth;
-    else % Threshold *was* set in snpm_ui.
-      if ~isnan(job.Thr.Clus.CFth)
-	error(sprintf('ERROR: Cluster-forming threshold of T=%0.2f was already set during analysis configuration; hence, in results, cluster-forming threshold must be left as "NaN".\nRe-run results with cluster-forming threshold set to NaN.\n',ST_Ut))
-      end
+  else % Threshold *was* set in snpm_ui.
+    if ~isnan(job.Thr.Clus.CFth)
+        error(sprintf('ERROR: Cluster-forming threshold of T=%0.2f was already set during analysis configuration; hence, in results, cluster-forming threshold must be left as "NaN".\nRe-run results with cluster-forming threshold set to NaN.\n',ST_Ut))
     end
+  end
     u=ST_Ut; % Flag use of a statistic-value threshold
     % Inference details...
     tmp = fieldnames(job.Thr.Clus.ClusSig);

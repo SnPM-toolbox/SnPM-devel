@@ -278,6 +278,33 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{end}.cfg_snpm.Infer.WriteFiltImg.name = 'SnPMt_filtered_clus_5_fwe_p50.nii';  
         end
         
+        function additional_predifined_cluster_results(testCase)
+            % Rename uncorrected p<0.1
+            testCase.matlabbatch{end}.cfg_snpm.Infer.WriteFiltImg.name = 'SnPMt_filtered_vox_unc_p10.nii';
+            
+            % Uncorrected (cluster forming p<0.1) cluster-wise p<0.1
+            testCase.matlabbatch{end+1}.cfg_snpm.Infer.SnPMmat(1) = cfg_dep;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tname = 'SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tgt_spec = {};
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1});
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_output = substruct('.','SnPM');
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Clus.CFth = NaN;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Clus.ClusSig.PthC = 0.1;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.WriteFiltImg.name = 'SnPMt_filtered_clus_p10_unc_p10.nii';
+            
+            % FWE (cluster forming p<0.1) cluster-wise p<0.5
+            testCase.matlabbatch{end+1}.cfg_snpm.Infer.SnPMmat(1) = cfg_dep;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tname = 'SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).tgt_spec = {};
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1});
+            testCase.matlabbatch{end}.cfg_snpm.Infer.SnPMmat(1).src_output = substruct('.','SnPM');
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Clus.CFth = NaN;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.Thr.Clus.ClusSig.FWEthC = 0.5;
+            testCase.matlabbatch{end}.cfg_snpm.Infer.WriteFiltImg.name = 'SnPMt_filtered_clus_p10_fwe_p50.nii'; 
+        end
+        
         function compare_batch_with_inter(testCase)
             if ~iscell(testCase.inter_map)
                 testCase.inter_map = {testCase.inter_map};
