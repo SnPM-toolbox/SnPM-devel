@@ -945,6 +945,16 @@ for i = 1:zdim
 	      Locs_mm=SnPM_ST(1:3,:);
 	      Locs_mm (4,:) = 1;
 	      Locs_vox = IMAT * Locs_mm;
+          
+          % Sometimes Locs_vox are not exactly integers and this raises an
+          % error later in the code. Here check that the values are
+          % integers with respect to a level of absolute tolerance (~10^-14)
+          % and enforce Locs_vox to be integers.
+          if max(abs(Locs_vox(:)-round(Locs_vox(:)))) > eps*100
+             error('''Locs_vox'' must be integers');
+          else
+             Locs_vox = round(Locs_vox); 
+          end
 	      
 	      STCS = snpm_STcalc('update',STCS, SnPM_ST(4,:),...
 				 Locs_vox(1:3,:),isPos,perm,pU_ST_Ut,df);
