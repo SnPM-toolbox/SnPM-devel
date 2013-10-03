@@ -34,7 +34,6 @@ classdef test_twoSample < matlab.unittest.TestCase & generic_test_snpm
         function test_twosample_cluster(testCase)
             testCase.testName = 'twosample_cluster';
             
-            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.bVolm = 1;
             testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.ST.ST_later = -1;
             
             % Test FDR, FWE et uncorrected T thresh as well
@@ -47,8 +46,18 @@ classdef test_twoSample < matlab.unittest.TestCase & generic_test_snpm
         function test_twosample_cluster_predefined(testCase)
             testCase.testName = 'twosample_cluster_predefined';
             
-            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.bVolm = 1;
             testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.ST.ST_U = 0.1;
+            
+            additional_predifined_cluster_results(testCase);
+        end
+        
+        
+        % No covariate, no variance smoothing and cluster stat with
+        % pre-defined height threshold at default value
+        function test_twosample_cluster_predef_stat(testCase)
+            testCase.testName = 'twosample_cluster_predef_stat';
+            
+            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.ST.ST_U = 2.03;
             
             additional_predifined_cluster_results(testCase);
         end
@@ -62,7 +71,7 @@ classdef test_twoSample < matlab.unittest.TestCase & generic_test_snpm
             testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.cov.c = [1 5 2 21 0 3 6 14 8 5];
             testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampT.cov.cname = 'Age';
         end
-
+        
         % With 3 covariates
         function test_twosample_cov3(testCase)
             testCase.compaWithSpm = false; % Not matching SPM orthog?
@@ -172,6 +181,9 @@ classdef test_twoSample < matlab.unittest.TestCase & generic_test_snpm
                 
             factoDesign = rmfield(factoDesign, 'scans1');
             factoDesign = rmfield(factoDesign, 'scans2');
+            if isfield(factoDesign, 'ST')
+                factoDesign = rmfield(factoDesign, 'ST');
+            end
             
             % % Equal variance
             %factoDesign.des.t2.variance = 0;

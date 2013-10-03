@@ -387,8 +387,8 @@ globalc.help    = {
 %%%  Stupid SnPM problem demands that a global is always calculated - To fix later
 %%%  For now disallow "omit" option
 %%%
-%globalc.values  = {g_omit g_user g_mean };
-globalc.values  = {g_user g_mean };
+globalc.values  = {g_omit g_user g_mean };
+%globalc.values  = {g_user g_mean };
 
 
 % Grand Mean scaling
