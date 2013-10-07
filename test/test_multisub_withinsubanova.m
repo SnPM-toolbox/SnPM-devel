@@ -1,6 +1,6 @@
 % Compare results (t-map and positive effects filtered map T>3) of
 % interactive and batch for multi-subject ANOVA
-classdef test_multisub_withinsubanova < matlab.unittest.TestCase & generic_test_snpm
+classdef test_multisub_withinsubanova < generic_test_snpm
     properties
     end
     
@@ -10,45 +10,46 @@ classdef test_multisub_withinsubanova < matlab.unittest.TestCase & generic_test_
         end
         
         function create_basis_matlabbatch(testCase)
-            % Fill the design part in the batch
+            testCase.compaWithSpm = false;
             
-            testCase.matlabbatch{1}.cfg_snpm.Design.ANOVAwithinS.fsubject(1).scans = {
+            % Fill the design part in the batch
+            testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.fsubject(1).scans = {
                  fullfile(testCase.testDataDir, 'su_control01', 'cn_sess1', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control01', 'cn_sess2', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control01', 'cn_sess3', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control01', 'cn_sess4', 'con_0001.img,1')
                  };
-            testCase.matlabbatch{1}.cfg_snpm.Design.ANOVAwithinS.fsubject(2).scans = {
+            testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.fsubject(2).scans = {
                  fullfile(testCase.testDataDir, 'su_control02', 'cn_sess1', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control02', 'cn_sess2', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control02', 'cn_sess3', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control02', 'cn_sess4', 'con_0001.img,1')
                  };
-            testCase.matlabbatch{1}.cfg_snpm.Design.ANOVAwithinS.fsubject(3).scans = {
+            testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.fsubject(3).scans = {
                  fullfile(testCase.testDataDir, 'su_control03', 'cn_sess1', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control03', 'cn_sess2', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control03', 'cn_sess3', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control03', 'cn_sess4', 'con_0001.img,1')
                  };
-            testCase.matlabbatch{1}.cfg_snpm.Design.ANOVAwithinS.fsubject(4).scans = {
+            testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.fsubject(4).scans = {
                  fullfile(testCase.testDataDir, 'su_control04', 'cn_sess1', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control04', 'cn_sess2', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control04', 'cn_sess3', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control04', 'cn_sess4', 'con_0001.img,1')
                  };
-            testCase.matlabbatch{1}.cfg_snpm.Design.ANOVAwithinS.fsubject(5).scans = {
+            testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.fsubject(5).scans = {
                  fullfile(testCase.testDataDir, 'su_control05', 'cn_sess1', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control05', 'cn_sess2', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control05', 'cn_sess3', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control05', 'cn_sess4', 'con_0001.img,1')
                  };
-            testCase.matlabbatch{1}.cfg_snpm.Design.ANOVAwithinS.fsubject(6).scans = {
+            testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.fsubject(6).scans = {
                  fullfile(testCase.testDataDir, 'su_control06', 'cn_sess1', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control06', 'cn_sess2', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control06', 'cn_sess3', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control06', 'cn_sess4', 'con_0001.img,1')
                  };
-            testCase.matlabbatch{1}.cfg_snpm.Design.ANOVAwithinS.fsubject(7).scans = {
+            testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.fsubject(7).scans = {
                  fullfile(testCase.testDataDir, 'su_control07', 'cn_sess1', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control07', 'cn_sess2', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control07', 'cn_sess3', 'con_0001.img,1')
@@ -68,7 +69,7 @@ classdef test_multisub_withinsubanova < matlab.unittest.TestCase & generic_test_
         function test_multisub_withinsubanova_var(testCase)
             testCase.testName = 'multisub_withinsubanova_var';
             
-            testCase.matlabbatch{1}.cfg_snpm.Design.ANOVAwithinS.vFWHM = [6 6 6];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.vFWHM = [6 6 6];
         end
 
         % With approximate test
@@ -78,14 +79,14 @@ classdef test_multisub_withinsubanova < matlab.unittest.TestCase & generic_test_
             rand('seed',200);
             
             for sub = 8:13
-                testCase.matlabbatch{1}.cfg_snpm.Design.ANOVAwithinS.fsubject(sub).scans = {
+                testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.fsubject(sub).scans = {
                  fullfile(testCase.testDataDir, ['su_control' num2str(sub, '%02d')], 'cn_sess1', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, ['su_control' num2str(sub, '%02d')], 'cn_sess2', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, ['su_control' num2str(sub, '%02d')], 'cn_sess3', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, ['su_control' num2str(sub, '%02d')], 'cn_sess4', 'con_0001.img,1')
                  };
             end
-            testCase.matlabbatch{1}.cfg_snpm.Design.ANOVAwithinS.nPerm = 100;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.nPerm = 100;
         end
     end
     
@@ -96,7 +97,7 @@ classdef test_multisub_withinsubanova < matlab.unittest.TestCase & generic_test_
             % original spm2-like interface
             testCase.batchResDir = fullfile(testCase.parentDataDir, 'results', 'batch', testCase.testName);
             testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), 'interactive', testCase.testName);
-            testCase.matlabbatch{1}.cfg_snpm.Design.ANOVAwithinS.dir = {testCase.batchResDir};
+            testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.dir = {testCase.batchResDir};
         end
     end
 end

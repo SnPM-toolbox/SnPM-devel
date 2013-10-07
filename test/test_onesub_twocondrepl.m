@@ -6,8 +6,10 @@ classdef test_onesub_twocondrepl < matlab.unittest.TestCase & generic_test_snpm
     
     methods (TestMethodSetup)
         function create_basis_matlabbatch(testCase)
+            testCase.compaWithSpm = false;
+            
             % Fill the design part in the batch
-            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampTss.P = {
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.P = {
                  fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em01R.img,1')
                  fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em02R.img,1')
                  fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em03R.img,1')
@@ -21,9 +23,9 @@ classdef test_onesub_twocondrepl < matlab.unittest.TestCase & generic_test_snpm
                  fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em11R.img,1')
                  fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em12R.img,1')
                  };
-            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampTss.condidx = [1 2 1 2 1 2 1 2 1 2 1 2];
-            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampTss.Tss_repc = 6;
-            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampTss.TwosampTss_Block = 4;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.condidx = [1 2 1 2 1 2 1 2 1 2 1 2];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.Tss_repc = 6;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.TwosampTss_Block = 4;
         end
     end
     
@@ -38,7 +40,7 @@ classdef test_onesub_twocondrepl < matlab.unittest.TestCase & generic_test_snpm
         function test_onesub_twocondrepl_var(testCase)
             testCase.testName = 'onesub_twocondrepl_var';
             
-            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampTss.vFWHM = [12 12 12];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.vFWHM = [12 12 12];
         end
     end
     
@@ -49,7 +51,7 @@ classdef test_onesub_twocondrepl < matlab.unittest.TestCase & generic_test_snpm
             % original spm2-like interface
             testCase.batchResDir = fullfile(testCase.parentDataDir, 'results', 'batch', testCase.testName);
             testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), 'interactive', testCase.testName);
-            testCase.matlabbatch{1}.cfg_snpm.Design.TwoSampTss.dir = {testCase.batchResDir};
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.dir = {testCase.batchResDir};
         end
     end
 end

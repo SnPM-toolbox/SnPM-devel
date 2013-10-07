@@ -160,11 +160,12 @@ nScan   = nSubj*nCond;
 %-Get confounding covariates
 %-----------------------------------------------------------------------
 G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
-g = numel(job.mcov);%spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
+g = numel(job.cov);%spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
 %if (g == 6), g = spm_input('# of confounding covariates','+1'); end
-while size(Gc,2) < g
+%while size(Gc,2) < g
+for i = 1:g
   nGcs = size(Gc,2);
-  d = spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
+  d = job.cov(i).c;%d = spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
   if (size(d,1) == 1), d = d'; end
   if size(d,1) == q
     %-Save raw covariates for printing later on
@@ -178,6 +179,7 @@ while size(Gc,2) < g
       dnames = str2mat(dnames,['ConfCov#',int2str(i)]); end
     Gcnames = str2mat(Gcnames,dnames);
   end
+%end
 end
 %-Strip off blank line from str2mat concatenations
 if size(Gc,2), Gcnames(1,:)=[]; end

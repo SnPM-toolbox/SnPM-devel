@@ -221,7 +221,7 @@ Report.help  = {
 
 snpmpp        = cfg_exbranch;
 snpmpp.name   = 'Inference';
-snpmpp.tag    = 'Infer';
+snpmpp.tag    = 'inference';
 snpmpp.val    = {snpmres ThrType posneg WrtFilt Report};
 snpmpp.prog   = @snpm_run_pp;
 %snpmpp.vout

@@ -8,7 +8,7 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
         function create_basis_matlabbatch(testCase)
             testCase.numBetas = 1;
             
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.P = {
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P = {
                      fullfile(testCase.testDataDir, 'su_control01', 'cn_sess1', 'con_0001.img,1')
                      fullfile(testCase.testDataDir, 'su_control02', 'cn_sess1', 'con_0001.img,1')
                      fullfile(testCase.testDataDir, 'su_control03', 'cn_sess1', 'con_0001.img,1')
@@ -31,8 +31,8 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
         function test_onesample_cluster(testCase)
             testCase.testName = 'onesample_cluster';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.bVolm = 1;
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.ST.ST_later = -1;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.bVolm = 1;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.ST.ST_later = -1;
             
             % Test FDR, FWE et uncorrected T thresh as well
             additional_results(testCase);
@@ -44,8 +44,8 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
         function test_onesample_cluster_predefined(testCase)
             testCase.testName = 'onesample_cluster_predefined';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.bVolm = 1;
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.ST.ST_U = 0.1;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.bVolm = 1;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.ST.ST_U = 0.1;
             
             additional_predifined_cluster_results(testCase);
         end
@@ -54,27 +54,27 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
         function test_onesample_cov(testCase)
             testCase.testName = 'onesample_cov';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.cov.c = [1 5 2 21 0];
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.cov.cname = 'age';
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.cov.c = [1 5 2 21 0];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.cov.cname = 'age';
         end
 
         % With 3 covariates
         function test_onesample_cov3(testCase)
             testCase.testName = 'onesample_cov3';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.cov(1).c = [1 1 2 3 1];
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.cov(1).cname = 'age';
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.cov(2).c = [0 21 15 18 3];
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.cov(2).cname = 'height';
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.cov(3).c = [-1 -0.5 -1 1 0];
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.cov(3).cname = 'width';
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.cov(1).c = [1 1 2 3 1];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.cov(1).cname = 'age';
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.cov(2).c = [0 21 15 18 3];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.cov(2).cname = 'height';
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.cov(3).c = [-1 -0.5 -1 1 0];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.cov(3).cname = 'width';
         end
 
         % With variance smoothing
         function test_onesample_var(testCase)
             testCase.testName = 'onesample_var';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.vFWHM = [6 6 6];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.vFWHM = [6 6 6];
         end
 
         % With approximate test
@@ -82,7 +82,7 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
             testCase.testName = 'onesample_approx';
             
             rand('seed',200);
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.P(end+1:end+8) = {
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P(end+1:end+8) = {
                  fullfile(testCase.testDataDir, 'su_control06', 'cn_sess1', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control07', 'cn_sess1', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control08', 'cn_sess1', 'con_0001.img,1')
@@ -92,7 +92,7 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
                  fullfile(testCase.testDataDir, 'su_control12', 'cn_sess1', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control13', 'cn_sess1', 'con_0001.img,1')
                  };
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.nPerm = 100;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.nPerm = 100;
         end
         
         % Global normalisation, normalisation: Proportional scaling scaled 
@@ -100,7 +100,7 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
         function test_onesample_propscaling(testCase)
             testCase.testName = 'onesample_propscaling';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.globalm.glonorm = 2;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.globalm.glonorm = 2;
         end
         
         % Global normalisation, normalisation: Proportional scaling scale 
@@ -108,29 +108,29 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
         function test_onesample_propscaling_to_user(testCase)
             testCase.testName = 'onesample_propscaling_to_user';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.globalm.glonorm = 2;
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.globalm.gmsca.gmsca_yes.gmscv = 145;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.globalm.glonorm = 2;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.globalm.gmsca.gmsca_yes.gmscv = 145;
         end
 
         % Global normalisation: overall grand mean scaling to 145
         function test_onesample_grandmean_145(testCase)
             testCase.testName = 'onesample_grandmean_145';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.globalm.gmsca.gmsca_yes.gmscv = 145;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.globalm.gmsca.gmsca_yes.gmscv = 145;
         end
         
         % Global normalisation: overall grand mean scaling to 50
         function test_onesample_grandmean_50(testCase)
             testCase.testName = 'onesample_grandmean_50';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.globalm.gmsca.gmsca_yes.gmscv = 50;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.globalm.gmsca.gmsca_yes.gmscv = 50;
         end
         
         % Global normalisation, normalisation: ANCOVA
         function test_onesample_ancova(testCase)
             testCase.testName = 'onesample_ancova';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.globalm.glonorm = 3;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.globalm.glonorm = 3;
         end
         
         % Work slice by slice
@@ -140,7 +140,7 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
             testCase.testName = 'onesample_slice';
             
             rand('seed',200);
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.P(end+1:end+12) = {
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P(end+1:end+12) = {
                  fullfile(testCase.testDataDir, 'su_control06', 'cn_sess1', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control07', 'cn_sess1', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control08', 'cn_sess1', 'con_0001.img,1')
@@ -154,8 +154,8 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
                  fullfile(testCase.testDataDir, 'su_control01', 'cn_sess4', 'con_0001.img,1')
                  fullfile(testCase.testDataDir, 'su_control02', 'cn_sess2', 'con_0001.img,1')
                  };
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.nPerm = 100;
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.bVolm = 0;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.nPerm = 100;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.bVolm = 0;
         end
         
     end
@@ -167,7 +167,7 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
             % original spm2-like interface
             testCase.batchResDir = fullfile(testCase.parentDataDir, 'results', 'batch', testCase.testName);
             testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), 'interactive', testCase.testName);
-            testCase.matlabbatch{1}.spm.tools.snpm.Design.OneSampT.dir = {testCase.batchResDir};
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.dir = {testCase.batchResDir};
         end
         
         function create_spm_batch(testCase)
