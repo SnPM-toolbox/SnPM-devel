@@ -40,6 +40,6 @@ des.help   = {['These are the different models that are available to run with Sn
 %% Collect above Collections
 cfg        = cfg_choice;
 cfg.name   = 'SnPM';
-cfg.tag    = 'cfg_snpm';
+cfg.tag    = 'snpm';
 cfg.values = {des snpm_bch_cp snpm_bch_pp}; % Values in a cfg_repeat can be any cfg_item objects
 cfg.help   = {'SnPM - In batch mode'};

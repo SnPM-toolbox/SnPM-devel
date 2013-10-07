@@ -37,7 +37,7 @@ action.num     = [1 1];
 %% Executable Branch
 snpmpp      = cfg_exbranch;       % This is the branch that has information about how to run this module
 snpmpp.name = 'Results';             % The display name
-snpmpp.tag  = 'snpm_bch_pp'; % The name appearing in the harvested job structure. This name must be unique among all items in the val field of the superior node
+snpmpp.tag  = 'pp'; % The name appearing in the harvested job structure. This name must be unique among all items in the val field of the superior node
 snpmpp.val  = {snpmres action};    % The items that belong to this branch. All items must be filled before this branch can run or produce virtual outputs
 snpmpp.prog = @snpm_run_pp;  % A function handle that will be called with the harvested job to run the computation
 %snpmpp.vout = @cfg_example_vout_snpmpp; % A function handle that will be called with the harvested job to determine virtual outputs
