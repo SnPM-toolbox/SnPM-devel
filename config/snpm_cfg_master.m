@@ -1,4 +1,4 @@
-function cfg = cfg_example_master
+function cfg = snpm_cfg_master%cfg_example_master
 % Master file that collects the cfg_exbranches in conceptually similar
 % groups.
 %

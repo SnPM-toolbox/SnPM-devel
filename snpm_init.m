@@ -35,7 +35,10 @@ end
 p = fileparts(mfilename('fullpath'));
 addpath(fullfile(p,'config'));
 
-% cfg_util initialisation
-cfg_util('initcfg');
-% fire up batch user interface
-cfg_ui;
+% Commented as we do not want to automatically open the batch window.
+% Instead a menu is created and depending on the use interaction, the batch
+% will be open with a specific type of job.
+% % cfg_util initialisation
+% cfg_util('initcfg');
+% % fire up batch user interface
+% cfg_ui;
