@@ -9,8 +9,10 @@ function snpmBatch = tbx_cfg_snpm()
 %_______________________________________________________________________
 % Camille Maumet
 
-addpath(fullfile(spm('dir'),'toolbox','snpm'));
-addpath(fullfile(spm('dir'),'toolbox','snpm', 'config'));
+toolboxDir = spm_str_manip(mfilename('fullpath'), 'h');
+
+addpath(toolboxDir);
+addpath(fullfile(toolboxDir, 'config'));
 
 snpmBatch = snpm_cfg_master;
 end
