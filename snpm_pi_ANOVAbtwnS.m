@@ -81,6 +81,7 @@
 %_______________________________________________________________________
 % Based on snpm_MG2x.m v1.7
 % $Id: snpm_pi_ANOVAbtwnS.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
+% Batch version: Camille Maumet
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx
@@ -101,87 +102,70 @@
 %%% nCond    = 2;			% Number of conditions (groups)
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iCond GrpCnt';	% PlugIn variables to save in cfg file
-rand('seed',sum(100*clock));	% Initialise random number generator
+global TEST;
+if isempty(TEST) || ~TEST % When testing we need a fixed seed
+    rand('seed',sum(100*clock));	% Initialise random number generator
+end
 
 %-Get filenames and iCond, the condition labels
 %=======================================================================
-P = spm_select(Inf,'image','Select all scans');
+nCond = numel(job.group);
+P = '';
+iCond = [];
+for g = 1:nCond
+    P = strvcat(P, strvcat(job.group(g).scans{:}));% spm_select(Inf,'image','Select all scans');
+    iCond = [iCond, repmat(g, 1, numel(job.group(g).scans))];
+end
 nScan = size(P,1);
 
-%-Get the condition (group) labels
-%=======================================================================
-while(1)
-    nCond = spm_input('Number of groups k=','+0','w',3,1);
-    if (nCond <= 2)
-         fprintf(2,'%cNumber of groups should be greater than 2.',7)
-    else
-         break
-    end
-end
+% %-Get the condition (group) labels
+% %=======================================================================
+% while(1)
+%     nCond = spm_input('Number of groups k=','+0','w',3,1);
+%     if (nCond <= 2)
+%          fprintf(2,'%cNumber of groups should be greater than 2.',7)
+%     else
+%          break
+%     end
+% end
 
 if nCond>255, error('Can''t support more than 255 groups'); end
 
 tmp0='A/B/...';
 
-while(1)
-    tmp=['Enter subject index: (',tmp0, ')[',int2str(nScan),']'];
-    iCond = spm_input(tmp,'+1','s');
-    %-Convert A/B/C notation to 1,2,...,k vector - assume A-B is of interest
-    iCond = abs(upper(iCond(~isspace(iCond))));
-    iCond = iCond-min(iCond)+1;
-    
-    unique_iCond = unique(iCond);
-    
-    %-Check validity of iCond
-    if length(iCond)~= nScan
-        fprintf(2,'%cEnter indicies for exactly %d scans',7,nScan)
-    elseif length(unique_iCond) ~= nCond
-        fprintf(2,'%cEnter indicies for exactly %d groups',7,nCond) 	
-    else
-        % Deal with the 'Skip' situation, e.g. if users input 'A C A C D D',
-        % Then iCond = [1 2 1 2 3 3];
-        for i = 1:length(unique_iCond)
-           iCond(iCond==unique_iCond(i)) = i;
-        end
-        
-	GrpCnt = zeros(1,nCond);
-        for (i = 1:nCond)
-           GrpCnt(i) = sum(iCond==i);
-        end
-        break	
-    end
-end
+% while(1)
+%     tmp=['Enter subject index: (',tmp0, ')[',int2str(nScan),']'];
+%     iCond = spm_input(tmp,'+1','s');
+%     %-Convert A/B/C notation to 1,2,...,k vector - assume A-B is of interest
+%     iCond = abs(upper(iCond(~isspace(iCond))));
+%     iCond = iCond-min(iCond)+1;
+%     
+%     unique_iCond = unique(iCond);
+%     
+%     %-Check validity of iCond
+%     if length(iCond)~= nScan
+%         fprintf(2,'%cEnter indicies for exactly %d scans',7,nScan)
+%     elseif length(unique_iCond) ~= nCond
+%         fprintf(2,'%cEnter indicies for exactly %d groups',7,nCond) 	
+%     else
+%         % Deal with the 'Skip' situation, e.g. if users input 'A C A C D D',
+%         % Then iCond = [1 2 1 2 3 3];
+%         for i = 1:length(unique_iCond)
+%            iCond(iCond==unique_iCond(i)) = i;
+%         end
+%         
+% 	GrpCnt = zeros(1,nCond);
+%         for (i = 1:nCond)
+%            GrpCnt(i) = sum(iCond==i);
+%         end
+%         break	
+%     end
+% end
+GrpCnt = arrayfun(@(x) numel(x.scans), job.group);
 
 %-Get the F contrasts
 %-----------------------------------------------------------------------
-b_all_zero = spm_input('Null Hypothesis: Groups are','+1','b','all zero|all equal',[1,0],1);
-
-%-Get confounding covariates
-%-----------------------------------------------------------------------
-G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
-% g = spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
-% if (g == 6), g = spm_input('# of confounding covariates','+1'); end
-% while size(Gc,2) < g
-%   nGcs = size(Gc,2);
-%   d = spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
-%   if (size(d,1) == 1), d = d'; end
-%   if size(d,1) == q
-%     %-Save raw covariates for printing later on
-%     Gc = [Gc,d];
-%     %-Always Centre the covariate
-%     bCntr = 1;	    
-%     if bCntr, d  = d - ones(q,1)*mean(d); str=''; else, str='r'; end
-%     G = [G, d];
-%     dnames = [str,'ConfCov#',int2str(nGcs+1)];
-%     for i = nGcs+1:nGcs+size(d,1)
-%       dnames = str2mat(dnames,['ConfCov#',int2str(i)]); end
-%     Gcnames = str2mat(Gcnames,dnames);
-%   end
-% end
-% %-Strip off blank line from str2mat concatenations
-% if size(Gc,2), Gcnames(1,:)=[]; end
-% %-Since no FxC interactions these are the same
-% Gnames = Gcnames;
+b_all_zero = job.nullHypAllZero; %spm_input('Null Hypothesis: Groups are','+1','b','all zero|all equal',[1,0],1);
 
 
 %-Compute permutations of conditions
@@ -194,23 +178,17 @@ G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
 %(nScan)!/(GrpCnt[1]!*GrpCnt[2]!*...*GrpCnt[nCond]!)
 
 nPiCond_mx = round(exp(gammaln(nScan+1)-sum(gammaln(GrpCnt+1))));
-
-bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond_mx),...
-							'+1','y/n')=='y';
-if (bAproxTst)
-  tmp = 0;
-  Defperm = min(10000,nPiCond);
-  while ((tmp>nPiCond) | (tmp==0) )
-    tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond),'+0','w',Defperm,1);
-    tmp = floor(max([0,tmp]));
-  end
-  nPiCond=tmp; 
-  if (tmp==nPiCond), bAproxTst=0; end
+if job.nPerm >= nPiCond_mx
+    bAproxTst=0;
+    if job.nPerm > nPiCond_mx
+        fprintf('Running fewer permutations than originally requested.\n')
+        nPiCond = nPiCond_mx;
+    end
 else
-  nPiCond=nPiCond_mx;
+    bAproxTst=1;
+    nPiCond = job.nPerm;
 end
 snpm_check_nperm(nPiCond,nPiCond_mx);
-
 
 %-Two methods for computing permutations, random and exact; exact
 % is efficient, but a memory hog; Random is slow but requires little
@@ -234,7 +212,7 @@ true_hash = iCond * hash';
 % it will be unique both on base 3 (i.e. original iCond) and base 10 (the
 % inner product of iCond and hash).
 
-if nScan<=10 | ~bAproxTst                    % exact method
+if nScan<=10 || ~bAproxTst                    % exact method
 
     %-Generate all labellings of nScan scans as 1,2,3,...
     PiCond=uint8([]);
