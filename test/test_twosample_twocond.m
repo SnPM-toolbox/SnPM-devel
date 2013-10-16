@@ -1,5 +1,5 @@
 % Compare results (t-map and positive effects filtered map T>3) of
-% interactive and batch XXX
+% interactive and batch two sample two conditions (paired two sample test)
 classdef test_twosample_twocond < generic_test_snpm
     properties
     end
@@ -52,20 +52,20 @@ classdef test_twosample_twocond < generic_test_snpm
         function test_twosample_twocond_cov(testCase)
             testCase.testName = 'twosample_twocond_cov';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.mcov.c = [1 5 2 21 0 5 4 8 7 1];
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.mcov.cname = 'Age';
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.cov.c = [1 5 2 21 0 5 4 8 7 1 1 5 2 21 0 5 4 8 7 1];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.cov.cname = 'Age';
         end
 
         % With 3 covariates
         function test_twosample_twocond_cov3(testCase)
             testCase.testName = 'twosample_twocond_cov3';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.mcov(1).c = [1 1 2 3 1 5 4 6 3 1];
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.mcov(1).cname = 'Age';
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.mcov(2).c = [0 21 15 18 3 4 22 1 5 4];
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.mcov(2).cname = 'Height';
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.mcov(3).c = [-1 -0.5 -1 1 0 2 0.1 1 -1 2];
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.mcov(3).cname = 'Width';
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.cov(1).c = [1 1 2 3 1 5 4 6 3 1];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.cov(1).cname = 'Age';
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.cov(2).c = [0 21 15 18 3 4 22 1 5 4];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.cov(2).cname = 'Height';
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.cov(3).c = [-1 -0.5 -1 1 0 2 0.1 1 -1 2];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.cov(3).cname = 'Width';
         end
 
         % With variance smoothing
