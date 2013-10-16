@@ -19,17 +19,17 @@ rev = '$Rev: 1716 $'; %#ok
 DesNm = 'Between group ANOVA; 1 scan per subject';
 DesFile = mfilename;
 DesHelp = {'',...
-	  'stuff.',...
-	  '',...
-	  'stuff ',...
-	  '    stuff',...
-	  'stuff.',...
+    'Create design and permutation matrix appropriate for k groups analyses where there is just *one* scan per subject.',...
+    '',...
+    'This PlugIn can be regarded as a generalization of a two-sample t-test to k>2 groups.  Instead of producing a t-statistic, it produces a F statistic.',...
+    '',...
+    'The PlugIn can test for two different types of effects.  It can test for the presence of any *non-zero* effect among the k groups; that is, it tests the null hypothesis that all of the groups are mean zero.  Or it can test for the presence of any differences *between* the k groups; that is, it tests the null hypothesis that all of the groups have some (possibly non-zero) common mean.',...
+    '',...
+    'Number of permutations. There are (nScan)!/(GrpCnt[1]!*GrpCnt[2]!*...*GrpCnt[k]!) possible permutations, where nScan is the total number of scans and GrpCnt(i) is the size of the ith group. round(exp(gammaln(nScan+1)-sum(gammaln(GrpCnt+1))))',...
 	  };
 
-
-%% Questions
 % ---------------------------------------------------------------------
-% scans Scans [1,2]
+% scans 
 % ---------------------------------------------------------------------
 scans         = cfg_files;
 scans.tag     = 'scans';
@@ -39,7 +39,7 @@ scans.filter = 'image';
 scans.ufilter = '.*';
 scans.num     = [1 Inf];
 % ---------------------------------------------------------------------
-% group group
+% group
 % ---------------------------------------------------------------------
 group         = cfg_branch;
 group.tag     = 'group';
@@ -66,44 +66,6 @@ nullHypAllZero.name    = 'Null Hypothesis';
 nullHypAllZero.labels  = {'Groups are all equal' 'Groups are all zero'};
 nullHypAllZero.values  = {true false};
 nullHypAllZero.help    = {'','Null Hypothesis: Groups are all zero|all equal.'};
-
-
-% % F Contrasts
-% contr            = cfg_entry;
-% contr.name       = 'F Contrasts';
-% contr.tag        = 'Abtwns_contrast';
-% contr.strtype    = 'i';
-% contr.val        = {};
-% contr.num        = [1 Inf];
-% contr.help       = {'This is the number of Contrasts'};
-% 
-% % Covariate Values
-% cv_none         = cfg_const;
-% cv_none.tag     = 'cv_none';
-% cv_none.name    = 'None';
-% cv_none.val     = {1};
-% cv_none.help    = {'Covariate value = none'};
-% 
-% cov_Val         = cfg_entry;
-% cov_Val.tag     = 'cov_Val';
-% cov_Val.name    = 'Covariate';%arbitary name
-% cov_Val.help    = {'Help'};
-% cov_Val.strtype = 'e';
-% cov_Val.num     = [1 Inf];
-% 
-% cv_one         = cfg_branch;
-% cv_one.tag     = 'cv_one';
-% cv_one.name    = 'Enter Different Covariate Value';
-% cv_one.val     = {cov_Val};
-% cv_one.help    = {'Help'};
-% 
-% covariate         = cfg_choice;
-% covariate.tag     = 'covariate';
-% covariate.name    = 'Covariate'; %arbitary name
-% covariate.val     = {cv_none };
-% covariate.help    = {'Help'};
-% covariate.values  = {cv_none cov_Val }; 
-
 
 
 %% Executable Branch
