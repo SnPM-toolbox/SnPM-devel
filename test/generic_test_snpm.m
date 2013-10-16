@@ -139,7 +139,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                 testCase.compare_batch_with_inter();
             end
             
-            % Compare IP maps
+            % Compare lP maps
             testCase.inter_map = inter_ip;
             testCase.batch_map = batch_ip;
             testCase.tolerance = 10^-10;
@@ -158,6 +158,30 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         
         function complete_batch_and_run(testCase)
             testCase.complete_batch();
+            
+            if ~exist(testCase.batchResDir, 'dir')
+                mkdir(testCase.batchResDir);
+            else
+                % Remove filtered maps, betas, lP from previous runs
+                prevBetas = spm_select('FPList', testCase.batchResDir, '^beta.*');
+                prevlP = spm_select('FPList', testCase.batchResDir, '^lP.*');
+                prevtmap = spm_select('FPList', testCase.batchResDir, '^snpmT\+.*');
+                prevtmapneg = spm_select('FPList', testCase.batchResDir, '^snpmT-.*');
+                prevfilt = spm_select('FPList', testCase.batchResDir, '^SnPM_filtered_.*');
+                prevsnpmmat = spm_select('FPList', testCase.batchResDir, '^SnPM.*\.mat');
+                prevps = spm_select('FPList', testCase.batchResDir, '^spm.*\.ps');
+                prevxyz = spm_select('FPList', testCase.batchResDir, '^XYZ\.mat');
+                prevRes = spm_select('FPList', testCase.batchResDir, '^ResMS.*');
+                
+                filesToDelete = cellstr(strvcat(prevBetas, prevlP, prevtmap, ...
+                    prevtmapneg, prevfilt, prevsnpmmat, prevps, prevxyz, prevRes));
+                
+                if ~isempty(filesToDelete)
+                    for i = 1:numel(filesToDelete)
+                        delete(filesToDelete{i});
+                    end
+                end
+            end
             spm_jobman('run', testCase.matlabbatch);
             
             if testCase.compaWithSpm
@@ -320,10 +344,9 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                         num2str(numel(testCase.inter_map))   ]);
             else
                 for i = 1:numel(testCase.inter_map)
-                    testCase.verifyEqual(...
-                        spm_read_vols(spm_vol(testCase.batch_map{i})), ...
-                        spm_read_vols(spm_vol(testCase.inter_map{i})), ...
-                        'AbsTol', testCase.tolerance, [testCase.batch_map{i}])
+                    data1 = spm_read_vols(spm_vol(testCase.batch_map{i}));
+                    data2 = spm_read_vols(spm_vol(testCase.inter_map{i}));
+                    testCase.verifyEqual(data1, data2, 'AbsTol', testCase.tolerance, [testCase.batch_map{i}])
                 end
             end
         end
