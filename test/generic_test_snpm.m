@@ -165,20 +165,28 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                 % Remove filtered maps, betas, lP from previous runs
                 prevBetas = spm_select('FPList', testCase.batchResDir, '^beta.*');
                 prevlP = spm_select('FPList', testCase.batchResDir, '^lP.*');
-                prevtmap = spm_select('FPList', testCase.batchResDir, '^snpmT\+.*');
-                prevtmapneg = spm_select('FPList', testCase.batchResDir, '^snpmT-.*');
+                if strcmp(testCase.stattype, 't')
+                    prevtmap = spm_select('FPList', testCase.batchResDir, '^snpmT\+.*');
+                    prevtmapneg = spm_select('FPList', testCase.batchResDir, '^snpmT-.*');
+                    prevstatmap = {prevtmap; prevtmapneg};
+                else
+                    prevstatmap = spm_select('FPList', testCase.batchResDir, '^snpmF.*');
+                end
+                
                 prevfilt = spm_select('FPList', testCase.batchResDir, '^SnPM_filtered_.*');
                 prevsnpmmat = spm_select('FPList', testCase.batchResDir, '^SnPM.*\.mat');
                 prevps = spm_select('FPList', testCase.batchResDir, '^spm.*\.ps');
                 prevxyz = spm_select('FPList', testCase.batchResDir, '^XYZ\.mat');
                 prevRes = spm_select('FPList', testCase.batchResDir, '^ResMS.*');
                 
-                filesToDelete = cellstr(strvcat(prevBetas, prevlP, prevtmap, ...
-                    prevtmapneg, prevfilt, prevsnpmmat, prevps, prevxyz, prevRes));
+                filesToDelete = cellstr(strvcat(prevBetas, prevlP, prevstatmap, ...
+                    prevfilt, prevsnpmmat, prevps, prevxyz, prevRes));
                 
                 if ~isempty(filesToDelete)
                     for i = 1:numel(filesToDelete)
-                        delete(filesToDelete{i});
+                        if ~isempty(filesToDelete{i})
+                            delete(filesToDelete{i});
+                        end
                     end
                 end
             end
