@@ -95,6 +95,7 @@
 % Based on snpm_MG2x.m v1.5
 % @(#)snpm_MG2i.m	3.3 Thomas Nichols & Andrew Holmes 04/06/08
 %	$Id: snpm_pi_TwoSampPairT.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
+% Batch version: Camille Maumet
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx
@@ -174,9 +175,10 @@ for i = 1:g
     bCntr = 1;	    
     if bCntr, d  = d - ones(q,1)*mean(d); str=''; else, str='r'; end
     G = [G, d];
-    dnames = [str,'ConfCov#',int2str(nGcs+1)];
-    for i = nGcs+1:nGcs+size(d,1)
-      dnames = str2mat(dnames,['ConfCov#',int2str(i)]); end
+    dnames = job.cov(i).cname; %[str,'ConfCov#',int2str(nGcs+1)];
+%     for j = nGcs+1:nGcs+size(d,1)
+%       dnames = str2mat(dnames,job.cov(j).cname);%str2mat(dnames,['ConfCov#',int2str(i)]); 
+%     end
     Gcnames = str2mat(Gcnames,dnames);
   end
 %end
@@ -226,7 +228,7 @@ snpm_check_nperm(nPiStud,nPiStud_mx);
 %-If user wants all perms, then random method would seem to take an
 % absurdly long time, so exact is used.
 
-if nSUBJ<=12 | ~bAproxTst                    % exact method
+if nSUBJ<=12 || ~bAproxTst                    % exact method
 
     %-Generate all labellings of nSUBJ subjects as +/- 1
     PiStud=[];
@@ -238,7 +240,7 @@ if nSUBJ<=12 | ~bAproxTst                    % exact method
 
     %-Only do half the work, if possible
     bhPerms=0;
-    if ~bAproxTst & (nFlip==nSUBJ/2) % balanced group numbers
+    if ~bAproxTst && (nFlip==nSUBJ/2) % balanced group numbers
 	% Here, PiStud should *always* satisfy:
 	% all(all(PiStud(PiStud(:,1)==1,:)==flipud(-PiStud(PiStud(:,1)==-1,:))))
 	PiStud=PiStud(PiStud(:,1)==1,:);
@@ -290,7 +292,7 @@ if length(perm)==1
         % Allows interim analysis	
 	PiStud=[PiStud(1,:);PiStud(randperm(size(PiStud,1)-1)+1,:)];
     end	
-elseif length(perm)==0 & (nScan<=12) & bAproxTst
+elseif length(perm)==0 & (nSUBJ<=12) & bAproxTst % MODIFIED FROM ORIGINAL CHANGED BUG (nScan -> nSUBJ)
     % Special case where we missed iStud; order of perms is random 
     % so can we can just replace first perm.
     PiStud(1,:) = iStudC;
