@@ -1,13 +1,14 @@
 function varargout=snpm(Action)
 % SnPM: nonParametric statistical analysis toolbox for SPM
 %_______________________________________________________________________
-%  ___       ____  __  __ 
-% / __) ___ (  _ \(  \/  )  Statistical nonParametric Mapping toolbox
-% \__ \( _ ) )___/ )    (   The Wellcome Department of Cognitive Neurology
-% (___/(_)_)(__)  (_/\/\_)  SnPM13
+%  ___       ____  __  __   Statistical nonParametric Mapping toolbox
+% / __) ___ (  _ \(  \/  )  Dpt of Statistics & Warwick Manufacturing Group
+% \__ \( _ ) )___/ )    (   The University of Warwick
+% (___/(_)_)(__)  (_/\/\_)  SnPM13 
 %_______________________________________________________________________
 %
-% This is SnPM13, the beta release of the nonParametric toolbox for SPM
+% This is SnPM13, the SPM batch-compatible release of the nonParametric 
+% toolbox for SPM
 % SnPM13 is written for SPM8 and SPM12b -released Friday October 11th, 2013
 %
 % Please refer to this version as "SnPM13" in papers and
