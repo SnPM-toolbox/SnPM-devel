@@ -1,4 +1,4 @@
-function [snpmui] = snpm_bch_ui(DesignName,DesignFile,DesignHelp,DesignItems,removeScansNode)
+function [snpmui] = snpm_bch_ui(DesignName,DesignFile,DesignHelp,DesignItems,removeScansNode,checkFunctionHandle)
 %  Set up common parameters to be set for all analyses.
 % INPUT
 %  DesignName  - Short, one-line description of design (string)
@@ -502,6 +502,9 @@ snpmui.val  = {snpmui_pre{:} snpmui_des{:} snpmui_post{:}};    % The items that 
 snpmui.prog = @snpm_run_ui;
 snpmui.help = DesignHelp;
 snpmui.vout = @snpm_bch_ui_vout;
+if nargin > 5
+    snpmui.check = checkFunctionHandle;
+end
 
 function vout = snpm_bch_ui_vout(job)
 % Determine what outputs will be present if this job is run. In this case,

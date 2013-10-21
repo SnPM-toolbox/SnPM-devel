@@ -168,7 +168,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                 if strcmp(testCase.stattype, 't')
                     prevtmap = spm_select('FPList', testCase.batchResDir, '^snpmT\+.*');
                     prevtmapneg = spm_select('FPList', testCase.batchResDir, '^snpmT-.*');
-                    prevstatmap = {prevtmap; prevtmapneg};
+                    prevstatmap = strvcat(prevtmap, prevtmapneg);
                 else
                     prevstatmap = spm_select('FPList', testCase.batchResDir, '^snpmF.*');
                 end

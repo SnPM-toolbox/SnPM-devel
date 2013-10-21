@@ -62,6 +62,13 @@ classdef test_twoSample < matlab.unittest.TestCase & generic_test_snpm
             additional_predifined_cluster_results(testCase);
         end
 
+%         % With covariate with wrong number of values
+%         function test_twosample_wrong_cov(testCase)
+%             testCase.testName = 'twosample_wrong_cov';
+%             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov.c = [1 5 2 21];
+%             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov.cname = 'Wrong covar';
+%         end
+        
         % With 1 covariate
         function test_twosample_cov(testCase)
             testCase.compaWithSpm = false; % Not matching SPM orthog?

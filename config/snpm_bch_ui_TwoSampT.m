@@ -96,4 +96,4 @@ generic.values  = {cov };
 generic.num     = [0 Inf];
 
 %% Executable Branch
-snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{scans1, scans2, generic}, true);
+snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{scans1, scans2, generic}, true, @snpm_bch_check_TwoSampT);
