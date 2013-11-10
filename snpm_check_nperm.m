@@ -4,8 +4,9 @@ function snpm_check_perm(nPerm,TotPerm)
 %
 %
 %_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_check_perm.m  SnPM13 2013/10/12
 % Thomas Nichols
-% $Id$
 
 % Use very arbitrary heuristic... if fewer than 100 permutations used
 % *and* less than 90% of possible permutations considered, then issue a

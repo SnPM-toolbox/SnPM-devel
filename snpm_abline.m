@@ -15,8 +15,10 @@ function h=snpm_abline(b,a,varargin)
 % Plots verticle dotted line at x
 % 
 %
-% @(#)snpm_abline.m	1.2 T. Nichols 04/07/08
-%$Id: snpm_abline.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
+%_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_abline.m  SnPM13 2013/10/12
+% Thomas Nichols
 
 if (nargin==2) & isstr(b)
   b = lower(b);

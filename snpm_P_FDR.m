@@ -71,10 +71,11 @@ function [P] = snpm_P_FDR(Z,df,STAT,n,Ps)
 % Yekutieli & Benjamini (1999). "Resampling-based false discovery rate
 % controlling multiple test procedures for correlated test
 % statistics".  J of Statistical Planning and Inference, 82:171-196.
-%___________________________________________________________________________
+%_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_P_FDR.m  SnPM13 2013/10/12
+% Thomas Nichols
 % Based on FIL spm_P_FDR.m     2.6 Thomas Nichols 04/07/02
-% @(#)snpm_P_FDR.m	3.2 05/02/23
-%	$Id: snpm_P_FDR.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 
 if n>0

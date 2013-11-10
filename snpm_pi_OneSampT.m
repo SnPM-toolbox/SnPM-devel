@@ -73,9 +73,10 @@
 % iCond         - Condition indicator vector
 %
 %_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_pi_OneSampT.m  SnPM13 2013/10/12
+% Thomas Nichols, Camille Maumet
 % Based on UM-modified snpm_MG2x.m, v1.7
-% @(#)snpm_MS1.m	3.2 Thomas Nichols 04/06/08
-%	$Id: snpm_pi_OneSampT.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx

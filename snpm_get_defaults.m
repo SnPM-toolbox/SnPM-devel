@@ -13,9 +13,9 @@ function varargout = snpm_get_defaults(defstr, varargin)
 % This value will not be saved for future sessions of SPM. To make
 % persistent changes, edit spm_defaults.m.
 %__________________________________________________________________________
-% Copyright (C) 2008 Wellcome Trust Centre for Neuroimaging
-
-% T. Nichols
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_get_defaults.m  SnPM13 2013/10/12
+% Thomas Nichols
 % Based on spm_get_defaults.m 2696 2009-02-05 20:29:48Z guillaume, Glauche
 
 global SnPMdefs;

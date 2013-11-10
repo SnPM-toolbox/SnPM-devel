@@ -66,8 +66,9 @@
 % Xblk          - Size of exchangability block
 %
 %_______________________________________________________________________
-%@(#)snpm_SSA2x.m	3.3	Andrew Holmes 04/10/26
-%	$Id: snpm_pi_TwoSampTss.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_pi_TwoSampTss.m  SnPM13 2013/10/12
+% Thomas Nichols & Andrew Holmes, Camille Maumet
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx

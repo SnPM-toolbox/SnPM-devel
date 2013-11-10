@@ -34,8 +34,9 @@ function varargout=snpm(Action)
 %                SnPM, by Andrew Holmes and Thomas Nichols
 %                   <snpm-authors@fil.ion.ucl.ac.uk>
 %_______________________________________________________________________
-% 
-%	$Id$	
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm.m  SnPM13 2013/10/12
+% Thomas Nichols
 
 %-----------------------------functions-called------------------------
 % spm

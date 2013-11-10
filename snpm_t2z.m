@@ -50,13 +50,11 @@ function [z,t1,z1] = snpm_t2z(t,df,Tol)
 % especially for ludicrously high t and/or high df, giving conservative
 % (though still significant) results.
 %
-%__________________________________________________________________________
-% Copyright (C) 2005 Wellcome Department of Imaging Neuroscience
-
+%_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: spm_t2z.m  SnPM13 2013/10/12
 % Andrew Holmes
-% Based on spm_t2z.m 112 2005-05-04 18:20:52Z
-% $Id: snpm_t2z.m,v 8.1 2009/01/29 15:02:57 nichols Exp $
-
+% Based on spm_t2z.m
 
 %-Initialisation
 %===========================================================================

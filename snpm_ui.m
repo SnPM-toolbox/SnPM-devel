@@ -148,9 +148,9 @@ function snpm_ui(varargin)
 % (Hnames, Cnames &c.)
 %
 %_______________________________________________________________________
-% @(#)snpm_ui_0811.m	1.12 snpm_ui.m  Tom Nichols  05/07/29
-%	$Id: snpm_ui.m,v 8.5 2010/03/18 17:39:51 nichols Exp $	
-
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_ui.m  SnPM13 2013/10/12
+% Thomas Nichols, Camille Maumet
 
 %------------------------------functions-called------------------------
 % spm_DesMtx

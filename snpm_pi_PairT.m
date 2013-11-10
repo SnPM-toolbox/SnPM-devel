@@ -92,9 +92,10 @@
 % PiSubj        - +/-1 flip conditions indicator for subjects,
 %                 relative to first subject.
 %_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_pi_PairT.m  SnPM13 2013/10/12
+% Thomas Nichols, Camille Maumet
 % Based on snpm_MSA2x.m v1.5
-% @(#)snpm_MSA2xPerm.m	3.4 Thomas Nichols 04/10/26
-%	$Id: snpm_pi_PairT.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx

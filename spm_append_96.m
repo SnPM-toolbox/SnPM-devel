@@ -19,10 +19,10 @@ function spm_append_96(MAT,X)
 %
 % This is SPM96's spm_append, intended for use with SnPM.
 %
-%__________________________________________________________________________
-% @(#)spm_append_96.m	3.1	Thomas Nichols, Andrew Holmes 04/06/04
-%	$Id: spm_append_96.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
-
+%_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: spm_append_96.m  SnPM13 2013/10/12
+% Thomas Nichols, Andrew Holmes	
 
 %----------------------------------------------------------------------------
 if ~length(X); return; end

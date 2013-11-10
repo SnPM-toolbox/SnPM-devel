@@ -89,9 +89,10 @@
 % GrpCnt        - 2-vector of group counts
 %
 %_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_pi_TwoSampT.m  SnPM13 2013/10/12
+% Thomas Nichols & Andrew Holmes, Camille Maumet
 % Based on snpm_SSA2x.m v1.7
-% @(#)snpm_MG2x.m	3.2	Andrew Holmes, Thomas Nichols 04/06/08
-%	$Id: snpm_pi_TwoSampT.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx

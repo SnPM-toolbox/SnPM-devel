@@ -9,8 +9,9 @@
 %
 % Care must be taken when modifying this file
 %_______________________________________________________________________
-% @(#)snpm_defaults.m	3.2 Thomas Nichols 04/08/24
-%	$Id: snpm_defaults.m,v 8.1 2009/01/29 15:02:57 nichols Exp nichols $	
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_defaults.m  SnPM13 2013/10/12
+% Thomas Nichols
 
 global SnPMdefs
 

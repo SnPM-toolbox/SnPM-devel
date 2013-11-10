@@ -66,8 +66,9 @@
 % CovInt        - Specified covariate of interest
 % Xblk          - Size of exchangability block
 %_______________________________________________________________________
-% @(#)snpm_SSC.m	3.2 Andrew Holmes 04/06/08
-%	$Id: snpm_pi_Corr1S.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_pi_Corr1S.m  SnPM13 2013/10/12
+% Thomas Nichols & Andrew Holmes
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx

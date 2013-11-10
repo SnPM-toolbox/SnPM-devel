@@ -25,8 +25,9 @@
 % 
 %
 %_______________________________________________________________________
-% @(#)Contents.m	3.13	Jun Ding, Andrew Holmes & Thomas Nichols 05/03/23
-% $Id: Contents.m,v 8.1 2009/01/29 14:58:09 nichols Exp $	
+% Copyright (C) 2013 The University of Warwick
+% Id: Contents.m  SnPM13 2013/10/12
+% Jun Ding, Andrew Holmes & Thomas Nichols
 
 %
 % SnPM13 - Manifest

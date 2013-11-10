@@ -79,10 +79,10 @@
 % GrpCnt        - A vector of group counts
 %
 %_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_pi_ANOVAbtwnS.m  SnPM13 2013/10/12
+% Thomas Nichols, Camille Maumet
 % Based on snpm_MG2x.m v1.7
-% $Id: snpm_pi_ANOVAbtwnS.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
-% Batch version: Camille Maumet
-
 %-----------------------------functions-called------------------------
 % spm_DesMtx
 % spm_select

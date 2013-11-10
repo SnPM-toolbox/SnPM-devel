@@ -88,8 +88,10 @@
 % sHCform_Mtx   - A matrix that will be used when sHCform is called.  
 %
 %_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_pi_ANOVAwithinS.m  SnPM13 2013/10/12
+% Thomas Nichols, Camille Maumet
 % Based on snpm_MS1.m, V3.2 04/06/08
-% $Id: snpm_pi_ANOVAwithinS.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx

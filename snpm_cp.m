@@ -123,8 +123,9 @@ function snpm_cp(CWD)
 %       perm is negative if T was negative
 %
 %_______________________________________________________________________
-% % @(#)snpm_cp_0811.m	3.38 	3.5 Thomas Nichols, Andrew Holmes 04/06/15 05/09/26
-%	$Id: snpm_cp.m,v 8.5 2010/03/18 17:47:05 nichols Exp $	
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_cp.m  SnPM13 2013/10/12
+% Thomas Nichols, Andrew Holmes
 
 
 

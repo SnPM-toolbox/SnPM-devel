@@ -92,10 +92,10 @@
 % nSubGrp       - 2-vector of group counts (subjects per group)
 % 
 %_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_pi_PairT.m  SnPM13 2013/10/12
+% Thomas Nichols & Andrew Holmes, Camille Maumet
 % Based on snpm_MG2x.m v1.5
-% @(#)snpm_MG2i.m	3.3 Thomas Nichols & Andrew Holmes 04/06/08
-%	$Id: snpm_pi_TwoSampPairT.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
-% Batch version: Camille Maumet
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx

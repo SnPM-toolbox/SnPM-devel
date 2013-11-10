@@ -241,10 +241,10 @@ function snpm_pp(CWD,varargin)
 % further voxel-level analyses.
 %
 %_______________________________________________________________________
-%
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_pp.m  SnPM13 2013/10/12
 % Andrew Holmes, Thomas Nichols, Jun Ding
 % Optimizations by Darren Gitelman
-% $Id: snpm_pp.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx
