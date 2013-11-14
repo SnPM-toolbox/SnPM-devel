@@ -34,9 +34,12 @@ classdef test_oneSample < matlab.unittest.TestCase & generic_test_snpm
             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.bVolm = 1;
             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.ST.ST_later = -1;
             
-            % Test FDR, FWE et uncorrected T thresh as well
+            % Test FDR, FWE and uncorrected T thresh as well
             additional_results(testCase);
+            % Test cluster size statistic
             additional_cluster_results(testCase);
+            % Test cluster mass statistic
+            additional_cluster_mass_results(testCase);
         end
 
         % No covariate, no variance smoothing and cluster stat with

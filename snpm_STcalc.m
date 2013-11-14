@@ -24,8 +24,7 @@ function STCS = snpm_STcalc(varargin)
 %_______________________________________________________________________
 % Copyright (C) 2013 The University of Warwick
 % Id: snpm_STcalc.m  SnPM13 2013/10/12
-% Thomas Nichols, Jun Ding & Hui Zhang
-% Optimizations by Darren Gitelman
+% Thomas Nichols, Jun Ding, Hui Zhang, Darren Gitelman
 
 switch (lower(varargin{1}))
  case 'init'

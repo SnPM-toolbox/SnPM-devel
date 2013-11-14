@@ -1,5 +1,10 @@
-% Compare results (t-map and positive effects filtered map T>3) of
-% interactive and batch one-sample t-tests
+% Generic function to perform non-regression tests in SnPM.
+% Check that results obtained using the batch version are identical to the
+% results computed manually (using the interactive GUI).
+%_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: generic_test_snpm.m  SnPM13 2013/10/12
+% Camille Maumet
 classdef generic_test_snpm < matlab.unittest.TestCase
     properties
         testDataDir;
@@ -25,7 +30,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             global TEST;
             TEST = true;
 
-            testCase.parentDataDir = fullfile('/Users/cmaumet/Documents/Data/snpm_test_data');
+            testCase.parentDataDir = fullfile('/Users/cmaumet/Data/snpm_test_data');
             testCase.testDataDir = fullfile(testCase.parentDataDir, 'data');
             
             % By default t-test
@@ -173,7 +178,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                     prevstatmap = spm_select('FPList', testCase.batchResDir, '^snpmF.*');
                 end
                 
-                prevfilt = spm_select('FPList', testCase.batchResDir, '^SnPM_filtered_.*');
+                prevfilt = spm_select('FPList', testCase.batchResDir, '^SnPMt?_filtered_.*');
                 prevsnpmmat = spm_select('FPList', testCase.batchResDir, '^SnPM.*\.mat');
                 prevps = spm_select('FPList', testCase.batchResDir, '^spm.*\.ps');
                 prevxyz = spm_select('FPList', testCase.batchResDir, '^XYZ\.mat');
@@ -272,8 +277,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_output = substruct('.','SnPM');
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.CFth = 4;
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSig.PthC = 0.1;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.CFth = 4;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.ClusSig.PthC = 0.1;
             testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_clus_4_unc_p10.nii';
             
             % Uncorrected (cluster forming u>4) cluster-wise k>6
@@ -283,8 +288,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_output = substruct('.','SnPM');
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.CFth = 4;
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSig.Cth = 6;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.CFth = 4;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.ClusSig.Cth = 6;
             testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_clus_4_unc_k6.nii';
             
             % FWE (cluster forming u>4) cluster-wise p<0.5
@@ -294,8 +299,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_output = substruct('.','SnPM');
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.CFth = 4;
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSig.FWEthC = 0.5;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.CFth = 4;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.ClusSig.FWEthC = 0.5;
             testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_clus_4_fwe_p50.nii'; 
             
             % FWE (cluster forming u>5) cluster-wise p<0.5
@@ -305,8 +310,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_output = substruct('.','SnPM');
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.CFth = 5;
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSig.FWEthC = 0.5;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.CFth = 5;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.ClusSig.FWEthC = 0.5;
             testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_clus_5_fwe_p50.nii';  
         end
         
@@ -321,8 +326,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_output = substruct('.','SnPM');
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.CFth = NaN;
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSig.PthC = 0.1;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.CFth = NaN;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.ClusSig.PthC = 0.1;
             testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_clus_p10_unc_p10.nii';
             
             % FWE (cluster forming p<0.1) cluster-wise p<0.5
@@ -332,9 +337,23 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_output = substruct('.','SnPM');
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.CFth = NaN;
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSig.FWEthC = 0.5;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.CFth = NaN;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.ClusSig.FWEthC = 0.5;
             testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_clus_p10_fwe_p50.nii'; 
+        end
+        
+        function additional_cluster_mass_results(testCase)
+            testCase.matlabbatch{end+1}.spm.tools.snpm.inference.SnPMmat(1) = cfg_dep;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).tname = 'SnPM.mat results file';
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).tgt_spec = {};
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_output = substruct('.','SnPM');
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusMass.PFilt = 0.05;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusMass.PrimThresh = 3.8;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusMass.Theta = 0.5;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Tsign = 1;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_cluss_mass.nii';
         end
         
         function compare_batch_with_inter(testCase)

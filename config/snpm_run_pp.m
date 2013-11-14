@@ -16,6 +16,10 @@ rev = '$Rev: 1716 $'; %#ok
 
 snpmcwd=fileparts(job.SnPMmat{1});
 
-snpm_pp(snpmcwd,job);
+if ~(isfield(job.Thr, 'Clus') && isfield(job.Thr.Clus, 'ClusMass'))
+    snpm_pp(snpmcwd,job);
+else
+    snpm_combo_pp(snpmcwd, job)
+end
 
 out=[];

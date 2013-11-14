@@ -1,4 +1,4 @@
-function snpm_combo_pp(CWD)
+function snpm_combo_pp(CWD, job)
 % SnPM post processing and results display
 % FORMAT snpm_combo_pp(CWD)
 %
@@ -40,15 +40,14 @@ function snpm_combo_pp(CWD)
 % Hayasaka S, and Nichols TE. (2004)
 % Combining Voxel Intensity and Cluster Extent with 
 % Permutation Test Framework.
-% Available at http://www.sph.umich.edu/fni-stat/Docs/Combo.pdf
 % 
 % THIS IS A BETA VERSION. THE PROGRAM IS STILL BEING TESTED!
 % 
-%--------------------------------------------------------
-% By Satoru Hayasaka
-% Based on spm_snpm_pp.m v2.5 Andrew Holmes
-% Optimizations by Darren Gitelman
-% $Id: snpm_combo_pp.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
+%_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_combo_pp.m  SnPM13 2013/10/12
+% Satoru Hayasaka, Darren Gitelman, Camille Maumet
+% Based on snpm_pp.m 
 
 %-Setup
 %=======================================================================
@@ -93,7 +92,7 @@ end
 
 %-Ask whether positive or negative effects be analysed
 %-----------------------------------------------------------------------
-bNeg = spm_input('Positive or negative effects?',1,'b','+ve|-ve',[0,1],1);
+bNeg = (sign(job.Tsign) == -1); % spm_input('Positive or negative effects?',1,'b','+ve|-ve',[0,1],1);
 
 %-Form full Tmax distribution
 %-----------------------------------------------------------------------
@@ -137,11 +136,12 @@ Vs0.dt = [spm_type('float64'), spm_platform('bigend')];
 
 %-Write out filtered statistic image?  (Get's done later)
 %-----------------------------------------------------------------------
-WrtFlt = spm_input('Write filtered statistic img?','+1','y/n',[1,0],2);
+WrtFlt = isfield(job.WriteFiltImg, 'name'); %spm_input('Write filtered statistic img?','+1','y/n',[1,0],2);
 if WrtFlt
-	WrtFltFn = 'SnPMt_filtered';
-	WrtFltFn=spm_input('Filename ?','+1','s',WrtFltFn);
-        WrtFltFn = [WrtFltFn, '.img'];
+	%WrtFltFn = 'SnPMt_filtered';
+	%WrtFltFn=spm_input('Filename ?','+1','s',WrtFltFn);
+    %    WrtFltFn = [WrtFltFn, '.img'];
+    WrtFltFn = job.WriteFiltImg.name;
 end
 
 
@@ -151,7 +151,7 @@ end
 
 %-Get corrected threshold
 %-----------------------------------------------------------------------
-alpha = spm_input('Corrected p value for filtering','+1','e',0.05);
+alpha = job.Thr.Clus.ClusMass.PFilt; %spm_input('Corrected p value for filtering','+1','e',0.05);
 
 %-Compute critical threshold for level alpha test
 %-----------------------------------------------------------------------
@@ -191,57 +191,60 @@ if bSpatEx
     %-If a test level alpha has been set, then it there's no sense in having
     % the threshold greater than C_MaxT, above which voxels are individually 
     % significant
-    tmp = 0;
+    %tmp = 0;
+    primaryThresh = job.Thr.Clus.ClusMass.PrimThresh;
     if bVarSm
-	%-If using pseudo-statistics then can't use (uncorrected) 
-	% upper tail p-values to specify primary threshold
-	if alpha==1	% Not filtering on significance
-	    while ~(tmp>=ST_Ut)
-		tmp = spm_input(sprintf(...
-		    'Primary threshold (>%4.2f)',ST_Ut),'+0');
-	    end
-	else
-	    while ~(tmp>=ST_Ut & tmp<C_MaxT)
-		tmp = spm_input(sprintf(...
-		    'Threshold (%4.2f<=Ut<%4.2f)',ST_Ut,C_MaxT),'+0');
-	    end
-	end
+        %-If using pseudo-statistics then can't use (uncorrected) 
+        % upper tail p-values to specify primary threshold
+        if alpha == 1	% Not filtering on significance
+            if ~(primaryThresh>=ST_Ut)
+                error(['Using pseudo-statistics you can''t use (uncorrected)'... 
+                        'upper tail p-values to specify primary threshold']);
+            end   
+        else
+            if ~(primaryThresh>=ST_Ut && primaryThresh<C_MaxT)
+                        error(['Using pseudo-statistics you can''t use (uncorrected)'... 
+                                'upper tail p-values to specify primary threshold']);
+            end  
+        end
     else
-	%-Statistic image is t with df degrees of freedom
-	pU_ST_Ut  = 1-spm_Tcdf(ST_Ut,df);
-	if alpha==1	% Not filtering on significance
-	    while ~( tmp>=ST_Ut | (tmp>0 & tmp<=pU_ST_Ut))
-		tmp = spm_input(sprintf(...
-		    'Threshold (p<=%4.2f I t>=%4.2f)',pU_ST_Ut,ST_Ut),'+0'); 
-	    end
-	else
-	    pU_C_MaxT = 1-spm_Tcdf(C_MaxT,df);
-	    while ~((tmp>=ST_Ut & tmp<C_MaxT) | (tmp>pU_C_MaxT & tmp<=pU_ST_Ut))
-		tmp = spm_input(sprintf(...
-		    'Ut (%4.2f<p<%4.2f I %4.2f<t<%4.2f)',...
-		    pU_C_MaxT,pU_ST_Ut,ST_Ut,C_MaxT),'+0');
-	    end
-	    clear pU_C_MaxT
-	end
-	clear pU_ST_Ut
-	if (tmp < 1), tmp = spm_invTcdf(1-tmp,df); end
+        %-Statistic image is t with df degrees of freedom
+        pU_ST_Ut  = 1-spm_Tcdf(ST_Ut,df);
+        if alpha==1	% Not filtering on significance
+            if ~( primaryThresh>=ST_Ut || (primaryThresh>0 && primaryThresh<=pU_ST_Ut_filt))
+                error(['Primary threshold must be >=' num2str(ST_Ut) ...
+                    ' and >0 and <=' num2str(pU_ST_Ut_filt) ]);
+            end  
+        else
+            pU_C_MaxT = 1-spm_Tcdf(C_MaxT,df);
+            if ~((primaryThresh>=ST_Ut && primaryThresh<C_MaxT) || ...
+                    (primaryThresh>pU_C_MaxT && primaryThresh<=pU_ST_Ut_filt))
+                error(['Primary threshold must be >=' num2str(ST_Ut) ...
+                    ' and <' num2str(C_MaxT) ' or >' num2str(pU_C_MaxT) ...
+                    ' and <= ' num2str(pU_ST_Ut_filt)]);
+            end
+            clear pU_C_MaxT
+        end
+        clear pU_ST_Ut
+        if (primaryThresh < 1), 
+            primaryThresh = spm_invTcdf(1-primaryThresh,df); 
+        end
     end
-    ST_Ut = tmp;
+    ST_Ut = primaryThresh;
 
     %
     % Getting combined test parameters
     %
-    tmpTheta = -1;
-    while (tmpTheta<0+tol | tmpTheta>1-tol)
-      Theta = spm_input('Theta value for voxel-cluster combining?', ...
-                        '+1','e',0.5);
-      tmpTheta = Theta;
+    Theta = job.Thr.Clus.ClusMass.Theta;
+    if (Theta<0+tol || Theta>1-tol)
+        error('Theta should be between 0 and 1');
     end
     mTheta = Theta/(1-Theta);  %-Weight for mass combining
     
     %-Picking which combining test
-    iW    = spm_input('Choose combining function',1,'b', ...
-                      'Fisher|Tippet|Mass|All',[1:4],1);
+    % Only mass combining for now
+    iW    = 3;%    = spm_input('Choose combining function',1,'b', ...
+%                       'Fisher|Tippet|Mass|All',[1:4],1);
 
 end
 
@@ -628,9 +631,11 @@ end
 % Change the style of pressing ' return' to clicking on a new button.
 %spm_print
 %disp('Press <RETURN> to continue'); pause
-if spm_input('Review permutation distributions.',1,'bd',...
+if false
+    if spm_input('Review permutation distributions.',1,'bd',...
                   'Print & Continue|Continue',[1,0],1)
-spm_print
+        spm_print
+    end
 end
 
 spm_clf(Fgraph)
@@ -653,7 +658,7 @@ imagesc((spm_DesMtx('Sca', [H,C,B,G],HCBGnames) + 1)*32)
 xlabel 'Design Matrix'
 set(hDesMtx,'XTick',[],'XTickLabel','')
 hConAxes = axes('Position',[0.65 0.8 0.2 0.1]);
-h = bar(CONT(1,:)); if MLver=='7', h=get(h,'children'), end
+h = bar(CONT(1,:)); if str2num(MLver)>=7, h=get(h,'children'), end
 hold on
 set(h,'FaceColor',[1 1 1]*.8)
 tX = get(h,'Xdata'); tY = get(h,'Ydata');
@@ -867,9 +872,11 @@ end
 
 %spm_print
 %Set a button, so the user can decide whether to print the page of results to spm2.ps.
-if spm_input('Review results.',1,'bd','Print|Done',[1,0],1)
-spm_print
-end 
+if false % interactive display inactive
+    if spm_input('Review results.',1,'bd','Print|Done',[1,0],1)
+        spm_print
+    end 
+end
 
 set(Finter,'Pointer','Arrow')
 
@@ -912,16 +919,26 @@ if WrtFlt
 
 	%-Write out to analyze file
 	%---------------------------------------------------------------
-	Vs = Vs0; 
-	Vs.fname = Fname; Vs.descrip = tmp;
-	Vs.dim   = Vs.dim(1:3);
-	Vs = sf_create_vol(Vs);
-	t = reshape(t,DIM);
-	for p=1:Vs.dim(3)
-	  Vs = spm_write_plane(Vs,t(:,:,p),p);
-	end
-	Vs = sf_close_vol(Vs);
-	clear t
+% 	Vs = Vs0; 
+% 	Vs.fname = Fname; Vs.descrip = tmp;
+% 	Vs.dim   = Vs.dim(1:3);
+% 	Vs = sf_create_vol(Vs);
+% 	t = reshape(t,DIM);
+% 	for p=1:Vs.dim(3)
+% 	  Vs = spm_write_plane(Vs,t(:,:,p),p);
+% 	end
+% 	Vs = sf_close_vol(Vs);
+% 	clear t
+    %-Write out to image file
+    %---------------------------------------------------------------
+    Vs = snpm_clone_vol(Vs0, Fname, tmp); 
+    Vs =  spm_create_vol(Vs);
+    t = reshape(t,DIM);
+    for p=1:Vs.dim(3)
+        Vs = spm_write_plane(Vs,t(:,:,p),p);
+    end
+    Vs =  sf_close_vol(Vs);
+    clear t
 end
 
 %-Reset Interactive Window

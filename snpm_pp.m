@@ -243,8 +243,7 @@ function snpm_pp(CWD,varargin)
 %_______________________________________________________________________
 % Copyright (C) 2013 The University of Warwick
 % Id: snpm_pp.m  SnPM13 2013/10/12
-% Andrew Holmes, Thomas Nichols, Jun Ding
-% Optimizations by Darren Gitelman
+% Andrew Holmes, Thomas Nichols, Jun Ding, Darren Gitelman
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx
@@ -464,9 +463,10 @@ end
 % . . Uncorrected Nonparametric P | Uncorrected T or F | FDR Corrected | FWE Corrected 
 %    > .Pth                            .TFth                .FDRth          .FWEth
 % Cluster-Level  > .Clus
-% . Cluster-Forming Threshold > .CFth
-% . Significance Level > .ClusSig
-% . . Uncorrected k | FWE Corrected 
+% . Cluster size statistic > .ClusSize
+% . . Cluster-Forming Threshold > .CFth
+% . . Significance Level > .ClusSig
+% . . . Uncorrected k | FWE Corrected 
 %   >   .Cth           .FWEthC
 
 %-Get corrected threshold
@@ -513,12 +513,12 @@ if BATCH
         end
         %%% Sort out the cluster-forming threshold
         if pU_ST_Ut==-1  % No threshold was set in snpm_ui.
-            if isnan(job.Thr.Clus.CFth)
+            if isnan(job.Thr.Clus.ClusSize.CFth)
                 error('ERROR: Cluster-forming threshold set to NaN in results with "slow" cluster inference method used in compoutation.  \nRe-run results specifying a cluster-forming threshold.\n')
             end
             % Save original ST_Ut
             ST_Ut_0 = ST_Ut;
-            CFth=job.Thr.Clus.CFth;
+            CFth=job.Thr.Clus.ClusSize.CFth;
             if (CFth<=0)
                 error('ERROR: Cluster-forming threshold must be strictly positive.\nRe-run results with a cluster-forming threshold greater than 0.\n')
             end
@@ -557,20 +557,20 @@ if BATCH
             end
                 ST_Ut = CFth;
         else % Threshold *was* set in snpm_ui.
-            if ~isnan(job.Thr.Clus.CFth)
+            if ~isnan(job.Thr.Clus.ClusSize.CFth)
                 error(sprintf('ERROR: Cluster-forming threshold of T=%0.2f was already set during analysis configuration; hence, in results, cluster-forming threshold must be left as "NaN".\nRe-run results with cluster-forming threshold set to NaN.\n',ST_Ut))
             end
         end
         u=ST_Ut; % Flag use of a statistic-value threshold
         % Inference details...
-        tmp = fieldnames(job.Thr.Clus.ClusSig);
+        tmp = fieldnames(job.Thr.Clus.ClusSize.ClusSig);
         switch tmp{1}
             case 'Cth'
-                C_STCS = job.Thr.Clus.ClusSig.Cth;
+                C_STCS = job.Thr.Clus.ClusSize.ClusSig.Cth;
             case 'PthC'
-                alpha_ucp = BoundCheck(job.Thr.Clus.ClusSig.PthC,[0 1],'Invalid uncorrected P(k)');
+                alpha_ucp = BoundCheck(job.Thr.Clus.ClusSize.ClusSig.PthC,[0 1],'Invalid uncorrected P(k)');
             case 'FWEthC'
-                alph_FWE  = BoundCheck(job.Thr.Clus.ClusSig.FWEthC,[0 1],'Invalid FWE level (cluster-level inference)');
+                alph_FWE  = BoundCheck(job.Thr.Clus.ClusSize.ClusSig.FWEthC,[0 1],'Invalid FWE level (cluster-level inference)');
                 iFWE      = ceil((1-alph_FWE)*nPermReal);
         end
     end % END: Cluster-wise inference
@@ -832,39 +832,39 @@ if bSpatEx
 	      loop = 1:2;
 	    end
 	    
-	    for isPos= loop  %1 for positive; 2 for negative
-	      if isPos==1
-		SnPM_ST = SnPM_ST_Pos;
-	      else
-		SnPM_ST = SnPM_ST_Neg;
-	      end
-	      tQ = (SnPM_ST(5,:)==i);
-	      if any(tQ)
-		%-Compute cluster labellings for this perm
-		Locs_mm = SnPM_ST(1:3,tQ);
-		Locs_mm (4,:) = 1;
-		Locs_vox = IMAT * Locs_mm;
-		
-		STCS = snpm_STcalc('update',STCS, SnPM_ST(4,tQ),...
-				   Locs_vox(1:3,:),isPos,i,ST_Ut,df);
-	      end
-	      if i==1
-		%-Save perm 1 stats for use later - [X;Y;Z;T;perm;STCno]
-		tmp = spm_clusters(Locs_vox(1:3,:));
-		if isPos==1
-		  STCstats_Pos = [ SnPM_ST(:,tQ); tmp];
-		  if bNeg==0
-		    STCstats=STCstats_Pos;
-		  end
-		else
-		  STCstats_Neg = [ SnPM_ST(:,tQ); tmp];
-		  if bNeg==1
-		    STCstats=STCstats_Neg;
-		  end
-		end
-	      end
-	    end
-	  end
+        for isPos= loop  %1 for positive; 2 for negative
+            if isPos==1
+                SnPM_ST = SnPM_ST_Pos;
+            else
+                SnPM_ST = SnPM_ST_Neg;
+            end
+            tQ = (SnPM_ST(5,:)==i);
+            if any(tQ)
+                %-Compute cluster labellings for this perm
+                Locs_mm = SnPM_ST(1:3,tQ);
+                Locs_mm (4,:) = 1;
+                Locs_vox = IMAT * Locs_mm;
+
+                STCS = snpm_STcalc('update',STCS, SnPM_ST(4,tQ),...
+                   Locs_vox(1:3,:),isPos,i,ST_Ut,df);
+            end
+            if i==1
+                %-Save perm 1 stats for use later - [X;Y;Z;T;perm;STCno]
+                tmp = spm_clusters(Locs_vox(1:3,:));
+                if isPos==1
+                    STCstats_Pos = [ SnPM_ST(:,tQ); tmp];
+                    if bNeg==0
+                        STCstats=STCstats_Pos;
+                    end
+                else
+                    STCstats_Neg = [ SnPM_ST(:,tQ); tmp];
+                    if bNeg==1
+                        STCstats=STCstats_Neg;
+                    end
+                end
+            end
+        end
+    end
 	  fprintf('\b\b\b\bdone\n');
 	  
 	  if bhPerms   %Double the STCS variables.

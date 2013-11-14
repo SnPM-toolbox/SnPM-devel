@@ -1,20 +1,12 @@
 function snpmpp = snpm_bch_pp
-% Example script that creates an cfg_exbranch to sum two numbers. The
-% inputs are entered as two single numbers, the output is just a single
-% number.
-%
-% This code is part of a batch job configuration system for MATLAB. See 
-%      help matlabbatch
-% for a general overview.
+% Setup menus to draw inference in an SnPM analysis
 %_______________________________________________________________________
-% Copyright (C) 2007 Freiburg Brain Imaging
-
-% Volkmar Glauche
-% $Id: cfg_example_add1.m 1716 2008-05-23 08:18:45Z volkmar $
-
-rev = '$Rev: 1716 $'; %#ok
-
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_bch_cp.m  SnPM13 2013/10/12
+% Thomas Nichols, Camille Maumet
 %
+% Based on Volkmar Glauche's MatlabBatch example code (Rev 1716)
+
 % Common items for all Results actions
 %
 % Input SnPM results mat file
@@ -109,7 +101,7 @@ VoxSig.name    = 'Significance Level';
 VoxSig.tag     = 'VoxSig';
 VoxSig.values  = {Pth TFth FDRth FWEth};
 VoxSig.val     = {FWEth};
-VoxSig.help    = {'Select voxel-wise significence thresholding method.  You can choose between uncorrected and corrected inference, but note the different type of images they apply to.'
+VoxSig.help    = {'Select voxel-wise significance thresholding method.  You can choose between uncorrected and corrected inference, but note the different type of images they apply to.'
     '"Uncorrected Nonparametric P" thresholds to the result of permutation tests applied at each voxel.' 
     '"Uncorrected T or F" thresholds the T (or F) statistic image.'
     '"FDR Corrected" thresholds the nonparametric P image to control the False Discovery Rate, the expected proportion of false positive voxels among detected voxels.'
@@ -130,29 +122,56 @@ ClusSig.help    = {'Select cluster-wise significance thresholding method.  You c
     ''
     'Note, clusters are defined on T (or F) images, and not on the nonparametric P-value image.'
 		 };
-
-
-VoxLab       = cfg_const;
-VoxLab.tag  = 'label';
-VoxLab.name = 'Voxel-wise';
-VoxLab.help = {'Voxel-wise inference selected.'};
-
-ClusLab       = cfg_const;
-ClusLab.tag  = 'label';
-ClusLab.name = 'Cluster-wise';
-ClusLab.help = {'Voxel-wise inference selected.'};
-
+     
 Vox = cfg_branch;
 Vox.name = 'Voxel-Level Inference';
 Vox.tag = 'Vox';
 Vox.val = {VoxSig};
 Vox.help = {'Specify voxel-level inference'};
 
-Clus = cfg_branch;
+ClusSize = cfg_branch;
+ClusSize.name = 'Cluster size';
+ClusSize.tag = 'ClusSize';
+ClusSize.val = {CFth ClusSig};
+ClusSize.help = {'Specify cluster-size inference'};
+
+PFilt         = cfg_entry;
+PFilt.tag     = 'PFilt';
+PFilt.name    = 'Corrected p-value for filtering';
+PFilt.strtype = 'e';
+PFilt.num     = [1 1];
+PFilt.val    = {0.05};
+PFilt.help    = {'Select corrected threshold'};
+
+PrimThresh         = cfg_entry;
+PrimThresh.tag     = 'PrimThresh';
+PrimThresh.name    = 'Primary threshold';
+PrimThresh.strtype = 'e';
+PrimThresh.num     = [1 1];
+PrimThresh.help    = {'Select primary threshold for STC analysis.'};
+
+theta         = cfg_entry;
+theta.tag     = 'Theta';
+theta.name    = 'Theta';
+theta.strtype = 'e';
+theta.num     = [1 1];
+theta.val    = {0.5};
+theta.help    = {'Theta value for voxel-cluster combining'};
+
+ClusMass = cfg_branch;
+ClusMass.name = 'Cluster mass';
+ClusMass.tag = 'ClusMass';
+ClusMass.val = {PFilt PrimThresh theta};
+ClusMass.help = {'Specify cluster-mass inference'};
+
+
+
+Clus = cfg_choice;
 Clus.name = 'Cluster-Level Inference';
 Clus.tag = 'Clus';
-Clus.val = {CFth ClusSig};
-Clus.help = {'Specify cluster-level inference'};
+Clus.values = {ClusSize ClusMass};
+Clus.val = {ClusSize};
+Clus.help = {'Select cluster-level statistic'};
 
 ThrType        = cfg_choice;
 ThrType.name   = 'Type of Thresholding';
@@ -163,14 +182,10 @@ ThrType.help   = {
     'Choose between voxel-wise and cluster-wise inference.'
     };
 
-tmp.help   = {
-    };
-
 
 %
 % Menus
 %
-
 posneg        = cfg_menu;
 posneg.name   = 'Display positive or negative effects?';
 posneg.tag    = 'Tsign';

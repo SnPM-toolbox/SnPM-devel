@@ -1,10 +1,10 @@
 function snpmcp = snpm_bch_cp
 % Setup menus to run SnPM analysis
-%
 %_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: snpm_bch_cp.m  SnPM13 2013/10/12
 % Thomas Nichols, Emma Thomas
-% $Id$
-
+%
 % Based on Volkmar Glauche's MatlabBatch example code (Rev 1716)
 
 %% Input Items for our SnPM Compute Run
