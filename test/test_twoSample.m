@@ -1,6 +1,11 @@
-% Compare results (t-map and positive effects filtered map T>3) of
-% interactive and batch two-sample t-tests
-classdef test_twoSample < matlab.unittest.TestCase & generic_test_snpm
+% Perform non-regression tests on two-sample tests in SnPM. 
+% Check that results obtained using the batch version are identical to the 
+% results computed manually (using the interactive GUI).
+%_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: test_twoSample.m  SnPM13 2013/10/12
+% Camille Maumet
+classdef test_twoSample < generic_test_snpm
     properties
     end
     

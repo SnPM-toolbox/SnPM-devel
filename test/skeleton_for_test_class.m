@@ -1,5 +1,8 @@
-% Compare results (t-map and positive effects filtered map T>3) of
-% interactive and batch XXX
+% Skeleton for non-regression tests classes. 
+%_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: skeleton_for_test_class.m  SnPM13 2013/10/12
+% Camille Maumet
 classdef skeleton_for_test_class < generic_test_snpm
     properties
     end

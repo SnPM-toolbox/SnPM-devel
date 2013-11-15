@@ -1,5 +1,10 @@
-% Compare results (t-map and positive effects filtered map T>3) of
-% interactive and batch XXX
+% Perform non-regression tests on between-group ANOVA in SnPM. 
+% Check that results obtained using the batch version are identical to the 
+% results computed manually (using the interactive GUI).
+%_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: test_ANOVAbetween.m  SnPM13 2013/10/12
+% Camille Maumet
 classdef test_ANOVAbetween < generic_test_snpm
     properties
     end

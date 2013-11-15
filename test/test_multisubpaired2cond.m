@@ -1,5 +1,10 @@
-% Compare results (t-map and positive effects filtered map T>3) of
-% interactive and batch multi-subject paired with 2 conditions
+% Perform non-regression tests on multi-sub paired 2 condition tests SnPM. 
+% Check that results obtained using the batch version are identical to the 
+% results computed manually (using the interactive GUI).
+%_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: test_multisubpaired2cond.m  SnPM13 2013/10/12
+% Camille Maumet
 classdef test_multisubpaired2cond < generic_test_snpm
     properties
     end

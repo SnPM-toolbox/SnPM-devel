@@ -1,5 +1,10 @@
-% Compare results (t-map and positive effects filtered map T>3) of
-% interactive and batch two sample two conditions (paired two sample test)
+% Perform non-regression tests on two-sample two conditions tests in SnPM. 
+% Check that results obtained using the batch version are identical to the 
+% results computed manually (using the interactive GUI).
+%_______________________________________________________________________
+% Copyright (C) 2013 The University of Warwick
+% Id: test_twosample_twocond.m  SnPM13 2013/10/12
+% Camille Maumet
 classdef test_twosample_twocond < generic_test_snpm
     properties
     end
