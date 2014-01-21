@@ -465,9 +465,9 @@ for i = 1:zdim
   if bVolm
     for j = 1:q
       for k = 1:zdim
-	tmp    = spm_slice_vol(V(j),spm_matrix([0 0 k]), ...
+        tmp    = spm_slice_vol(V(j),spm_matrix([0 0 k]), ...
 			       [xdim ydim],0);
-	X(j,(k-1)*PlDim+1:k*PlDim) = tmp(:)';
+        X(j,(k-1)*PlDim+1:k*PlDim) = tmp(:)';
       end
     end
   else
@@ -480,10 +480,10 @@ for i = 1:zdim
   if bMask
     if bVolm
       for k = 1:zdim
-	j = Vwt.mat\MAT*[xyPl;repmat(k,1,PlDim);ones(1,PlDim)];
-	tmp    = spm_get_data(Vwt,j,false);
-	tmp(~isfinite(tmp) | tmp<0) = 0;
-	Wt(1,(k-1)*PlDim+1:k*PlDim) = tmp(:)';
+        j = Vwt.mat\MAT*[xyPl;repmat(k,1,PlDim);ones(1,PlDim)];
+        tmp    = spm_get_data(Vwt,j,false);
+        tmp(~isfinite(tmp) | tmp<0) = 0;
+        Wt(1,(k-1)*PlDim+1:k*PlDim) = tmp(:)';
       end
     else
       j = Vwt.mat\MAT*[xyPl;repmat(i,1,PlDim);ones(1,PlDim)];
@@ -536,23 +536,23 @@ for i = 1:zdim
     %-----------------------------------------------------------------
     if bVarSm
       if bVolm
-	SmResSS   = zeros(xdim, ydim, zdim);
-	SmMask    = zeros(xdim, ydim, zdim);
-	TmpVol    = zeros(xdim, ydim, zdim);
-	TmpVol(Q) = ones(size(Q));
-	spm_smooth(TmpVol,SmMask,vFWHM./VOX);
-	TmpVol(Q) = ResSS;
-	spm_smooth(TmpVol,SmResSS,vFWHM./VOX);
-	
-	ResSS     = SmResSS(Q)./SmMask(Q);
+        SmResSS   = zeros(xdim, ydim, zdim);
+        SmMask    = zeros(xdim, ydim, zdim);
+        TmpVol    = zeros(xdim, ydim, zdim);
+        TmpVol(Q) = ones(size(Q));
+        spm_smooth(TmpVol,SmMask,vFWHM./VOX);
+        TmpVol(Q) = ResSS;
+        spm_smooth(TmpVol,SmResSS,vFWHM./VOX);
+
+        ResSS     = SmResSS(Q)./SmMask(Q);
       else
-	TmpPl     = zeros(xdim,ydim);
-	TmpPl(Q)  = ones(size(Q));
-	SmMask    = spm_conv(TmpPl, vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
-	TmpPl(Q)  = ResSS;
-	SmResSS   = spm_conv(TmpPl, vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
-		
-	ResSS     = SmResSS(Q)./SmMask(Q);
+        TmpPl     = zeros(xdim,ydim);
+        TmpPl(Q)  = ones(size(Q));
+        SmMask    = spm_conv(TmpPl, vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
+        TmpPl(Q)  = ResSS;
+        SmResSS   = spm_conv(TmpPl, vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
+
+        ResSS     = SmResSS(Q)./SmMask(Q);
       end
     end
     
@@ -714,9 +714,9 @@ if bST
       ST_Ut=pU_ST_Ut;
     else
       if (pU_ST_Ut>1)
-	ST_Ut=pU_ST_Ut;
+        ST_Ut=pU_ST_Ut;
       else
-	ST_Ut=spm_invTcdf(1-pU_ST_Ut, df);
+        ST_Ut=spm_invTcdf(1-pU_ST_Ut, df);
       end   
     end 
   end  
@@ -791,12 +791,14 @@ for i = 1:zdim
   end % (if ~bVolm)
     
   if length(Q)
-    if ~bVolm, X = X(:,Q); end	%-Already done if bVolm
+    if ~bVolm, 
+      X = X(:,Q); 
+    end	%-Already done if bVolm
     
     if bST & ~bVolm			%-XYZ already done if bVolm
       XYZ   = [ x(rem(Q-1,PlDim)+1);          ...
-		y(rem(Q-1,PlDim)+1);          ...
-		z(i)*ones(length(Q),1)];	%-Locations
+        y(rem(Q-1,PlDim)+1);          ...
+        z(i)*ones(length(Q),1)];	%-Locations
       XYZ = MAT*[XYZ;ones(1,length(Q))]; 
       XYZ(4,:) = [];
     end 
@@ -821,13 +823,13 @@ for i = 1:zdim
     %-----------------------------------------------------------------
     for perm = StartPerm:nPerm
       PmStart = toc;			%-Timestamp (>)
-      
+
       if bVolm 
-	SmTime=0;			%-Timestamp (>)
+        SmTime=0;			%-Timestamp (>)
       else
-	clear T BETA ResSS; 	%-Clean up
+        clear T BETA ResSS; 	%-Clean up
       end
-		  
+
       %-Rebuild H C for current permuation
       %-----------------------------------------------------------
       HC = eval(sHCform);
@@ -841,17 +843,17 @@ for i = 1:zdim
       ResSS = sum((X - [HC B G]*BETA).^2);
       
       if bVarSm
-	SmStart=toc;			%-Timestamp (>)
-	if bVolm
-	  TmpVol(Q) = ResSS;
-	  spm_smooth(TmpVol,SmResSS,vFWHM./VOX);
-	  ResSS     = SmResSS(Q)./SmMask(Q);
-	else
-	  TmpPl(Q)  = ResSS;
-	  SmResSS   = spm_conv(TmpPl,vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
-	  ResSS     = SmResSS(Q)./SmMask(Q);
-	end
-	SmTime = SmTime + toc-SmStart;	%-Timestamp (>)
+        SmStart=toc;			%-Timestamp (>)
+        if bVolm
+          TmpVol(Q) = ResSS;
+          spm_smooth(TmpVol,SmResSS,vFWHM./VOX);
+          ResSS     = SmResSS(Q)./SmMask(Q);
+        else
+          TmpPl(Q)  = ResSS;
+          SmResSS   = spm_conv(TmpPl,vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
+          ResSS     = SmResSS(Q)./SmMask(Q);
+        end
+        SmTime = SmTime + toc-SmStart;	%-Timestamp (>)
       end
 	    
       %-Compute t-statistics for specified contrast of parameters
@@ -859,13 +861,13 @@ for i = 1:zdim
       T      = zeros(1,size(BETA,2));
       Co     = CONT;
       if STAT=='T'
-	% t, as usual
-	T(1,:) = Co*BETA./sqrt((ResSS*(Co*pinv([HC B G]'*[HC B G])*Co'))/df);
+        % t, as usual
+        T(1,:) = Co*BETA./sqrt((ResSS*(Co*pinv([HC B G]'*[HC B G])*Co'))/df);
       else
-	% F!
-	pX   = pinv([HC B G]);
-	T(1,:) = (sum(((Co*BETA)'*inv(Co*pinv([HC B G]'*[HC B G])*Co'))' .* ...
-		      (Co*BETA),1)/size(Co,1)) ./ (ResSS/df);
+        % F!
+        pX   = pinv([HC B G]);
+        T(1,:) = (sum(((Co*BETA)'*inv(Co*pinv([HC B G]'*[HC B G])*Co'))' .* ...
+                (Co*BETA),1)/size(Co,1)) ./ (ResSS/df);
       end	
       
       
@@ -877,104 +879,104 @@ for i = 1:zdim
       %-Update nonparametric P-value
       %-----------------------------------------------------------
       if (perm==1)
-	T0 = T;
-	nPtmp = ones(size(T));
-	if bhPerms
-	  nPtmp = nPtmp + (T0<0);
-	end
+        T0 = T;
+        nPtmp = ones(size(T));
+        if bhPerms
+          nPtmp = nPtmp + (T0<0);
+        end
       else
-	if bhPerms
-	  nPtmp = nPtmp + (T>=T0) + (-T>=T0);   % NB: Worry if T0=T=0
-						% if STAT=='T', then T, 
-						% T0 >=0, so (-T>=T0) 
-						% will be empty.
-	else
-	  nPtmp = nPtmp + (T>=T0);
-	end
+        if bhPerms
+          nPtmp = nPtmp + (T>=T0) + (-T>=T0);   % NB: Worry if T0=T=0
+                  % if STAT=='T', then T, 
+                  % T0 >=0, so (-T>=T0) 
+                  % will be empty.
+        else
+          nPtmp = nPtmp + (T>=T0);
+        end
       end
       
       %-Save min weighted p-value
       %-----------------------------------------------------------
       if bVarAlph,
-	MinwP(perm,:) = min([ min(Wt.*(1-spm_Tcdf( T(1,:),df))),     ...
-		    min(Wt.*(1-spm_Tcdf(-T(1,:),df)));    ...
-		    MinwP(perm,1), MinwP(perm,2) ]);
+        MinwP(perm,:) = min([ min(Wt.*(1-spm_Tcdf( T(1,:),df))),     ...
+              min(Wt.*(1-spm_Tcdf(-T(1,:),df)));    ...
+              MinwP(perm,1), MinwP(perm,2) ]);
       end
       
       %-Save T,XYZ,perm for suprathreshold analysis
       %-----------------------------------------------------------
       if bST 
 
-	if pU_ST_Ut==-1  % No threshold set - save mountain tops
-	  clear d1 d2
-	  d1 = find(T(1,:) >  ST_Ut);
-	  d2 = find(T(1,:) < -ST_Ut);
-	  spm_append_96('SnPM_ST',[                            ...
-	      XYZ(:,d1),               XYZ(:,d2);              ...
-	      T(1,d1),                 -T(1,d2);               ...
-	      perm*ones(1,length(d1)), -perm*ones(1,length(d2)) ...
-		   ]);
-	  
-	else  % pU_ST_Ut>=0 - threshold set
+        if pU_ST_Ut==-1  % No threshold set - save mountain tops
+          clear d1 d2
+          d1 = find(T(1,:) >  ST_Ut);
+          d2 = find(T(1,:) < -ST_Ut);
+          spm_append_96('SnPM_ST',[                            ...
+          XYZ(:,d1),               XYZ(:,d2);              ...
+          T(1,d1),                 -T(1,d2);               ...
+          perm*ones(1,length(d1)), -perm*ones(1,length(d2)) ...
+          ]);
 
-	  clear d1 d2 SnPM_ST_Pos SnPM_ST_Neg
-	  d1 = find(T(1,:) >  ST_Ut);
-	  d2 = find(T(1,:) < -ST_Ut);
-	  SnPM_ST_Pos=[               ...
-	      XYZ(:,d1);              ...
-	      T(1,d1)];  
-	  
-	  SnPM_ST_Neg=[               ...
-	      XYZ(:,d2);              ...
-	      -T(1,d2)];
-	  
-	  if STAT== 'F'
-	    loop = 1;
-	  else
-	    loop = 1:2;
-	  end
-	  
-	  for isPos = loop %1 for positive; 2 for negative
-	    if isPos==1
-	      SnPM_ST = SnPM_ST_Pos;
-	    else
-	      SnPM_ST = SnPM_ST_Neg;
-	    end
-	    
-	    % consider Permuation NO. perm
-	    if ~isempty(SnPM_ST)
-	      Locs_mm=SnPM_ST(1:3,:);
-	      Locs_mm (4,:) = 1;
-	      Locs_vox = IMAT * Locs_mm;
-          
-          % Sometimes Locs_vox are not exactly integers and this raises an
-          % error later in the code. Here check that the values are
-          % integers with respect to a level of absolute tolerance (~10^-14)
-          % and enforce Locs_vox to be integers.
-          if max(abs(Locs_vox(:)-round(Locs_vox(:)))) > eps*100
-             error('''Locs_vox'' must be integers');
+        else  % pU_ST_Ut>=0 - threshold set
+
+          clear d1 d2 SnPM_ST_Pos SnPM_ST_Neg
+          d1 = find(T(1,:) >  ST_Ut);
+          d2 = find(T(1,:) < -ST_Ut);
+          SnPM_ST_Pos=[               ...
+          XYZ(:,d1);              ...
+          T(1,d1)];  
+
+          SnPM_ST_Neg=[               ...
+          XYZ(:,d2);              ...
+          -T(1,d2)];
+
+          if STAT== 'F'
+            loop = 1;
           else
-             Locs_vox = round(Locs_vox); 
+            loop = 1:2;
           end
-	      
-	      STCS = snpm_STcalc('update',STCS, SnPM_ST(4,:),...
-				 Locs_vox(1:3,:),isPos,perm,pU_ST_Ut,df);
-	      
-	      %save perm 1 stats for use later -[X;Y;Z;T;perm;STCno]
-	      if (perm==1)
-		tmp = spm_clusters(Locs_vox(1:3,:));
-		STCstats=[SnPM_ST;perm*ones(1,size(SnPM_ST,2));tmp];
-		if isPos==1
-		  save SnPM_pp STCstats
-		else
-		  STCstats_Neg = STCstats;
-		  save SnPM_pp_Neg STCstats_Neg
-		end
-	      end			
-	    end  % if ~isempty(SnPM_ST) 
-	  end  % for isPos=loop    
-	end % pU_ST_Ut==-1 
-	    
+
+          for isPos = loop %1 for positive; 2 for negative
+            if isPos==1
+              SnPM_ST = SnPM_ST_Pos;
+            else
+              SnPM_ST = SnPM_ST_Neg;
+            end
+
+            % consider Permuation NO. perm
+            if ~isempty(SnPM_ST)
+              Locs_mm=SnPM_ST(1:3,:);
+              Locs_mm (4,:) = 1;
+              Locs_vox = IMAT * Locs_mm;
+
+              % Sometimes Locs_vox are not exactly integers and this raises an
+              % error later in the code. Here check that the values are
+              % integers with respect to a level of absolute tolerance (~10^-14)
+              % and enforce Locs_vox to be integers.
+              if max(abs(Locs_vox(:)-round(Locs_vox(:)))) > eps*100
+                 error('''Locs_vox'' must be integers');
+              else
+                 Locs_vox = round(Locs_vox); 
+              end
+
+              STCS = snpm_STcalc('update',STCS, SnPM_ST(4,:),...
+              Locs_vox(1:3,:),isPos,perm,pU_ST_Ut,df);
+
+              %save perm 1 stats for use later -[X;Y;Z;T;perm;STCno]
+              if (perm==1)
+                tmp = spm_clusters(Locs_vox(1:3,:));
+                STCstats=[SnPM_ST;perm*ones(1,size(SnPM_ST,2));tmp];
+                if isPos==1
+                  save SnPM_pp STCstats
+                else
+                  STCstats_Neg = STCstats;
+                  save SnPM_pp_Neg STCstats_Neg
+                end
+              end			
+            end  % if ~isempty(SnPM_ST) 
+          end  % for isPos=loop    
+        end % pU_ST_Ut==-1 
+
       end % bST
       
       %-Print status at each perm if bVolm (& stop maybe)
