@@ -42,21 +42,36 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         
         function update_basis_matlabbatch(testCase)
             % Compute
-            testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1) = cfg_dep;
-            testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tname = 'SnPMcfg.mat configuration file';
-            testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec = {};
-            testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).sname = 'MultiSub: One Sample T test on diffs/contrasts: SnPMcfg.mat configuration file';
-            testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).src_exbranch = substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
-            testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).src_output = substruct('.','SnPMcfg');
+%             testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg = {fullfile(testCase.batchResDir, 'SPM.mat')};
+
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1) = cfg_dep;
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tname = 'SnPMcfg.mat configuration file';
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(1).name = 'filter';
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(1).value = 'mat';
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(2).name = 'strtype';
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(2).value = 'e';
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).sname = 'Factorial design specification: SPM.mat File';
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).src_exbranch = substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).src_output = substruct('.','spmmat');
+          
+          
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tname = 'Select SPM.mat';
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(1).name = 'filter';
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(1).value = 'mat';
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(2).name = 'strtype';
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(2).value = 'e';
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).sname = 'Factorial design specification: SPM.mat File';
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).src_exbranch = substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
+%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).src_output = substruct('.','spmmat');
 
             % Results   
             % Uncorrected voxel-wise p<0.1
-            testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1) = cfg_dep;
-            testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).tname = 'SnPM.mat results file';
-            testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).tgt_spec = {};
-            testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
-            testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
-            testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).src_output = substruct('.','SnPM');
+%             testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1) = cfg_dep;
+%             testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).tname = 'SnPM.mat results file';
+%             testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).tgt_spec = {};
+%             testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
+%             testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
+%             testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).src_output = substruct('.','SnPM');
             testCase.matlabbatch{3}.spm.tools.snpm.inference.Thr.Vox.VoxSig.Pth = 0.10;
             testCase.matlabbatch{3}.spm.tools.snpm.inference.Tsign = 1;
             testCase.matlabbatch{3}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPM_filtered_10none.nii';
@@ -170,6 +185,14 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         function complete_batch_and_run(testCase)
             testCase.complete_batch();
             
+            % Fill dependencies
+            % Compute
+            SPMmatFile = fullfile(testCase.matlabbatch{1}.spm.stats.factorial_design.dir{1}, 'SPM.mat');
+            testCase.matlabbatch{2}.spm.tools.snpm.cp.spmmat = {SPMmatFile};
+            for numRes = 3:numel(testCase.matlabbatch)
+              testCase.matlabbatch{numRes}.spm.tools.snpm.inference.SnPMmat = {SPMmatFile};
+            end
+            
             if ~exist(testCase.batchResDir, 'dir')
                 mkdir(testCase.batchResDir);
             else
@@ -185,13 +208,14 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                 end
                 
                 prevfilt = spm_select('FPList', testCase.batchResDir, '^SnPMt?_filtered_.*');
-                prevsnpmmat = spm_select('FPList', testCase.batchResDir, '^SnPM.*\.mat');
+%                 prevsnpmmat = spm_select('FPList', testCase.batchResDir, '^SnPM.*\.mat');
+                prevspmmat = spm_select('FPList', testCase.batchResDir, '^SPM.*\.mat');
                 prevps = spm_select('FPList', testCase.batchResDir, '^spm.*\.ps');
                 prevxyz = spm_select('FPList', testCase.batchResDir, '^XYZ\.mat');
                 prevRes = spm_select('FPList', testCase.batchResDir, '^ResMS.*');
                 
                 filesToDelete = cellstr(strvcat(prevBetas, prevlP, prevstatmap, ...
-                    prevfilt, prevsnpmmat, prevps, prevxyz, prevRes));
+                    prevfilt, prevspmmat, prevps, prevxyz, prevRes));
                 
                 if ~isempty(filesToDelete)
                     for i = 1:numel(filesToDelete)
@@ -201,7 +225,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                     end
                 end
             end
-            spm_jobman('run', testCase.matlabbatch);
+            % TODO change (not just 1:2)
+            spm_jobman('run', testCase.matlabbatch(1:2));
             
             if testCase.compaWithSpm
                 designName = fieldnames(testCase.matlabbatch{1}.spm.tools.snpm.des);
@@ -319,6 +344,10 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.CFth = 5;
             testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.ClusSig.FWEthC = 0.5;
             testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_clus_5_fwe_p50.nii';  
+        end
+        
+        % TODO avoid rewriting
+        function set_spm_mat_dependency(testCase)
         end
         
         function additional_predifined_cluster_results(testCase)

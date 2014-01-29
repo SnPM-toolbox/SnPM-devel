@@ -9,20 +9,22 @@ function snpmcp = snpm_bch_cp
 
 %% Input Items for our SnPM Compute Run
 % Input config file
-snpmcfg         = cfg_files;
-snpmcfg.tag     = 'snpmcfg';
-snpmcfg.name    = 'SnPMcfg.mat configuration file';
-snpmcfg.help    = {'Computes the permutation analysis specified in the selected SnPMcfg file.'};
-snpmcfg.filter = 'mat';
-snpmcfg.ufilter = 'SnPMcfg.mat';
-snpmcfg.num     = [1 1];
+spmmat         = cfg_files;
+spmmat.tag     = 'spmmat';
+% spmmat.name    = 'spmmat.mat configuration file';
+spmmat.name    = 'SPM.mat configuration file';
+spmmat.help    = {'Computes the permutation analysis specified in the selected SPM.mat file.'};
+spmmat.filter = 'mat';
+spmmat.ufilter = 'SPM.mat';
+spmmat.num     = [1 1];
 
 %% Executable Branch
 snpmcp      = cfg_exbranch;       % This is the branch that has information about how to run this module
 snpmcp.name = 'Compute';             % The display name
 snpmcp.tag  = 'cp'; % The name appearing in the harvested job structure. This name must be unique among all items in the val field of the superior node
-snpmcp.val  = {snpmcfg};    % The items that belong to this branch. All items must be filled before this branch can run or produce virtual outputs
-snpmcp.prog = @snpm_run_cp;  % A function handle that will be called with the harvested job to run the computation
+snpmcp.val  = {spmmat};    % The items that belong to this branch. All items must be filled before this branch can run or produce virtual outputs
+%snpmcp.prog = @snpm_run_cp;  % A function handle that will be called with the harvested job to run the computation
+snpmcp.prog = @cg_snpm_estimate;
 snpmcp.vout = @snpm_bch_cp_vout;
 snpmcp.help = {'Runs a configured SnPM.'};
 

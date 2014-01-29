@@ -1,6 +1,12 @@
 % Perform non-regression tests on one sample tests in SnPM. 
 % Check that results obtained using the batch version are identical to the 
 % results computed manually (using the interactive GUI).
+%
+% Usage:
+% Run all tests
+% tests=test_oneSample;res=run(tests)
+% Run a specific test
+% tests=test_oneSample;res=run(tests, 'test_onesample_1')
 %_______________________________________________________________________
 % Copyright (C) 2013 The University of Warwick
 % Id: test_oneSample.m  SnPM13 2013/10/12
@@ -13,7 +19,9 @@ classdef test_oneSample < generic_test_snpm
         function create_basis_matlabbatch(testCase)
             testCase.numBetas = 1;
             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P = {
+            % Set-up a one-sample t-test in SPM           
+%             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P = {
+            testCase.matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = {
                      fullfile(testCase.testDataDir, 'su_control01', 'cn_sess1', 'con_0001.img,1')
                      fullfile(testCase.testDataDir, 'su_control02', 'cn_sess1', 'con_0001.img,1')
                      fullfile(testCase.testDataDir, 'su_control03', 'cn_sess1', 'con_0001.img,1')
@@ -175,7 +183,8 @@ classdef test_oneSample < generic_test_snpm
             % original spm2-like interface
             testCase.batchResDir = fullfile(testCase.parentDataDir, 'results', 'batch', testCase.testName);
             testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), 'interactive', testCase.testName);
-            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.dir = {testCase.batchResDir};
+%             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.dir = {testCase.batchResDir};
+            testCase.matlabbatch{1}.spm.stats.factorial_design.dir = {testCase.batchResDir};
         end
         
         function create_spm_batch(testCase)
