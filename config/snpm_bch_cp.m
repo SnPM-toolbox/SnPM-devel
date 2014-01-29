@@ -24,7 +24,7 @@ snpmcp.name = 'Compute';             % The display name
 snpmcp.tag  = 'cp'; % The name appearing in the harvested job structure. This name must be unique among all items in the val field of the superior node
 snpmcp.val  = {spmmat};    % The items that belong to this branch. All items must be filled before this branch can run or produce virtual outputs
 %snpmcp.prog = @snpm_run_cp;  % A function handle that will be called with the harvested job to run the computation
-snpmcp.prog = @cg_snpm_estimate;
+snpmcp.prog = @snpm_run_estimate;
 snpmcp.vout = @snpm_bch_cp_vout;
 snpmcp.help = {'Runs a configured SnPM.'};
 

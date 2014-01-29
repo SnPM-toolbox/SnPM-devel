@@ -41,30 +41,14 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         end
         
         function update_basis_matlabbatch(testCase)
-            % Compute
-%             testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg = {fullfile(testCase.batchResDir, 'SPM.mat')};
-
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1) = cfg_dep;
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tname = 'SnPMcfg.mat configuration file';
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(1).name = 'filter';
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(1).value = 'mat';
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(2).name = 'strtype';
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(2).value = 'e';
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).sname = 'Factorial design specification: SPM.mat File';
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).src_exbranch = substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).src_output = substruct('.','spmmat');
+          % 1- SPM design
+          % 2- SPM estimation
+          % 3- SPM contrast definition
+                   
           
-          
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tname = 'Select SPM.mat';
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(1).name = 'filter';
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(1).value = 'mat';
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(2).name = 'strtype';
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).tgt_spec{1}(2).value = 'e';
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).sname = 'Factorial design specification: SPM.mat File';
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).src_exbranch = substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
-%           testCase.matlabbatch{2}.spm.tools.snpm.cp.snpmcfg(1).src_output = substruct('.','spmmat');
+          % 4- SnPM Compute
 
-            % Results   
+          % 5- Results   
             % Uncorrected voxel-wise p<0.1
 %             testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1) = cfg_dep;
 %             testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).tname = 'SnPM.mat results file';
@@ -72,9 +56,9 @@ classdef generic_test_snpm < matlab.unittest.TestCase
 %             testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
 %             testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
 %             testCase.matlabbatch{3}.spm.tools.snpm.inference.SnPMmat(1).src_output = substruct('.','SnPM');
-            testCase.matlabbatch{3}.spm.tools.snpm.inference.Thr.Vox.VoxSig.Pth = 0.10;
-            testCase.matlabbatch{3}.spm.tools.snpm.inference.Tsign = 1;
-            testCase.matlabbatch{3}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPM_filtered_10none.nii';
+            testCase.matlabbatch{5}.spm.tools.snpm.inference.Thr.Vox.VoxSig.Pth = 0.10;
+            testCase.matlabbatch{5}.spm.tools.snpm.inference.Tsign = 1;
+            testCase.matlabbatch{5}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPM_filtered_10none.nii';
             
             if testCase.compaWithSpm
                 % SPM batch
@@ -98,14 +82,22 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             
             % Maps obtained with the batch execution
             if strcmp(testCase.stattype, 't')
-                statMapRegexp = '^snpmT\+\.img';
+                statMapRegexp13 = '^snpmT\+\.img';
+                statMapRegexp14 = '^snpmT_\d\d\d\d\.nii';
             else
-                statMapRegexp = '^snpmF\.img';
+                statMapRegexp13 = '^snpmF\.img';
+                statMapRegexp14 = '^snpmF_\d\d\d\d\.nii';
             end
                 
-            batch_tmap = spm_select('FPList', testCase.batchResDir, statMapRegexp);
-            batch_beta = cellstr(spm_select('FPList', testCase.batchResDir, '^beta_00\d\d\.hdr'));
-            batch_ip = cellstr(spm_select('FPList', testCase.batchResDir, '^lP.*.hdr'));
+            batch_tmap = spm_select('FPList', testCase.batchResDir, statMapRegexp14);
+            if strcmp(spm('ver'), 'SPM8')
+                batch_beta = cellstr(spm_select('FPList', testCase.spmDir, '^beta_00\d\d\.hdr'));
+            elseif strcmp(spm('ver'), 'SPM12b')
+                batch_beta = cellstr(spm_select('FPList', testCase.spmDir, '^beta_00\d\d\.nii'));
+            else
+                error(['Version ' spm('ver') ' of SPM, not supported.' ]);
+            end
+            batch_ip = cellstr(spm_select('FPList', testCase.batchResDir, '^snpmLogP_\d\d\d\d.*.nii'));
             batch_filtmap = cellstr(spm_select('FPList', testCase.batchResDir, '^SnPMt?_filtered_.*\.nii'));
             
             if testCase.compaWithSpm
@@ -119,7 +111,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             end
 
             % Maps obtained with the interactive execution
-            inter_tmap = spm_select('FPList', testCase.interResDir, statMapRegexp);
+            inter_tmap = spm_select('FPList', testCase.interResDir, statMapRegexp13);
             inter_beta = cellstr(spm_select('FPList', testCase.interResDir, '^beta_00\d\d\.hdr'));
             inter_ip = cellstr(spm_select('FPList', testCase.interResDir, '^lP.*.hdr'));
             inter_filtmap = cellstr(spm_select('FPList', testCase.interResDir, '^SnPMt_filtered_.*\.img'));
@@ -186,10 +178,16 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.complete_batch();
             
             % Fill dependencies
-            % Compute
             SPMmatFile = fullfile(testCase.matlabbatch{1}.spm.stats.factorial_design.dir{1}, 'SPM.mat');
-            testCase.matlabbatch{2}.spm.tools.snpm.cp.spmmat = {SPMmatFile};
-            for numRes = 3:numel(testCase.matlabbatch)
+            % 1- SPM design
+            % 2- SPM estimation
+            testCase.matlabbatch{2}.spm.stats.fmri_est.spmmat = {SPMmatFile};
+            % 3- SPM contrast definition
+            testCase.matlabbatch{3}.spm.stats.con.spmmat = {SPMmatFile};
+            % 4- SnPM Compute
+            testCase.matlabbatch{4}.spm.tools.snpm.cp.spmmat = {SPMmatFile};
+            % 5-end Results 
+            for numRes = 5:numel(testCase.matlabbatch)
               testCase.matlabbatch{numRes}.spm.tools.snpm.inference.SnPMmat = {SPMmatFile};
             end
             
@@ -225,12 +223,11 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                     end
                 end
             end
-            % TODO change (not just 1:2)
-            spm_jobman('run', testCase.matlabbatch(1:2));
+            % TODO change (not just 1:4)
+            spm_jobman('run', testCase.matlabbatch(1:4));
             
             if testCase.compaWithSpm
-                designName = fieldnames(testCase.matlabbatch{1}.spm.tools.snpm.des);
-                myBatch = testCase.matlabbatch{1}.spm.tools.snpm.des.(designName{1});
+                myBatch = testCase.matlabbatch{1}.spm.stats.factorial_design;
                 testCase.spmDir = strrep(myBatch.dir{1}, 'batch', 'spm');
                 myBatch.dir = {testCase.spmDir};
                 testCase.spmBatch{1}.spm.stats.factorial_design = myBatch;

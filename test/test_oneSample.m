@@ -11,23 +11,29 @@
 % Copyright (C) 2013 The University of Warwick
 % Id: test_oneSample.m  SnPM13 2013/10/12
 % Camille Maumet
-classdef test_oneSample < generic_test_snpm
+classdef test_oneSample < generic_test_snpm 
     properties
     end
     
     methods (TestMethodSetup)
         function create_basis_matlabbatch(testCase)
-            testCase.numBetas = 1;
+          testCase.numBetas = 1;
             
-            % Set-up a one-sample t-test in SPM           
+          % Set-up a one-sample t-test in SPM           
 %             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P = {
-            testCase.matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = {
+          testCase.matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = {
                      fullfile(testCase.testDataDir, 'su_control01', 'cn_sess1', 'con_0001.img,1')
                      fullfile(testCase.testDataDir, 'su_control02', 'cn_sess1', 'con_0001.img,1')
                      fullfile(testCase.testDataDir, 'su_control03', 'cn_sess1', 'con_0001.img,1')
                      fullfile(testCase.testDataDir, 'su_control04', 'cn_sess1', 'con_0001.img,1')
                      fullfile(testCase.testDataDir, 'su_control05', 'cn_sess1', 'con_0001.img,1')
                      };
+                   
+          testCase.matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'One-sample group results';
+          testCase.matlabbatch{3}.spm.stats.con.consess{1}.tcon.convec = 1;
+          
+          testCase.matlabbatch{4}.spm.tools.snpm.cp.conspec.contrasts = 1;
+
         end
     end
 
@@ -190,8 +196,8 @@ classdef test_oneSample < generic_test_snpm
         function create_spm_batch(testCase)
             factoDesign = testCase.spmBatch{1}.spm.stats.factorial_design;
             
-            factoDesign.des.t1.scans = factoDesign.P;
-            factoDesign = rmfield(factoDesign, 'P');
+%             factoDesign.des.t1.scans = factoDesign.P;
+%             factoDesign = rmfield(factoDesign, 'P');
             
             testCase.spmBatch{1}.spm.stats.factorial_design = factoDesign;
         end
