@@ -40,7 +40,7 @@ function snpm_test_ground_truth()
           fullfile(testDataDir, 'su_control05', 'cn_sess1', 'con_0001.img,1')
       };
       matlabbatch{1}.spm.tools.snpm.des.OneSampT.dir = {fullfile(resultDir, 'GT', 'onesample_1')}; 
-      SnPMmatFile = fullfile(resultDir, 'GT', 'onesample_1', 'SPM.mat');
+      SnPMmatFile = fullfile(resultDir, 'GT', 'onesample_1', 'SnPMcfg.mat');
       matlabbatch{2}.spm.tools.snpm.cp.snpmcfg = {SnPMmatFile};
 
       % Results   
