@@ -30,8 +30,15 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             global TEST;
             TEST = true;
 
-            testCase.parentDataDir = fullfile('/Users/cmaumet/Data/snpm_test_data');
-            testCase.testDataDir = fullfile(testCase.parentDataDir, 'data');
+            snpm_test_config;
+            global testDataDir;
+
+            if isempty(testDataDir)
+              error('Test data directory not set, please update snpm_test_config');
+            end
+            
+            testCase.parentDataDir = spm_str_manip(testDataDir, 'h');
+            testCase.testDataDir = testDataDir;
             
             % By default t-test
             testCase.stattype = 't';
