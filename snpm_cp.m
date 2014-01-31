@@ -123,8 +123,8 @@ function snpm_cp(CWD)
 %       perm is negative if T was negative
 %
 %_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_cp.m  SnPM13 2013/10/12
+% Copyright (C) 2013-2014 The University of Warwick
+% Id: snpm_cp.m  SnPM13.01 2014/01/31
 % Thomas Nichols, Andrew Holmes
 
 
@@ -730,6 +730,9 @@ end
 if bVolm & (StartPerm==2)
   T0 = T;
   nPtmp = ones(size(T));
+  if bhPerms
+    nPtmp = nPtmp + (T0<0);
+  end
 else
   StartPerm = 1;
   nPtmp=[];
