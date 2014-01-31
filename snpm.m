@@ -49,7 +49,7 @@ function varargout=snpm(Action)
 
 %-Parameters
 %-----------------------------------------------------------------------
-SnPMver    = 'SnPM13';
+SnPMver    = 'SnPM14-devel';
 
 %-Format arguments
 %-----------------------------------------------------------------------
