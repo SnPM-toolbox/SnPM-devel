@@ -1415,7 +1415,7 @@ if WrtFlt
   
   %-Reconstruct filtered image from XYZ & SnPMt
   %---------------------------------------------------------------
-  t = zeros(1,prod(DIM));
+  t = zeros(1,prod(DIM))*NaN;
   t(spm_xyz2e(XYZ,V)) = SnPMt;
   if ~bSpatEx
     if ~isnan(u)
