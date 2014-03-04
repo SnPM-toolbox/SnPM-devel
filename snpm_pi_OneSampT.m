@@ -149,12 +149,11 @@ Gnames = Gcnames;
 %-Compute permutations for a single exchangability block
 %-----------------------------------------------------------------------
 nPiCond_mx = 2^nScan;
-fprintf('\nNOTE: Number of possible permutations for this design is %d\n',nPiCond_mx)
 if job.nPerm >= nPiCond_mx
     bAproxTst=0;
     if job.nPerm > nPiCond_mx
         nPiCond = nPiCond_mx;
-        fprintf('Running fewer permutations than originally requested.\n')
+        fprintf('NOTE: %d permutations requested, only %d possible.\n',job.nPerm, nPiCond_mx)
     end
 else
     bAproxTst=1;
