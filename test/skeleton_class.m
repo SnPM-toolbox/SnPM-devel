@@ -1,9 +1,9 @@
 % Skeleton for non-regression tests classes. 
 %_______________________________________________________________________
 % Copyright (C) 2013 The University of Warwick
-% Id: skeleton_for_test_class.m  SnPM13 2013/10/12
+% Id: skeleton_class.m  SnPM13 2013/10/12
 % Camille Maumet
-classdef skeleton_for_test_class < generic_test_snpm
+classdef skeleton_class %< generic_test_snpm
     properties
     end
     
@@ -40,7 +40,7 @@ classdef skeleton_for_test_class < generic_test_snpm
             % corresponding result directory computed manually using the
             % original spm2-like interface
             testCase.batchResDir = fullfile(testCase.parentDataDir, 'results', 'batch', testCase.testName);
-            testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), 'interactive', testCase.testName);
+            testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), 'GT', testCase.testName);
             testCase.matlabbatch{1}.spm.tools.snpm.des.DESIGN_NAME.dir = {testCase.batchResDir};
         end
     end

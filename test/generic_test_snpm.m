@@ -114,7 +114,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             inter_tmap = spm_select('FPList', testCase.interResDir, statMapRegexp);
             inter_beta = cellstr(spm_select('FPList', testCase.interResDir, '^beta_00\d\d\.hdr'));
             inter_ip = cellstr(spm_select('FPList', testCase.interResDir, '^lP.*.hdr'));
-            inter_filtmap = cellstr(spm_select('FPList', testCase.interResDir, '^SnPMt_filtered_.*\.img'));
+            inter_filtmap = cellstr(spm_select('FPList', testCase.interResDir, '^SnPMt?_filtered_.*\.[img|.nii]'));
             
             % Compare t-maps
             testCase.inter_map = inter_tmap;

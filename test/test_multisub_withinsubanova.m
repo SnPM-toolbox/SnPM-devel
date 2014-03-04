@@ -101,7 +101,7 @@ classdef test_multisub_withinsubanova < generic_test_snpm
             % corresponding result directory computed manually using the
             % original spm2-like interface
             testCase.batchResDir = fullfile(testCase.parentDataDir, 'results', 'batch', testCase.testName);
-            testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), 'interactive', testCase.testName);
+            testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), 'GT', testCase.testName);
             testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.dir = {testCase.batchResDir};
         end
     end
