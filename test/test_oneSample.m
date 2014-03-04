@@ -32,6 +32,14 @@ classdef test_oneSample < generic_test_snpm
             additional_results(testCase);
         end
         
+        % No covariate, no variance smoothing, no cluster stat
+        % Missing extension in results should not cause error
+        function test_onesample_no_ext_in_results(testCase)
+            testCase.testName = 'onesample_no_ext_in_results';
+            
+            testCase.matlabbatch{3}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPM_filtered_10none';
+        end
+        
         % No covariate, no variance smoothing and cluster stat
         function test_onesample_cluster(testCase)
             testCase.testName = 'onesample_cluster';

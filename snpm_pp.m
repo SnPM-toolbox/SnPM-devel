@@ -442,6 +442,10 @@ if BATCH
   else
     WrtFlt=1;
     WrtFltFn=job.WriteFiltImg.name;
+    
+    if isempty(spm_str_manip(WrtFltFn, 'e'))
+        WrtFltFn = [WrtFltFn '.nii'];
+    end
   end
 else
   WrtFlt = spm_input('Write filtered statistic img?','+1','y/n',[1,0],2);
