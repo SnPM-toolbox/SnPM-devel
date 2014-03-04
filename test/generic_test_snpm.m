@@ -169,7 +169,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.batch_map = batch_filtmap;
             testCase.tolerance = 10^-10;
             testCase.mapName = 'filtered map';
-            testCase.compare_batch_with_inter(true); % Ignore NaNs Just for now as we just added them (not in GT yet)
+            testCase.compare_batch_with_inter(); 
             
             clear global TEST;
         end
