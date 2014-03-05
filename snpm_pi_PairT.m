@@ -185,7 +185,7 @@ nPiSubj_mx = 2^nSubj;
 if job.nPerm >= nPiSubj_mx
     bAproxTst=0;
     if job.nPerm > nPiSubj_mx
-        fprintf('Running fewer permutations than originally requested.\n')
+        fprintf('NOTE: %d permutations requested, only %d possible.\n',job.nPerm, nPiSubj_mx)
         nPiSubj = nPiSubj_mx;
     end
 else

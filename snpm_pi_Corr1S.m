@@ -126,7 +126,7 @@ nPiCond_mx = round(exp(nXblk*gammaln(Xblk+1)));
 if job.nPerm >= nPiCond_mx
     bAproxTst=0;
     if job.nPerm > nPiCond_mx
-        fprintf('Running fewer permutations than originally requested.\n')
+        fprintf('NOTE: %d permutations requested, only %d possible.\n',job.nPerm, nPiCond_mx)
         nPiCond = nPiCond_mx;
     end
 else

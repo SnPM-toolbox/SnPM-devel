@@ -114,7 +114,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             inter_tmap = spm_select('FPList', testCase.interResDir, statMapRegexp);
             inter_beta = cellstr(spm_select('FPList', testCase.interResDir, '^beta_00\d\d\.hdr'));
             inter_ip = cellstr(spm_select('FPList', testCase.interResDir, '^lP.*.hdr'));
-            inter_filtmap = cellstr(spm_select('FPList', testCase.interResDir, '^SnPMt_filtered_.*\.img'));
+            inter_filtmap = cellstr(spm_select('FPList', testCase.interResDir, '^SnPMt?_filtered_.*\.[img|.nii]'));
             
             % Compare t-maps
             testCase.inter_map = inter_tmap;
@@ -169,7 +169,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.batch_map = batch_filtmap;
             testCase.tolerance = 10^-10;
             testCase.mapName = 'filtered map';
-            testCase.compare_batch_with_inter();
+            testCase.compare_batch_with_inter(); 
             
             clear global TEST;
         end
@@ -369,7 +369,11 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_cluss_mass.nii';
         end
         
-        function compare_batch_with_inter(testCase)
+        function compare_batch_with_inter(testCase, zeroingNaNs)
+            if nargin == 1
+                zeroingNaNs = false;
+            end
+            
             if ~iscell(testCase.inter_map)
                 testCase.inter_map = {testCase.inter_map};
             end
@@ -386,6 +390,10 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                 for i = 1:numel(testCase.inter_map)
                     data1 = spm_read_vols(spm_vol(testCase.batch_map{i}));
                     data2 = spm_read_vols(spm_vol(testCase.inter_map{i}));
+                    
+                    if zeroingNaNs
+                        data1(isnan(data1(:))) = 0;
+                    end
                     testCase.verifyEqual(data1, data2, 'AbsTol', testCase.tolerance, [testCase.batch_map{i}])
                 end
             end

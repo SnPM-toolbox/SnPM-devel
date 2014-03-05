@@ -442,6 +442,10 @@ if BATCH
   else
     WrtFlt=1;
     WrtFltFn=job.WriteFiltImg.name;
+    
+    if isempty(spm_str_manip(WrtFltFn, 'e'))
+        WrtFltFn = [WrtFltFn '.nii'];
+    end
   end
 else
   WrtFlt = spm_input('Write filtered statistic img?','+1','y/n',[1,0],2);
@@ -1411,7 +1415,7 @@ if WrtFlt
   
   %-Reconstruct filtered image from XYZ & SnPMt
   %---------------------------------------------------------------
-  t = zeros(1,prod(DIM));
+  t = zeros(1,prod(DIM))*NaN;
   t(spm_xyz2e(XYZ,V)) = SnPMt;
   if ~bSpatEx
     if ~isnan(u)

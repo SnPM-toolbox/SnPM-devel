@@ -198,7 +198,7 @@ nPiStud_mx = round(exp(gammaln(nSUBJ+1)-gammaln(nSUBJ-nFlip+1)-gammaln(nFlip+1))
 if job.nPerm >= nPiStud_mx
     bAproxTst=0;
     if job.nPerm > nPiStud_mx
-        fprintf('Running fewer permutations than originally requested.\n')
+        fprintf('NOTE: %d permutations requested, only %d possible.\n',job.nPerm, nPiStud_mx)
         nPiStud = nPiStud_mx;
     end
 else
