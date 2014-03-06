@@ -415,11 +415,11 @@ if isfield(job.masking.tm,'tm_none')
     sThresh = 'None';
 elseif isfield(job.masking.tm,'tmr')
     iTHRESH=2;
-    THRESH=job.masking.tm.tmr;
+    THRESH=job.masking.tm.tmr.rthresh;
     sThresh=sprintf('Relative (%g)',THRESH);
 elseif isfield(job.masking.tm,'tma')
     iTHRESH=3;
-    THRESH=job.masking.tm.tma;
+    THRESH=job.masking.tm.tma.athresh;
     sThresh = sprintf('Absolute (%g)',THRESH);
 end
 
