@@ -189,15 +189,11 @@ snpm_check_nperm(nPiCond,nPiCond_mx);
 %-If user wants all perms, then random method would seem to take an
 % absurdly long time, so exact is used.
 
-if nScan<=12 || ~bAproxTst                    % exact method
-
-    %-Generate all labellings of nScan scans as +/- 1
-    PiCond=[];
-    for i=0:nScan-1
-	PiCond=[ones(2^i,1),PiCond;-ones(2^i,1),PiCond];
-    end
-    %-Trim to labellings with correct group numbers
-    PiCond=PiCond(sum(PiCond'==-1)==nFlip,:);
+if nScan<=12 || ~bAproxTst                    % exact method    
+    PiCond = ones(nPiCond, nScan);
+    % Label affected to group label "-1"
+    alternativeGroup = nchoosek(1:nScan,nFlip);
+    PiCond(sub2ind(size(PiCond), repmat(1:nPiCond, nFlip,1)', alternativeGroup)) = -1;
 
     %-Only do half the work, if possible
     bhPerms=0;
