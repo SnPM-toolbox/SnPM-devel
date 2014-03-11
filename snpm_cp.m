@@ -726,6 +726,9 @@ end
 if bVolm & (StartPerm==2)
   T0 = T;
   nPtmp = ones(size(T));
+  if bhPerms
+    nPtmp = nPtmp + (T0<=0);
+  end
 else
   StartPerm = 1;
   nPtmp=[];
@@ -876,7 +879,7 @@ for i = 1:zdim
 	T0 = T;
 	nPtmp = ones(size(T));
 	if bhPerms
-	  nPtmp = nPtmp + (T0<0);
+	  nPtmp = nPtmp + (T0<=0);
 	end
       else
 	if bhPerms
