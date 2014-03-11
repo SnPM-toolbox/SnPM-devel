@@ -22,6 +22,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         batch_map;
         tolerance;
         mapName;
+        SnPMrefVersion;
     end
     
     methods (TestMethodSetup)
@@ -32,6 +33,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
 
             snpm_test_config;
             global testDataDir;
+            global SnPMrefVersion;
+            testCase.SnPMrefVersion = SnPMrefVersion;
 
             if isempty(testDataDir)
               error('Test data directory not set, please update snpm_test_config');
