@@ -172,7 +172,14 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.batch_map = batch_filtmap;
             testCase.tolerance = 10^-10;
             testCase.mapName = 'filtered map';
-            testCase.compare_batch_with_inter(); 
+            refVersion = regexp(testCase.SnPMrefVersion, '^SnPM(?<num>\d+)\.?(?<subnum>\d?\d?)', 'names');
+            zeroingNaNs = false;
+            if str2num(refVersion.num) < 13 ||...
+               (str2num(refVersion.num) == 13 && ...
+                str2num(refVersion.subnum) < 3)
+                zeroingNaNs = true;
+            end
+            testCase.compare_batch_with_inter(zeroingNaNs); 
             
             clear global TEST;
         end
