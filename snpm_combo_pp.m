@@ -653,7 +653,7 @@ imagesc((spm_DesMtx('Sca', [H,C,B,G],HCBGnames) + 1)*32)
 xlabel 'Design Matrix'
 set(hDesMtx,'XTick',[],'XTickLabel','')
 hConAxes = axes('Position',[0.65 0.8 0.2 0.1]);
-h = bar(CONT(1,:)); if MLver=='7', h=get(h,'children'), end
+h = bar(CONT(1,:)); if str2num(MLver)>7, h=get(h,'children'), end
 hold on
 set(h,'FaceColor',[1 1 1]*.8)
 tX = get(h,'Xdata'); tY = get(h,'Ydata');
@@ -914,6 +914,7 @@ if WrtFlt
 	%---------------------------------------------------------------
 	Vs = Vs0; 
 	Vs.fname = Fname; Vs.descrip = tmp;
+    Vs.private.dat.fname = Vs.fname;
 	Vs.dim   = Vs.dim(1:3);
 	Vs = sf_create_vol(Vs);
 	t = reshape(t,DIM);
