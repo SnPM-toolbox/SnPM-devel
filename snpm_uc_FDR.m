@@ -80,11 +80,10 @@ function [u,Ps,Ts] = snpm_uc_FDR(q,df,STAT,n,Vs,Vm)
 % Benjamini & Yekutieli (2001), "The Control of the false discovery rate
 % in multiple testing under dependency". To appear, Annals of Statistics.
 % Available at http://www.math.tau.ac.il/~benja 
-%_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_uc_FDR.m  SnPM13 2013/10/12
-% Thomas Nichols
-% Based on FIL spm_uc_FDR.m
+%___________________________________________________________________________
+% Based on FIL spm_uc_FDR.m    2.9 Thomas Nichols 04/07/08
+% @(#)snpm_uc_FDR.m	3.3 05/03/23
+%	$Id: snpm_uc_FDR.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 if (nargin<6), Vm = []; end
 

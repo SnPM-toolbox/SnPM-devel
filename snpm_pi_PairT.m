@@ -92,10 +92,9 @@
 % PiSubj        - +/-1 flip conditions indicator for subjects,
 %                 relative to first subject.
 %_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_pi_PairT.m  SnPM13 2013/10/12
-% Thomas Nichols, Camille Maumet
 % Based on snpm_MSA2x.m v1.5
+% @(#)snpm_MSA2xPerm.m	3.4 Thomas Nichols 04/10/26
+%	$Id: snpm_pi_PairT.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx
@@ -106,14 +105,13 @@
 %-Initialisation
 %-----------------------------------------------------------------------
 nCond    = 2;			% Number of conditions
-iGloNorm = '123';		% Allowable Global norm. codes
+iGloNorm = '1234';		% Allowable Global norm. codes
 sDesSave = 'iCond iRepl PiSubj';
 				% PlugIn variables to save in cfg file
 
 %-Get number of subjects
-% nSubj    = spm_input('# subjects','+1');
-% if (nSubj==1), error('Use single subject plug for single subjects'); end    
-nSubj = numel(job.fsubject);
+nSubj    = spm_input('# subjects','+1');
+if (nSubj==1), error('Use single subject plug for single subjects'); end    
 
 %-Only consider one replication -- basically a RFX machine.
 nRepl  = 1;
@@ -129,39 +127,38 @@ iSubjC= [];
 iRepl = [];
 for subj=1:nSubj
     tmp = ['Subject ',int2str(subj),': Select scans in time order'];
-    P = str2mat(P, str2mat(job.fsubject(subj).scans)); %str2mat(P,spm_select(nCond*nRepl,'image',tmp));
+    P = str2mat(P,spm_select(nCond*nRepl,'image',tmp));
     Cond=[];
     while(isempty(Cond))
-%         tmp=['Enter conditions index: (A/B) [',int2str(nCond*nRepl),']'];
-%         tmpCond = spm_input(tmp,'+0','s');
-%         %-Convert a/b notation to +/- vector    
-%         tmpCond(isspace(tmpCond)) = [];
-%         tmpCond = abs(upper(tmpCond));
-%         tmp = tmpCond;
-        tmpCond = job.fsubject(subj).scindex;
-        tmpCond = tmpCond-min(tmpCond);
-        tmpCond = tmpCond/max([1,tmpCond])*2-1;
-        %-Check validity of tmpCond
-        if length(tmpCond)==nScan
-            if length(find(diff(sort(tmpCond)))) ~= nCond-1
-            error('Exactly ',[int2str(nCond), ...
-                ' conditions must be supplied']);
-            elseif sum(tmpCond)~=0
-            error(['Exactly ',int2str(nRepl),' As and ', ...
-                    int2str(nRepl),' Bs must be supplied']);
-            elseif isempty(iCond)
-            sCond=setstr(tmp([1,diff(sort(tmp))]~=0));
-            Cond = tmpCond;		
-            elseif any(iCond(1:nScan)~=tmpCond) & ...
-                any(iCond(1:nScan)~=(-tmpCond))
-            error(['Conditions index must be same as', ...
-                    'first subject, or flipped']);
-            else		
-            Cond = tmpCond;		
-            end
-        else
-            error(['Enter indicies for ',int2str(nCond*nRepl),' scans'])
-        end
+	tmp=['Enter conditions index: (A/B) [',int2str(nCond*nRepl),']'];
+	tmpCond = spm_input(tmp,'+0','s');
+	%-Convert a/b notation to +/- vector    
+	tmpCond(isspace(tmpCond)) = [];
+	tmpCond = abs(upper(tmpCond));
+	tmp = tmpCond;
+	tmpCond = tmpCond-min(tmpCond);
+	tmpCond = tmpCond/max([1,tmpCond])*2-1;
+	%-Check validity of tmpCond
+	if length(tmpCond)==nScan
+	    if length(find(diff(sort(tmpCond)))) ~= nCond-1
+		error('Exactly ',[int2str(nCond), ...
+			' conditions must be supplied']);
+	    elseif sum(tmpCond)~=0
+		error(['Exactly ',int2str(nRepl),' As and ', ...
+			    int2str(nRepl),' Bs must be supplied']);
+	    elseif isempty(iCond)
+		sCond=setstr(tmp([1,diff(sort(tmp))]~=0));
+		Cond = tmpCond;		
+	    elseif any(iCond(1:nScan)~=tmpCond) & ...
+			any(iCond(1:nScan)~=(-tmpCond))
+		error(['Conditions index must be same as', ...
+			    'first subject, or flipped']);
+	    else		
+		Cond = tmpCond;		
+	    end
+	else
+	    error(['Enter indicies for ',int2str(nCond*nRepl),' scans'])
+	end
     end
     iCond = [iCond, Cond];
     iSubj = [iSubj, subj*ones(1,nScan)];
@@ -181,41 +178,26 @@ iSUBJ = iSubj;
 %=======================================================================
 %-Work out how many perms, and ask about approximate tests
 %-----------------------------------------------------------------------
-nPiSubj_mx = 2^nSubj;
-if job.nPerm >= nPiSubj_mx
-    bAproxTst=0;
-    if job.nPerm > nPiSubj_mx
-        fprintf('NOTE: %d permutations requested, only %d possible.\n',job.nPerm, nPiSubj_mx)
-        nPiSubj = nPiSubj_mx;
+nPiSubj = 2^nSubj;
+if (spm_input(sprintf('%d Perms. Use approx. test?',nPiSubj),'+1','y/n')=='y')
+    bAproxTst = 1;
+    tmp = 0;
+    while ((tmp>nPiSubj) | (tmp==0))
+	tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiSubj),'+0');
+	tmp = floor(max([0,tmp]));
+	if rem(tmp,2)
+	    error(['Number of perms must be even']);
+	    tmp=0;	    
+	end	    
+    end
+    if (tmp==nPiSubj)
+	bAproxTst = 0;
+    else
+	nPiSubj=tmp;
     end
 else
-    bAproxTst=1;
-    nPiSubj = job.nPerm;
+    bAproxTst = 0;
 end
-if rem(nPiSubj,2)
-    error(['Number of perms must be even']);
-    nPiSubj = 0;	    
-end	  
-
-% if (spm_input(sprintf('%d Perms. Use approx. test?',nPiSubj),'+1','y/n')=='y')
-%     bAproxTst = 1;
-%     tmp = 0;
-%     while ((tmp>nPiSubj) | (tmp==0))
-% 	tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiSubj),'+0');
-% 	tmp = floor(max([0,tmp]));
-% 	if rem(tmp,2)
-% 	    error(['Number of perms must be even']);
-% 	    tmp=0;	    
-% 	end	    
-%     end
-%     if (tmp==nPiSubj)
-% 	bAproxTst = 0;
-%     else
-% 	nPiSubj=tmp;
-%     end
-% else
-%     bAproxTst = 0;
-% end
 
 %-Compute permutations of subjects
 %=======================================================================

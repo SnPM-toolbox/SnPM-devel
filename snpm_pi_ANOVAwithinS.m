@@ -88,10 +88,8 @@
 % sHCform_Mtx   - A matrix that will be used when sHCform is called.  
 %
 %_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_pi_ANOVAwithinS.m  SnPM13 2013/10/12
-% Thomas Nichols, Camille Maumet
 % Based on snpm_MS1.m, V3.2 04/06/08
+% $Id: snpm_pi_ANOVAwithinS.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx
@@ -108,22 +106,16 @@
 
 %-Initialisation
 %-----------------------------------------------------------------------
-global TEST;
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iRepl sHCform_Mtx';		        % PlugIn variables to save in cfg file
-if isempty(TEST) || ~TEST
-    rand('seed',sum(100*clock));	% Initialise random number generator
-end
+rand('seed',sum(100*clock));	% Initialise random number generator
 
 %-Get number of subjects
-nSubj    = size(job.fsubject,2);%spm_input('# subjects','+1');
+nSubj    = spm_input('# subjects','+1');
 if (nSubj==1), error('Use single subject plug for single subjects'); end    
 
 %-Get number of scans per subject - nSubj x nRepl design
-nRepl    =  unique(arrayfun(@(x) numel(x.scans), job.fsubject));%spm_input('# scans per subject','+1');
-if numel(nRepl) > 1
-    error('All subjects must have the same number of replications')
-end
+nRepl    = spm_input('# scans per subject','+1');
 
 
 %-Get filenames and iCond, the condition labels
@@ -132,8 +124,8 @@ P     = [];
 iRepl = [];
 iSubj = [];
 for subj=1:nSubj
-    %tmp = ['Subject ',int2str(subj),': Select scans in time order'];
-    P = str2mat(P, str2mat(job.fsubject(subj).scans)); %str2mat(P,spm_select(nRepl,'image',tmp));
+    tmp = ['Subject ',int2str(subj),': Select scans in time order'];
+    P = str2mat(P,spm_select(nRepl,'image',tmp));
     iRepl = [iRepl, 1:nRepl];
     iSubj = [iSubj, subj*ones(1,nRepl)];
 end
@@ -173,18 +165,19 @@ G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nSubj;
 %=======================================================================
 %-Compute permutations for a single exchangability block
 %-----------------------------------------------------------------------
-nPiCond_mx = 2^(nSubj-1);
+nPiCond = 2^(nSubj-1);
 % Note: here nPiCond is half of its usual value. The reason is we are
 % calculating F stat.
-if job.nPerm >= nPiCond_mx
-    bAproxTst=0;
-    if job.nPerm > nPiCond_mx
-        fprintf('NOTE: %d permutations requested, only %d possible.\n',job.nPerm, nPiCond_mx)
-        nPiCond = nPiCond_mx;
-    end
-else
-    bAproxTst=1;
-    nPiCond = job.nPerm;
+
+bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond),...
+							'+1','y/n')=='y';
+if (bAproxTst)
+  tmp = 0;
+  while ((tmp>nPiCond) | (tmp==0) )
+    tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond),'+0');
+    tmp = floor(max([0,tmp]));
+  end
+  if (tmp==nPiCond), bAproxTst=0; else, nPiCond=tmp; end
 end
 
 %-Two methods for computing permutations, random and exact; exact

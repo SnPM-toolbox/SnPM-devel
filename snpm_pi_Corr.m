@@ -57,10 +57,9 @@
 % CovInt        - Specified covariate of interest
 % nSubj          - Size of exchangability block
 %_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_pi_Corr.m  SnPM13 2013/10/12
-% Thomas Nichols & Andrew Holmes, Emma Thomas
 % Based on snpm_SSC v3.2, 04/06/08
+% @(#)snpm_MSC.m	1.2 Tom Nichols & Andrew Holmes 05/03/11
+%	$Id: snpm_pi_Corr.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx
@@ -74,31 +73,19 @@
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'CovInt';		% PlugIn variables to save in cfg file
 
-global TEST;
+
 
 %-Get filenames of scans
 %-----------------------------------------------------------------------
-if BATCH
-  P = strvcat(job.P);  % Sill to use string arrays, but need it for compatibility
-else
-  P     = spm_select(Inf,'image','Select scans, 1 per subj.');
-end
+P     = spm_select(Inf,'image','Select scans, 1 per subj.');
 nSubj = size(P,1);
 
 %-Get covariate
 %-----------------------------------------------------------------------
-if BATCH
-  CovInt = job.CovInt(:);
-  if ~all(size(CovInt)==[nSubj,1])
-    error(sprintf('Covariate [%d,1] doesn''t match number of subjects [%d]',...
-		  size(CovInt,1),nSubj))
-  end
-else
-  CovInt = [];
-  while ~all(size(CovInt)==[nSubj,1])
-    CovInt = spm_input(sprintf('Enter covariate values [%d]',nSubj),'+1');
-    CovInt = CovInt(:);
-  end
+CovInt = [];
+while ~all(size(CovInt)==[nSubj,1])
+	CovInt = spm_input(sprintf('Enter covariate values [%d]',nSubj),'+1');
+	CovInt = CovInt(:);
 end
 
 %-Centre covariate if required
@@ -109,33 +96,17 @@ bCCovInt = 1;	% Always centre covariate
 %-Work out how many perms, and ask about approximate tests
 %-----------------------------------------------------------------------
 %-NB: n! == gamma(n+1)
-nPiCond_mx = gamma(nSubj+1);
-fprintf('\nNOTE: Number of possible permutations for this design is %d\n',nPiCond_mx)
-if BATCH
-  if job.nPerm >= nPiCond_mx
-    bAproxTst=0;
-    nPiCond = nPiCond_mx;
-    fprintf('NOTE: Requested %d perms, but only using %d (maximum possible).\n',job.nPerm,nPiCond_mx);
-  else
-    bAproxTst=1;
-    nPiCond = job.nPerm;
-  end
-else
-  bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond_mx),...
-			'+1','y/n')=='y';
-  if bAproxTst
+nPiCond = gamma(nSubj+1);
+bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond),...
+							'+1','y/n')=='y';
+if bAproxTst
     tmp = 0;
-    while ((tmp>nPiCond_mx) | (tmp==0) )
-      tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond_mx),'+0');
-      tmp = floor(max([0,tmp]));
+    while ((tmp>nPiCond) | (tmp==0) )
+	tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond),'+0');
+	tmp = floor(max([0,tmp]));
     end
-    nPiCond=tmp; 
-    if (tmp==nPiCond_mx), bAproxTst=0; end
-  else
-    nPiCond=nPiCond_mx;
-  end
+    if (tmp==nPiCond), bAproxTst=0; else, nPiCond=tmp; end
 end
-snpm_check_nperm(nPiCond,nPiCond_mx);
 
 
 %-Compute permutations of conditions
@@ -145,9 +116,7 @@ if bAproxTst
 	%-Approximate test :
 	% Build up random subset of all (within nSubj) permutations
 	%===============================================================
-    if isempty(TEST) || ~TEST % When testing the code we need a fixed seed
-        rand('seed',sum(100*clock))	%-Initialise random number generator
-    end
+	rand('seed',sum(100*clock))	%-Initialise random number generator
 	PiCond      = zeros(nPiCond,nSubj);
 	PiCond(1,:) = 1+rem([0:nSubj-1],nSubj);
 	for i = 2:nPiCond
@@ -203,9 +172,7 @@ if ~all(all(sum(PiCond,2)== (nSubj+1)*nSubj/2 ))
 %-Convert to full permutations from permutations within blocks
 nPiCond = size(PiCond,1);
 %-Randomise order of PiConds (except first) to allow interim analysis
-if isempty(TEST) || ~TEST % When testing the code we need a fixed seed
-    rand('seed',sum(100*clock))	%-Initialise random number generator
-end
+rand('seed',sum(100*clock))	%-Initialise random number generator
 PiCond=[PiCond(1,:);PiCond(randperm(nPiCond-1)+1,:)];
 %-Check first permutation is null permutation
 if ~all(PiCond(1,:)==[1:nSubj])

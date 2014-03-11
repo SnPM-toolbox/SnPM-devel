@@ -66,9 +66,8 @@
 % CovInt        - Specified covariate of interest
 % Xblk          - Size of exchangability block
 %_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_pi_Corr1S.m  SnPM13 2013/10/12
-% Thomas Nichols & Andrew Holmes
+% @(#)snpm_SSC.m	3.2 Andrew Holmes 04/06/08
+%	$Id: snpm_pi_Corr1S.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx
@@ -79,7 +78,6 @@
 
 %-Initialisation
 %-----------------------------------------------------------------------
-global TEST;
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'CovInt Xblk';	% PlugIn variables to save in cfg file
 
@@ -87,15 +85,15 @@ sDesSave = 'CovInt Xblk';	% PlugIn variables to save in cfg file
 
 %-Get filenames of scans
 %-----------------------------------------------------------------------
-P     = strvcat(job.P);%spm_select(Inf,'image','Select scans in time order');
+P     = spm_select(Inf,'image','Select scans in time order');
 nScan = size(P,1);
 
 %-Get covariate
 %-----------------------------------------------------------------------
 CovInt = [];
 while ~all(size(CovInt)==[nScan,1])
-	CovInt = job.CovInt(:);% spm_input(sprintf('Enter covariate values [%d]',nScan),'+1');
-	%CovInt = CovInt(:);
+	CovInt = spm_input(sprintf('Enter covariate values [%d]',nScan),'+1');
+	CovInt = CovInt(:);
 end
 
 %-Centre covariate if required
@@ -111,7 +109,7 @@ Xblk     = tmp( floor(tmp)==ceil(tmp) & tmp>1 );
 tmp      = int2str(Xblk(1));
 for i=2:length(Xblk), tmp=str2mat(tmp,int2str(Xblk(i))); end
 if length(Xblk)>1
-  Xblk     = job.xblock;%spm_input('Size of exchangability block','+0','b',tmp,Xblk);
+  Xblk     = spm_input('Size of exchangability block','+0','b',tmp,Xblk);
 end
 nXblk    = (nScan/Xblk);
 iXblk    = meshgrid(1:nXblk,1:Xblk); iXblk = iXblk(:)';
@@ -120,19 +118,18 @@ iXblk    = meshgrid(1:nXblk,1:Xblk); iXblk = iXblk(:)';
 %-Work out how many perms, and ask about approximate tests
 %-----------------------------------------------------------------------
 %-NB: n! == gamma(n+1)
-nPiCond_mx = round(exp(nXblk*gammaln(Xblk+1)));
-% bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond),...
-% 							'+1','y/n')=='y';
-if job.nPerm >= nPiCond_mx
-    bAproxTst=0;
-    if job.nPerm > nPiCond_mx
-        fprintf('NOTE: %d permutations requested, only %d possible.\n',job.nPerm, nPiCond_mx)
-        nPiCond = nPiCond_mx;
+nPiCond = round(exp(nXblk*gammaln(Xblk+1)));
+bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond),...
+							'+1','y/n')=='y';
+if bAproxTst
+    tmp = 0;
+    while ((tmp>nPiCond) | (tmp==0) )
+	tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond),'+0');
+	tmp = floor(max([0,tmp]));
     end
-else
-    bAproxTst=1;
-    nPiCond = job.nPerm;
+    if (tmp==nPiCond), bAproxTst=0; else, nPiCond=tmp; end
 end
+
 
 %-Compute permutations of conditions
 %=======================================================================
@@ -141,9 +138,7 @@ if bAproxTst
 	%-Approximate test :
 	% Build up random subset of all (within Xblk) permutations
 	%===============================================================
-    if isempty(TEST) || ~TEST
-        rand('seed',sum(100*clock))	%-Initialise random number generator
-    end
+	rand('seed',sum(100*clock))	%-Initialise random number generator
 	PiCond      = zeros(nPiCond,nScan);
 	PiCond(1,:) = 1+rem([0:Xblk*nXblk-1],Xblk);
 	for i = 2:nPiCond
@@ -211,9 +206,7 @@ if ~all(all(PiCond*spm_DesMtx(iXblk)== (Xblk+1)*Xblk/2 ))
 nPiCond = size(PiCond,1);
 PiCond = PiCond + meshgrid((iXblk-1)*Xblk,1:nPiCond);
 %-Randomise order of PiConds (except first) to allow interim analysis
-if isempty(TEST) || ~TEST
-    rand('seed',sum(100*clock))	%-Initialise random number generator
-end
+rand('seed',sum(100*clock))	%-Initialise random number generator
 PiCond=[PiCond(1,:);PiCond(randperm(nPiCond-1)+1,:)];
 %-Check first permutation is null permutation
 if ~all(PiCond(1,:)==[1:nScan])

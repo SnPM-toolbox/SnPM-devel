@@ -66,9 +66,8 @@
 % Xblk          - Size of exchangability block
 %
 %_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_pi_TwoSampTss.m  SnPM13 2013/10/12
-% Thomas Nichols & Andrew Holmes, Camille Maumet
+%@(#)snpm_SSA2x.m	3.3	Andrew Holmes 04/10/26
+%	$Id: snpm_pi_TwoSampTss.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx
@@ -78,13 +77,12 @@
 
 %-Initialisation
 %-----------------------------------------------------------------------
-global TEST;
 nCond    = 2;			% Number of conditions
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iCond iRepl Xblk';	% PlugIn variables to save in cfg file
 
 %-Get number of replications per condition - 2 x nRepl design
-nRepl    = job.Tss_repc;%spm_input('# replications per condition','+1');
+nRepl    = spm_input('# replications per condition','+1');
 
 %-Work out exchangability blocks - Assumme Xblks of equal size
 %-----------------------------------------------------------------------
@@ -94,7 +92,7 @@ tmp      = nRepl./[nRepl:-1:1];
 Xblk     = nCond * tmp(floor(tmp)==ceil(tmp));
 tmp      = int2str(Xblk(1));
 for i=2:length(Xblk), tmp=str2mat(tmp,int2str(Xblk(i))); end
-Xblk     = job.TwosampTss_Block; %spm_input('Size of exchangability block','+1','b',tmp,Xblk);
+Xblk     = spm_input('Size of exchangability block','+1','b',tmp,Xblk);
 nXblk    = nCond*nRepl/Xblk;
 iXblk    = meshgrid(1:nXblk,1:Xblk); iXblk = iXblk(:)';
 
@@ -136,13 +134,12 @@ bhPerms=1;
 %-Get filenames and iCond, the condition labels
 %=======================================================================
 nScan = nCond*nRepl;
-P = strvcat(job.P);% spm_select(nScan,'image','Select scans in time order');
+P = spm_select(nScan,'image','Select scans in time order');
 perm=[]; while(isempty(perm))
-    %tmp=['Enter conditions index: (B/A) [',int2str(nCond*nRepl),']'];
-    %iCond = spm_input(tmp,'+1','s');
+    tmp=['Enter conditions index: (B/A) [',int2str(nCond*nRepl),']'];
+    iCond = spm_input(tmp,'+1','s');
     %-Convert A/B notation to +/-1 vector - assume A-B is of interest
-    %iCond = abs(upper(iCond(~isspace(iCond))));
-    iCond = job.condidx;
+    iCond = abs(upper(iCond(~isspace(iCond))));
     iCond = iCond-min(iCond); iCond = -iCond/max([1,iCond])*2+1;    
     %-Check validity of iCond
     % All valid iConds for this design are in the PiCond matrix
@@ -173,10 +170,8 @@ if (perm~=1)
 	PiCond(perm,:)=[];
 	PiCond=[iCond;PiCond];
 end
-if isempty(TEST) || ~TEST
-    %-Randomise order of PiConds (except first) to allow interim analysis
-    rand('seed',sum(100*clock))	%-Initialise random number generator
-end
+%-Randomise order of PiConds (except first) to allow interim analysis
+rand('seed',sum(100*clock))	%-Initialise random number generator
 PiCond=[PiCond(1,:);PiCond(randperm(size(PiCond,1)-1)+1,:)];
 
 

@@ -92,10 +92,9 @@
 % nSubGrp       - 2-vector of group counts (subjects per group)
 % 
 %_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_pi_PairT.m  SnPM13 2013/10/12
-% Thomas Nichols & Andrew Holmes, Camille Maumet
 % Based on snpm_MG2x.m v1.5
+% @(#)snpm_MG2i.m	3.3 Thomas Nichols & Andrew Holmes 04/06/08
+%	$Id: snpm_pi_TwoSampPairT.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx
@@ -110,38 +109,32 @@ nCond    = 2;			% Number of conditions
 nStud    = 2;			% Number of groups
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iStud iCond nSubj'; % PlugIn variables to save in cfg file
-global TEST;
-if isempty(TEST) || ~TEST
-    rand('seed',sum(100*clock));	% Initialise random number generator
-end
+rand('seed',sum(100*clock));	% Initialise random number generator
 iStudC   = [];			% +1/-1 version of iStud
 
 %-Get filenames and iStud, the subject group labels
 %=======================================================================
 P = '';
 for stud=1:nStud
-    %tmp = sprintf('# of subjects in group %d ?',stud);
-    nSubj = numel(job.(['scans' num2str(stud)]).fsubject); %numel() %spm_input(tmp,'+0');
+    tmp = sprintf('# of subjects in group %d ?',stud);
+    nSubj = spm_input(tmp,'+0');
     for subj=1:nSubj    
-	%tmp = sprintf('Select scans, group %d, subj %d ',stud,subj);
-	tP = job.(['scans' num2str(stud)]).fsubject(subj).scans; %spm_select(2,'image',tmp);
+	tmp = sprintf('Select scans, group %d, subj %d ',stud,subj);
+	tP = spm_select(2,'image',tmp);
 	% get condition label	
-	%Cond = [];    
-% 	while(isempty(Cond))
-% 	    tmp='Enter scan index: (AB|BA)';
-% 	    tmpCond = upper(spm_input(tmp,'+0','s'));
-% 	    if (strcmp(tmpCond,'AB'))
-% 		Cond = [+1 -1];
-% 	    elseif (strcmp(tmpCond,'BA'))
-% 		Cond = [-1 +1];
-% 	    else	    
-% 		fprintf(2,'%cEnter either AB or BA',7);
-% 	    end	    
-% 	end
-    tmpCond = job.(['scans' num2str(stud)]).fsubject(subj).scindex;%
-    tmpCond = tmpCond-min(tmpCond);
-    Cond = -(tmpCond/max([1,tmpCond])*2-1);
-	P = str2mat(P,str2mat(tP));
+	Cond = [];    
+	while(isempty(Cond))
+	    tmp='Enter scan index: (AB|BA)';
+	    tmpCond = upper(spm_input(tmp,'+0','s'));
+	    if (strcmp(tmpCond,'AB'))
+		Cond = [+1 -1];
+	    elseif (strcmp(tmpCond,'BA'))
+		Cond = [-1 +1];
+	    else	    
+		fprintf(2,'%cEnter either AB or BA',7);
+	    end	    
+	end
+	P = str2mat(P,tP);
 	% update indicators	
 	iCond = [iCond, Cond];
 	iSubj = [iSubj, subj*ones(1,nCond)];
@@ -156,17 +149,16 @@ nSubj   = iSubj([diff(iStud),1]~=0);                    %-#subject per study
 nSUBJ   = sum(nSubj);                                   %-#subjects in total
 tmp     = cumsum([0,nSubj]);
 iSUBJ   = iSubj+tmp(cumsum([1,diff(iStud)]));           %-Index to subjects
-nScan   = nSUBJ*nCond;
+nScan   = nSubj*nCond;
 
 %-Get confounding covariates
 %-----------------------------------------------------------------------
 G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
-g = numel(job.cov);%spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
-%if (g == 6), g = spm_input('# of confounding covariates','+1'); end
-%while size(Gc,2) < g
-for i = 1:g
+g = spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
+if (g == 6), g = spm_input('# of confounding covariates','+1'); end
+while size(Gc,2) < g
   nGcs = size(Gc,2);
-  d = job.cov(i).c;%d = spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
+  d = spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
   if (size(d,1) == 1), d = d'; end
   if size(d,1) == q
     %-Save raw covariates for printing later on
@@ -175,13 +167,11 @@ for i = 1:g
     bCntr = 1;	    
     if bCntr, d  = d - ones(q,1)*mean(d); str=''; else, str='r'; end
     G = [G, d];
-    dnames = job.cov(i).cname; %[str,'ConfCov#',int2str(nGcs+1)];
-%     for j = nGcs+1:nGcs+size(d,1)
-%       dnames = str2mat(dnames,job.cov(j).cname);%str2mat(dnames,['ConfCov#',int2str(i)]); 
-%     end
+    dnames = [str,'ConfCov#',int2str(nGcs+1)];
+    for i = nGcs+1:nGcs+size(d,1)
+      dnames = str2mat(dnames,['ConfCov#',int2str(i)]); end
     Gcnames = str2mat(Gcnames,dnames);
   end
-%end
 end
 %-Strip off blank line from str2mat concatenations
 if size(Gc,2), Gcnames(1,:)=[]; end
@@ -194,30 +184,17 @@ Gnames = Gcnames;
 %-Compute permutations for a single exchangability block
 %-----------------------------------------------------------------------
 %-NB: m-Choose-n = exp(gammaln(m+1)-gammaln(m-n+1)-gammaln(n+1))
-nPiStud_mx = round(exp(gammaln(nSUBJ+1)-gammaln(nSUBJ-nFlip+1)-gammaln(nFlip+1)));
-if job.nPerm >= nPiStud_mx
-    bAproxTst=0;
-    if job.nPerm > nPiStud_mx
-        fprintf('NOTE: %d permutations requested, only %d possible.\n',job.nPerm, nPiStud_mx)
-        nPiStud = nPiStud_mx;
-    end
-else
-    bAproxTst=1;
-    nPiStud = job.nPerm;
-end                            
-%                             
-% if (bAproxTst)
-% %   tmp = 0;
-% %   while ((tmp>nPiStud_mx) | (tmp==0) )
-% %     tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiStud_mx),'+0');
-% %     tmp = floor(max([0,tmp]));
-% %   end
-%   nPiStud=tmp;
-%   if (tmp==nPiStud_mx), bAproxTst=0; end
-% else
-%   nPiStud=nPiStud_mx;
-% end
-snpm_check_nperm(nPiStud,nPiStud_mx);
+nPiStud = round(exp(gammaln(nSUBJ+1)-gammaln(nSUBJ-nFlip+1)-gammaln(nFlip+1)));
+bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiStud),...
+							'+1','y/n')=='y';
+if (bAproxTst)
+  tmp = 0;
+  while ((tmp>nPiStud) | (tmp==0) )
+    tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiStud),'+0');
+    tmp = floor(max([0,tmp]));
+  end
+  if (tmp==nPiStud), bAproxTst=0; else, nPiStud=tmp; end
+end
 
 %-Two methods for computing permutations, random and exact; exact
 % is efficient, but a memory hog; Random is slow but requires little
@@ -228,7 +205,7 @@ snpm_check_nperm(nPiStud,nPiStud_mx);
 %-If user wants all perms, then random method would seem to take an
 % absurdly long time, so exact is used.
 
-if nSUBJ<=12 || ~bAproxTst                    % exact method
+if nSUBJ<=12 | ~bAproxTst                    % exact method
 
     %-Generate all labellings of nSUBJ subjects as +/- 1
     PiStud=[];
@@ -240,7 +217,7 @@ if nSUBJ<=12 || ~bAproxTst                    % exact method
 
     %-Only do half the work, if possible
     bhPerms=0;
-    if ~bAproxTst && (nFlip==nSUBJ/2) % balanced group numbers
+    if ~bAproxTst & (nFlip==nSUBJ/2) % balanced group numbers
 	% Here, PiStud should *always* satisfy:
 	% all(all(PiStud(PiStud(:,1)==1,:)==flipud(-PiStud(PiStud(:,1)==-1,:))))
 	PiStud=PiStud(PiStud(:,1)==1,:);
@@ -292,7 +269,7 @@ if length(perm)==1
         % Allows interim analysis	
 	PiStud=[PiStud(1,:);PiStud(randperm(size(PiStud,1)-1)+1,:)];
     end	
-elseif length(perm)==0 & (nSUBJ<=12) & bAproxTst % MODIFIED FROM ORIGINAL CHANGED BUG (nScan -> nSUBJ)
+elseif length(perm)==0 & (nScan<=12) & bAproxTst
     % Special case where we missed iStud; order of perms is random 
     % so can we can just replace first perm.
     PiStud(1,:) = iStudC;

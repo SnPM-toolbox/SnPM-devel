@@ -21,10 +21,10 @@ function STCS = snpm_STcalc(varargin)
 % FORMAT STCS = snpm_STcalc('initK',STCS,C,isPos,perm)
 % Initialization for permutation K
 %
-%_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_STcalc.m  SnPM13 2013/10/12
-% Thomas Nichols, Jun Ding, Hui Zhang, Darren Gitelman
+%
+% By Tom Nichols, Jun Ding & Hui Zhang
+% Optimizations from Darren Gitelman
+% $Id: snpm_STcalc.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 switch (lower(varargin{1}))
  case 'init'

@@ -4,9 +4,8 @@ function V = snpm_clone_vol(Vtemplate, fname, descrip)
 %
 % Vtemplate ...
 %_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_clone_vol.m  SnPM13 2013/10/12
-% Thomas Nichols
+% $Id: snpm_clone_vol.m,v 8.1 2009/01/29 15:02:57 nichols Exp $
+
 
 V        = Vtemplate;
 V        = rmfield(V,{'fname','descrip','n','private'});

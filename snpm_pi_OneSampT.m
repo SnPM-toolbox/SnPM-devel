@@ -73,10 +73,9 @@
 % iCond         - Condition indicator vector
 %
 %_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_pi_OneSampT.m  SnPM13 2013/10/12
-% Thomas Nichols, Camille Maumet
 % Based on UM-modified snpm_MG2x.m, v1.7
+% @(#)snpm_MS1.m	3.2 Thomas Nichols 04/06/08
+%	$Id: snpm_pi_OneSampT.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx
@@ -94,14 +93,11 @@
 %-----------------------------------------------------------------------
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iCond';		% PlugIn variables to save in cfg file
-global TEST;
-if isempty(TEST) || ~TEST % When testing the code we need a fixed seed
-    rand('seed',sum(100*clock));	% Initialise random number generator
-end
+rand('seed',sum(100*clock));	% Initialise random number generator
 
 %-Get filenames and iCond, the condition labels
 %=======================================================================
-P = strvcat (job.P);
+P = spm_select(Inf,'image','Select all scans');
 nScan = size(P,1);
 
 iCond = ones(1,nScan);
@@ -110,36 +106,27 @@ nFlip = 0;
 %-Get confounding covariates
 %-----------------------------------------------------------------------
 G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
-if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
-    for i = 1:numel(job.cov)
-        d = job.cov(i).c;
-        if (size(d,1) == 1), 
-            d = d'; 
-        end
-        nGcs = size(Gc,2);
-        if size(d,1) ~= q
-            error(sprintf('Covariate [%d,1] does not match number of subjects [%d]',...
-                size(job.cov(i).c,1),nScan))
-        else
-            %-Save raw covariates for printing later on
-            Gc = [Gc,d];
-            % Center
-            d  = d - ones(q,1)*mean(d); str=''; 
-            G = [G, d];
-            dnames = job.cov(i).cname;
-    %         dnames = [str,'ConfCov#',int2str(nGcs+1)];
-    %         for j = nGcs+1:nGcs+size(d,1)
-    %             dnames = str2mat(dnames,['ConfCov#',int2str(j)]); 
-    %         end
-            Gcnames = str2mat(Gcnames,dnames);
-            aa=1
-        end 
-    end
-    %-Strip off blank line from str2mat concatenations
-    if size(Gc,2), 
-        Gcnames(1,:)=[]; 
-    end
+g = spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
+if (g == 6), g = spm_input('# of confounding covariates','+1'); end
+while size(Gc,2) < g
+  nGcs = size(Gc,2);
+  d = spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
+  if (size(d,1) == 1), d = d'; end
+  if size(d,1) == q
+    %-Save raw covariates for printing later on
+    Gc = [Gc,d];
+    %-Always Centre the covariate
+    bCntr = 1;	    
+    if bCntr, d  = d - ones(q,1)*mean(d); str=''; else, str='r'; end
+    G = [G, d];
+    dnames = [str,'ConfCov#',int2str(nGcs+1)];
+    for i = nGcs+1:nGcs+size(d,1)
+      dnames = str2mat(dnames,['ConfCov#',int2str(i)]); end
+    Gcnames = str2mat(Gcnames,dnames);
+  end
 end
+%-Strip off blank line from str2mat concatenations
+if size(Gc,2), Gcnames(1,:)=[]; end
 %-Since no FxC interactions these are the same
 Gnames = Gcnames;
 
@@ -148,18 +135,17 @@ Gnames = Gcnames;
 %=======================================================================
 %-Compute permutations for a single exchangability block
 %-----------------------------------------------------------------------
-nPiCond_mx = 2^nScan;
-if job.nPerm >= nPiCond_mx
-    bAproxTst=0;
-    if job.nPerm > nPiCond_mx
-        nPiCond = nPiCond_mx;
-        fprintf('NOTE: %d permutations requested, only %d possible.\n',job.nPerm, nPiCond_mx)
-    end
-else
-    bAproxTst=1;
-    nPiCond = job.nPerm;
+nPiCond = 2^nScan;
+bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond),...
+							'+1','y/n')=='y';
+if (bAproxTst)
+  tmp = 0;
+  while ((tmp>nPiCond) | (tmp==0) )
+    tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond),'+0');
+    tmp = floor(max([0,tmp]));
+  end
+  if (tmp==nPiCond), bAproxTst=0; else, nPiCond=tmp; end
 end
-snpm_check_nperm(nPiCond,nPiCond_mx);
 
 %-Two methods for computing permutations, random and exact; exact
 % is efficient, but a memory hog; Random is slow but requires little
@@ -170,7 +156,7 @@ snpm_check_nperm(nPiCond,nPiCond_mx);
 %-If user wants all perms, then random method would seem to take an
 % absurdly long time, so exact is used.
 
-if nScan<=12 || ~bAproxTst                    % exact method
+if nScan<=12 | ~bAproxTst                    % exact method
 
     %-Generate all labellings of nScan scans as +/- 1
     PiCond=[];

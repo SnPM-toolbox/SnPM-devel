@@ -21,9 +21,9 @@ function e = spm_xyz2e(XYZ,V)
 %	>> Ximg(spm_xyz2e(XYZ,[ImDim,VoxDim,Origin])) = X;
 %
 %_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: spm_xyz2e.m  SnPM13 2013/10/12
-% Thomas Nichols, Andrew Holmes
+% @(#)spm_xyz2e.m	3.4 Andrew Holmes 04/10/15
+%	$Id: spm_xyz2e.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
+
 
 %-Condition arguments
 %-----------------------------------------------------------------------

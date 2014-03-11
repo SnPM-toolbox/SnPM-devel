@@ -1,7 +1,6 @@
-function snpm_ui(varargin)
+function snpm_ui
 % Set up for general linear model and permutation/rando analysis
 % FORMAT snpm_ui
-%        snpm_ui(job)
 %_______________________________________________________________________
 %
 % snpm_ui sets up the parameters for a non-parametric
@@ -21,15 +20,11 @@ function snpm_ui(varargin)
 % how the relabeling is to be done for particular designs.
 %
 % The result of this function is a mat file, "SnPMcfg.mat", written
-% to the present working directory (when using the batch system, the
-% present directory is changed to the analysis directory specified). 
-% This file contains all the
+% to the present working directory. This file contains all the
 % parameters needed to perform the second step, which is in embodied in
 % snpm_cp. Design parameters are displayed in the SPM graphics window,
 % and are printed.
 %
-% When called with a job file, as configured by the SPM batch system, no
-% user interaction is required.
 %-----------------------------------------------------------------------
 %
 %-The Prompts Explained
@@ -122,7 +117,6 @@ function snpm_ui(varargin)
 % sDesign       Description of PlugIn design
 % V             Memory mapping handles
 % MASK          Filename of explicit mask image
-% ImMASKING     Implicit masking; 0=none; 1=zeros are equivalent to NaN
 % 
 % df            degrees of freedom due to error
 % sDesSave      String of PlugIn variables to save to cfg file
@@ -148,9 +142,9 @@ function snpm_ui(varargin)
 % (Hnames, Cnames &c.)
 %
 %_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_ui.m  SnPM13 2013/10/12
-% Thomas Nichols, Camille Maumet
+% @(#)snpm_ui_0811.m	1.12 snpm_ui.m  Tom Nichols  05/07/29
+%	$Id: snpm_ui.m,v 8.4 2010/03/16 12:30:49 nichols Exp $	
+
 
 %------------------------------functions-called------------------------
 % spm_DesMtx
@@ -174,23 +168,12 @@ if isempty(defaults), spm_defaults; end
 global SnPMdefs
 if isempty(SnPMdefs), snpm_defaults; end
 
-if nargin==0
-  % Traditional mode
-  Finter = spm_figure('FindWin','Interactive');
-  Fgraph = spm_figure('FindWin','Graphics');
-  if isempty(Fgraph), Fgraph=spm_figure('Create','Graphics'); end
-  spm_clf(Finter), spm_clf(Fgraph)
-  set(Finter,'Name','SnPM Setup');
-  BATCH=false;
-else
-  job=varargin{1};
-  BATCH=true;
-  if exist(job.dir{1})~=7
-    mkdir(job.dir{1})
-  end
-  cd(job.dir{1})
-end
-  
+Finter = spm_figure('FindWin','Interactive');
+Fgraph = spm_figure('FindWin','Graphics');
+if isempty(Fgraph), Fgraph=spm_figure('Create','Graphics'); end
+spm_clf(Finter), spm_clf(Fgraph)
+set(Finter,'Name','SnPM Setup');
+
 %-Definitions & Design parameters
 %=======================================================================
 sDesigns=str2mat(...
@@ -223,10 +206,6 @@ sDesFile=str2mat(...
 		'\tsee snpm_ui for PlugIn interface definitions\n',...
 		'\tType return when done\n\n'']), keyboard']);
 
-%%%
-%%% These descriptions and codes must match those in config/snpm_cfg_ui.m
-%%%
-
 %-Global normalization                                    (GloNorm)
 sGloNorm=str2mat(... 
 	'<no global normalisation>',...				%-1
@@ -243,23 +222,18 @@ sGXcalc  = str2mat(...
 
 %-Grand mean scaling options                                (GMsca)
 sGMsca = str2mat(...
-    '<no grand Mean scaling>',...				%-1
-    'scaling of overall grand mean');				%-2
+    'scaling of overall grand mean',...				%-1
+    '<no grand Mean scaling>'	);				%-2
 
 
 %-Select design type
 %=======================================================================
-if BATCH
-  sDesign=job.DesignName;
-  sDesFile=strrep(job.DesignFile,'bch_ui','pi');
-else
-  DesType  = spm_input('Select design type...',1,'m',sDesigns);
-  sDesign  = deblank(sDesigns(DesType,:));
-  sDesFile = deblank(sDesFile(DesType,:));
-  if isempty(sDesFile)
-    sDesFile = spm_select(1,'^.*\.m$','Select SnPM design PlugIn Mfile...');
-    sDesFile = spm_str_manip(sDesFile,'rtd');
-  end
+DesType  = spm_input('Select design type...',1,'m',sDesigns);
+sDesign  = deblank(sDesigns(DesType,:));
+sDesFile = deblank(sDesFile(DesType,:));
+if isempty(sDesFile)
+	sDesFile = spm_select(1,'^.*\.m$','Select SnPM design PlugIn Mfile...');
+ 	sDesFile = spm_str_manip(sDesFile,'rtd');
 end
 
 %-Variable initialisation prior to running PlugIn
@@ -288,7 +262,7 @@ sPiCond='';	% String describing permutations in PiCond
 bhPerms=0;	% Flag for half permutations. Rest are then their inverses
 sDesSave='';	% String of PlugIn variables to save to cfg file
 iGXcalc='23';   % Global calculation
-iGMsca = '12';  % Grand mean scaling of globals
+iGMsca = '21';  % Grand mean scaling of globals
 df1=1;          % For F stat, it will be the numerator df; For T stat, it
                 % will be 1.    
 
@@ -296,15 +270,13 @@ df1=1;          % For F stat, it will be the numerator df; For T stat, it
 %=======================================================================
 eval(sDesFile);
 
-%-Total #observations
-nScan = size(P,1);
 
 %-Get general analysis & data parameters
 %=======================================================================
 
 %-Ask about variance smoothing & volumetric computation
 %-----------------------------------------------------------------------
-vFWHM = job.vFWHM;
+vFWHM = spm_input('FWHM(mm) for Variance smooth','+1','e',0);
 if length(vFWHM)==1
 	vFWHM = vFWHM * ones(1,3);
 elseif length(vFWHM)==2
@@ -312,34 +284,43 @@ elseif length(vFWHM)==2
 else
 	vFWHM = reshape(vFWHM(1:3),1,3);
 end
-if ~all(vFWHM==0)
-  bVarSm=1; 
+
+%-Decide upon volumetric operation
+if (size(P,1) <= nMax4DefVol)
+	bVolm=1;
+elseif (vFWHM(3)~=0)
+	fprintf(['%cWARNING: Working volumetrically because of smoothing '... 
+		 'in z (%g),\nbut more than %d scans analyzed.\nMay run out'...
+		 'of memory.\n'],7,vFWHM(3),size(P,1));
+	bVolm=1;
+else
+	bVolm = spm_input(...
+		sprintf('%d scans: Work volumetrically?',size(P,1)),...
+			'+1','y/n',[1,0],1);
 end
+if ~all(vFWHM==0), bVarSm=1; end
 if bVarSm
   sVarSm = sprintf('Pseudo-t: Variance smoothed with FWHM [%dx%dx%d]  mm',vFWHM);
 end
 
-%-Decide upon volumetric operation
-bVolm = job.bVolm;
-if ~bVolm & (vFWHM(3)~=0)
-warning(sprintf(['Working volumetrically because of smoothing in z (%g).\n'... 
-         'May run out of memory.'],vFWHM(3)));
-bVolm=1;
-end
-
 %-Ask about collecting Supra-Threshold cluster statistics
 %-----------------------------------------------------------------------
-bST = ~isfield(job.ST,'ST_none');
+bST = spm_input('Collect Supra-Threshold stats?','+1','y/n',[1,0],2);
+
 
 % Add: get primary threshold for STC analysis if requested
 if bST
   if ~bVolm
-    warning(sprintf('Note:  Cannot define threshold now, because not working volumetrically\n'));
+    fprintf('%cNote:  Cannot define threshold now, because not working volumetrically\n',7);
     pU_ST_Ut=-1; % Define the threshold later
   else
-    pU_ST_Ut = ~isfield(job.ST,'ST_later');
+    pU_ST_Ut= spm_input('Define the thresh now?','+1','y/n',[1,0],2);
     if pU_ST_Ut    % Define the threshold right now
-        pU_ST_Ut = job.ST.ST_U;
+      if bVarSm
+	pU_ST_Ut= spm_input(sprintf('Clus-def thresh (pseudo t)'), '+0');
+      else
+	pU_ST_Ut= spm_input(sprintf('Clus-def thresh (t>1 or p<1)'), '+0');
+      end
     else
       pU_ST_Ut=-1; % Define the threshold later
     end
@@ -351,85 +332,92 @@ end
 
 %-Global normalization options
 %-----------------------------------------------------------------------
-iGloNorm = job.globalm.glonorm;
+tmp = []; for i = 1:length(iGloNorm), tmp = [tmp, eval(iGloNorm(i))]; end
+if length(iGloNorm)>1
+    %-User has a choice from the options in iGloNorm.
+    iGloNorm=spm_input('Select global normalisation','+1','m', ...
+	    sGloNorm(tmp,:),tmp,1);
+else
+  iGloNorm = tmp;
+end
 sGloNorm=deblank(sGloNorm(iGloNorm,:));
 
 
 %-Get value to be assigned to grand mean:
 %-----------------------------------------------------------------------
-if iGloNorm==2 % Proportional scaling
-  iGMsca = 2;%CHANGED from 1 to 2	%-grand mean scaling implicit in PropSca GloNorm
-  % TODO: must be set otherwise prop scaling alone in Batch mode lead to error  
-  % job.globalm.gmsca.gmscv = ; % By default use mean
-else % No global normalisation or ANCOVA
-    iGMsca = 1 + isfield(job.globalm.gmsca,'gmsca_yes');
+if iGloNorm==2
+	iGMsca=1;	%-grand mean scaling implicit in PropSca GloNorm
+else
+  tmp = []; for i = 1:length(iGMsca), tmp = [tmp, eval(iGMsca(i))]; end
+  iGMsca = spm_input('grand mean scaling','+1','m',...
+		     sGMsca(tmp,:),tmp,1);
 end
 
-if (iGMsca==2) % CHANGED from 1 to 2 as should not ask for a value if grand mean scaling is not required.
-  if (iGloNorm==2) % Proportional scaling
+if (iGMsca==1)
+  if (iGloNorm==2)
     str = 'PropSca global mean to';
   else
     str = [strrep(sGMsca(iGMsca,:),'scaling of','scale'),' to'];
   end
-  % As in SPM:
-  switch char(fieldnames(job.globalm.gmsca))
-      case 'gmsca_yes',
-          % Proportionally scale to this value
-          GM = job.globalm.gmsca.gmsca_yes.gmscv;
-      case 'gmsca_no',
-          GM = 50;
-  end
-elseif (iGMsca==1) % No grand mean scaling
+  GM    = spm_input(str,'+1','r',50,1);
+elseif (iGMsca==2)
   GM = 0;
 end
 
 
 %-Get globals
 %-----------------------------------------------------------------------
-if (iGloNorm==1) && (iGMsca==1)
-    % No need for globals, omit
-    iGXcalc = 1;
-elseif isfield(job.globalc,'g_omit')
-    %iGXcalc=1;
-    % Global needed and none requested, force iGXcalc to grand mean (3)
-    iGXcalc=3;
-elseif isfield(job.globalc,'g_user')
-    iGXcalc=2;
-    GX = job.globalc.g_user{1}(:);
-    rg = GX;
-    if length(GX) ~= nScan
-        error(['User-specified globals length [%d] doesn''t match number of' ...
-            ' scans [%d]'],length(GX),nScan);
-    end
-elseif isfield(job.globalc,'g_mean')
-    iGXcalc=3;
+if (iGloNorm==1) & (iGMsca==2)
+  % No need for globals, omit
+   iGXcalc = 1;
+else
+  tmp = []; for i = 1:length(iGXcalc), tmp = [tmp, eval(iGXcalc(i))]; end
+  if length(iGXcalc)>1
+    iGXcalc = spm_input('Select global calcuation','+1','m', ...
+			sGXcalc(tmp,:),tmp);
+  else
+    iGXcalc = tmp;
+  end
 end
 sGXcalc=deblank(sGXcalc(iGXcalc,:));
 
+if iGXcalc==2				%-Get user specified globals
+  %GX = spm_input('globals','+0','r',[],[nScan]);
+  GX = spm_input('globals','+0','r',[],[size(P,1)]);
+  rg = GX;
+end
 
 %-Get threshold defining voxels to analyse
 %-----------------------------------------------------------------------
-if isfield(job.masking.tm,'tm_none')
-    iTHRESH=1;
-    THRESH = -Inf;
-    sThresh = 'None';
-elseif isfield(job.masking.tm,'tmr')
-    iTHRESH=2;
-    THRESH=job.masking.tm.tmr.rthresh;
-    sThresh=sprintf('Relative (%g)',THRESH);
-elseif isfield(job.masking.tm,'tma')
-    iTHRESH=3;
-    THRESH=job.masking.tm.tma.athresh;
-    sThresh = sprintf('Absolute (%g)',THRESH);
+str = 'none|proportional|absolute'; 
+%-glob:absolute is absolute fraction of global.
+iTHRESH = spm_input('Threshold masking','+1','b',str,1:3);
+if (iTHRESH==1)
+  THRESH = -Inf;
+  sThresh = 'None';
+elseif (iTHRESH==2)
+  THRESH = spm_input('Prop''nal threshold ?','0','e',0.8);
+  sThresh = sprintf('Proportional (%g)',THRESH);
+elseif (iTHRESH==3)
+  THRESH = spm_input('Absolute threshold ?','0','e');
+  sThresh = sprintf('Absolute (%g)',THRESH);
 end
 
-%-Implicit Masking - Batch only!
-%-----------------------------------------------------------------------
-ImMASKING=job.masking.im;
 
 %-Get analysis mask
 %-----------------------------------------------------------------------
-MASK = job.masking.em{1};
+iMASK = spm_input('Analysis mask?','+1','y/n',[1,0],2);
+if (iMASK)
+  MASK = spm_select(1,'image','Select analysis mask');
+else
+  MASK = '';
+end
+
+
+%-The interactive parts of snpm_ui are now finished
+%-----------------------------------------------------------------------
+set(Finter,'Name','Thank You','Pointer','Watch')
+
 
 %=======================================================================
 %-Computation
@@ -444,6 +432,9 @@ if (isempty(Gc) & ~isempty(G)), Gc=G; Gcnames=Gnames; end
 
 %-Examine images
 %=======================================================================
+
+%-Total #observations
+nScan = size(P,1);
 
 %-MMap image files
 V = spm_vol(P);
@@ -582,16 +573,6 @@ eval(['save SnPMcfg ',s_SnPMcfg_save])
 %-Display parameters
 %=======================================================================
 
-if BATCH
-  % OK, only _now_ activate the graphics... so if we crash here, there's
-  % nothing lost
-  Finter = spm_figure('FindWin','Interactive');
-  Fgraph = spm_figure('FindWin','Graphics');
-  if isempty(Fgraph), Fgraph=spm_figure('Create','Graphics'); end
-  spm_clf(Finter), spm_clf(Fgraph)
-end
-
-
 %-Muck about a bit to set flags for various indicators - handy for later
 bMStud=~isempty(iStud);
 bMSubj=~isempty(iSubj);
@@ -601,7 +582,7 @@ bMXblk=~isempty(iXblk);
 
 %-Compute common path components - all paths will begin with file separator
 %-----------------------------------------------------------------------
-d     = max(find(P(1,1:find(~all(P == ones(nScan,1)*P(1,:)), 1 )-1)==filesep)) - 1;
+d     = max(find(P(1,1:min(find(~all(P == ones(nScan,1)*P(1,:))))-1)==filesep)) - 1;
 CPath = P(1,1:d);
 Q     = P(:,d+1:size(P,2));
 

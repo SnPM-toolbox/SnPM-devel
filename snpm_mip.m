@@ -26,10 +26,8 @@ function snpm_mip(Z,XYZ,M,DIM)
 % are scaled to 1*64.
 %
 %_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_mip.m  SnPM13 2013/10/12
-% Thomas Nichols
 % Based on SPM99's spm_mip.m	2.6 Karl Friston et al. 00/02/21
+% $Id: snpm_mip.m,v 8.1 2009/01/29 15:02:57 nichols Exp $
 
 
 %-Get GRID value

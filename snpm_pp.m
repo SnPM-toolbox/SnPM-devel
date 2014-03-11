@@ -1,4 +1,4 @@
-function snpm_pp(CWD,varargin)
+function snpm_pp(CWD)
 % SnPM post processing and results display
 % FORMAT snpm_pp(CWD)
 %
@@ -241,9 +241,10 @@ function snpm_pp(CWD,varargin)
 % further voxel-level analyses.
 %
 %_______________________________________________________________________
-% Copyright (C) 2013 The University of Warwick
-% Id: snpm_pp.m  SnPM13 2013/10/12
-% Andrew Holmes, Thomas Nichols, Jun Ding, Darren Gitelman
+%
+% Andrew Holmes, Thomas Nichols, Jun Ding
+% Optimizations by Darren Gitelman
+% $Id: snpm_pp.m,v 8.1 2009/01/29 15:02:57 nichols Exp $	
 
 %-----------------------------functions-called------------------------
 % spm_DesMtx
@@ -319,8 +320,6 @@ function snpm_pp(CWD,varargin)
 %=======================================================================
 global defaults
 if isempty(defaults), spm_defaults; end
-global SnPMdefs
-if isempty(SnPMdefs), snpm_defaults; end
 MLver=version;MLver=MLver(1);
 
 fprintf('\nSnPM: snpm_pp\n'),fprintf('%c','='*ones(1,72)),fprintf('\n')
@@ -345,25 +344,9 @@ set(Finter,'Name','SnPM PostProcess');
 %=======================================================================
 % Get analysis directory
 if nargin==0
-  tmp  = spm_select(1,'SnPM.mat','Select SnPM.mat for analysis...');
-  CWD  = spm_str_manip(tmp,'hd');
+    tmp = spm_select(1,'SnPM.mat','Select SnPM.mat for analysis...');
+    CWD  = spm_str_manip(tmp,'hd');
 end
-if nargin>1
-  job=varargin{1};
-  BATCH=true;
-else
-  BATCH=false;
-end
-
-%-Skip reports in BATCH; will create them later
-if BATCH
-  Report = {job.Report};
-else
-  % Only can specify multiple reports outside of BATCH mode; otherwise the results will fly by,
-  % one after another without pausing
-  Report = {'FWEreport','FDRreport','MIPtable'};
-end
-
 
 %-Load Config file & SnPM permutation data
 load(fullfile(CWD,'SnPMcfg'))
@@ -373,20 +356,12 @@ load(fullfile(CWD,'SnPMucp'))
 
 %-Ask whether positive or negative effects be analysed
 %-----------------------------------------------------------------------
-if BATCH
-  if STAT == 'T'
-    bNeg = job.Tsign==-1;
-  else
-    bNeg = 0;
-  end
+if STAT == 'T'
+  bNeg = spm_input('Positive or negative effects?',1,'b','+ve|-ve',[0,1],1);
 else
-  if STAT == 'T'
-    bNeg = spm_input('Positive or negative effects?',1,'b','+ve|-ve',[0,1],1);
-  else
-    bNeg = 0;  
-    str = 'Positive effects';
-    spm_input('F-statistic, so only:','+1','b',str,1);
-  end
+  bNeg = 0;  
+  str = 'Positive effects';
+  spm_input('F-statistic, so only:','+1','b',str,1);
 end
 
 %-Take MaxT for increases or decreases according to bNeg
@@ -425,53 +400,30 @@ Vs0 = V(1);
 % 	     'pinfo',	[1 0 0]',...
 % 	     'descrip',	'');
 
+%-Initialize ShwDst_ucp=1.
+ShwDst_ucp = 1;
+
 % Process Nonparmaetric P-values
 if bNeg 
   % Here, nPermReal has already been doubled if bhPerms=1
   SnPMucp = 1+1/nPermReal-SnPMucp;
 end  
-sSnPMucp = sort(SnPMucp);
+  sSnPMucp = sort(SnPMucp);
 
 
 
 %-Write out filtered statistic image?  (Get's done later)
 %-----------------------------------------------------------------------
-if BATCH
-  if isfield(job.WriteFiltImg,'WF_no')
-    WrtFlt=0;
-  else
-    WrtFlt=1;
-    WrtFltFn=job.WriteFiltImg.name;
-    
-    if isempty(spm_str_manip(WrtFltFn, 'e'))
-        WrtFltFn = [WrtFltFn '.nii'];
-    end
-  end
-else
-  WrtFlt = spm_input('Write filtered statistic img?','+1','y/n',[1,0],2);
-  if WrtFlt
-    WrtFltFn = 'SnPMt_filtered';
-    WrtFltFn=spm_input('Filename ?','+1','s',WrtFltFn);
-    WrtFltFn = [WrtFltFn, '.img'];
-  end
+WrtFlt = spm_input('Write filtered statistic img?','+1','y/n',[1,0],2);
+if WrtFlt
+	WrtFltFn = 'SnPMt_filtered';
+	WrtFltFn=spm_input('Filename ?','+1','s',WrtFltFn);
+	WrtFltFn = [WrtFltFn, '.img'];
 end
 
 
 %-Get inference parameters
 %=======================================================================
-
-% Map of options from Batch System
-% [Root]     > .Thr
-% Voxel-Level    > .Vox
-% . Significance  > .VoxSig
-% . . Uncorrected Nonparametric P | Uncorrected T or F | FDR Corrected | FWE Corrected 
-%    > .Pth                            .TFth                .FDRth          .FWEth
-% Cluster-Level  > .Clus
-% . Cluster size statistic > .ClusSize
-% . . Cluster-Forming Threshold > .CFth
-% . . Significance Level > .ClusSig
-% . . . Uncorrected k | FWE Corrected 
-%   >   .Cth           .FWEthC
 
 %-Get corrected threshold
 %-----------------------------------------------------------------------
@@ -479,154 +431,59 @@ u         = NaN;   % Statistic Image threshold
 alpha_ucp = NaN;   % Uncorrected P-value image threshold
 C_MaxT    = NaN;   % Statistic image threshold set by alph_FWE
 C_STCS    = NaN;   % Cluster size threshold (set directly by uncorrected
-		   % threshold or by alph_FWE)
-		   
+                   % threshold or by alph_FWE)
+
 alph_FWE  = NaN;   % FWE rate of a specified u threshold
 alph_FDR  = NaN;   % FDR rate of a specified alpha_ucp
+
+str_img =[STAT,'|P'];
+switch spm_input('Results for which img?','+1','b',str_img,[],1)
   
-if BATCH
-    bSpatEx = isfield(job.Thr,'Clus');
-    if ~bSpatEx
-        % Voxel-wise inference
-        tmp = fieldnames(job.Thr.Vox.VoxSig);
-        switch tmp{1}
-        case 'Pth'
-            alpha_ucp = BoundCheck(job.Thr.Vox.VoxSig.Pth,[0 1],'Invalid Uncorrected P');
-            alph_FDR  = snpm_P_FDR(alpha_ucp,[],'P',[],sSnPMucp');
-        case 'TFth'
-            u         = BoundCheck(job.Thr.Vox.VoxSig.TFth,[0 Inf],'Negative Threshold!');
-            alph_FWE  = sum(MaxT > u -tol) / nPermReal;
-        case 'FDRth'
-            alph_FDR  = BoundCheck(job.Thr.Vox.VoxSig.FDRth,[0 1],'Invalid FDR level');
-            alpha_ucp = snpm_uc_FDR(alph_FDR,[],'P',[],sSnPMucp');
-        case 'FWEth'
-            alph_FWE  = BoundCheck(job.Thr.Vox.VoxSig.FWEth,[0 1],'Invalid FWE level');
-            iFWE      = ceil((1-alph_FWE)*nPermReal);
-            if alph_FWE<1
-                C_MaxT=StMaxT(iFWE);
-            else
-                C_MaxT = 0;
-            end
-            u = C_MaxT;
-        end
-    else
-        % Cluster-wise inference
-        if exist(fullfile(CWD,'SnPM_ST.mat'))~=2 & exist(fullfile(CWD,'STCS.mat'))~=2
-            error(['ERROR: Cluster-wise inference requested, but no cluster information saved.\n',...
-            'Re-configure analysis changing "Cluster inference" to "Yes" and re-run.\n'])
-        end
-        %%% Sort out the cluster-forming threshold
-        if pU_ST_Ut==-1  % No threshold was set in snpm_ui.
-            if isnan(job.Thr.Clus.ClusSize.CFth)
-                error('ERROR: Cluster-forming threshold set to NaN in results with "slow" cluster inference method used in compoutation.  \nRe-run results specifying a cluster-forming threshold.\n')
-            end
-            % Save original ST_Ut
-            ST_Ut_0 = ST_Ut;
-            CFth=job.Thr.Clus.ClusSize.CFth;
-            if (CFth<=0)
-                error('ERROR: Cluster-forming threshold must be strictly positive.\nRe-run results with a cluster-forming threshold greater than 0.\n')
-            end
-            if bVarSm
-                %-If using pseudo-statistics then can't use (uncorrected) 
-                % upper tail p-values to specify primary threshold
-                if (CFth<1)
-                    error(sprintf('ERROR: Cluster-forming threshold specified as a P-value (%g), but uncorrected P-values are unavailable for the pseudo t (smoothed variance t-test).  \nRe-run results with a cluster-forming threshold greater than 1.\n',ST_Ut))
-                end
-                if (CFth>=ST_Ut-tol)
-                    error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STprop in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
-                end
-            else
-                %-Statistic image is t with df degrees of freedom
-                p_ST_Ut  = STalpha;
-                if (CFth < 1)
-                    pCFth = CFth;
-                    CFth = spm_invTcdf(1-CFth,df);
-                else
-                    pCFth = NaN;
-                    if (abs(CFth-ST_Ut)<=tol)
-                    CFth=ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
-                    end
-                end
+  case 'P' % Use the P-image
+  bSpatEx = 0; % Cluster-wise inference won't be performed anyway. 
+  str = 'FDR|None';
+  switch spm_input('Use corrected threshold?','+1','b',str,[],1)
 
-                if (CFth < ST_Ut) %(CFth>=ST_Ut-tol)
-                    if isnan(pCFth) % statistic-value cluster-forming threshold
-                        error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
-                    else
-                        error(sprintf('ERROR: Cluster-forming threshold of P=%0.4f (T=%0.2f) specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming P-value threshold of %0.2f or lower.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',pCFth,CFth,ST_Ut,p_ST_Ut))
-                    end
-                end
-            end
-            if (abs(CFth-ST_Ut)<=tol)
-                CFth = ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
-            end
-                ST_Ut = CFth;
-        else % Threshold *was* set in snpm_ui.
-            if ~isnan(job.Thr.Clus.ClusSize.CFth)
-                error(sprintf('ERROR: Cluster-forming threshold of T=%0.2f was already set during analysis configuration; hence, in results, cluster-forming threshold must be left as "NaN".\nRe-run results with cluster-forming threshold set to NaN.\n',ST_Ut))
-            end
-        end
-        u=ST_Ut; % Flag use of a statistic-value threshold
-        % Inference details...
-        tmp = fieldnames(job.Thr.Clus.ClusSize.ClusSig);
-        switch tmp{1}
-            case 'Cth'
-                C_STCS = job.Thr.Clus.ClusSize.ClusSig.Cth;
-            case 'PthC'
-                alpha_ucp = BoundCheck(job.Thr.Clus.ClusSize.ClusSig.PthC,[0 1],'Invalid uncorrected P(k)');
-            case 'FWEthC'
-                alph_FWE  = BoundCheck(job.Thr.Clus.ClusSize.ClusSig.FWEthC,[0 1],'Invalid FWE level (cluster-level inference)');
-                iFWE      = ceil((1-alph_FWE)*nPermReal);
-        end
-    end % END: Cluster-wise inference
+	case 'FDR' % False discovery rate
+	%---------------------------------------------------------------	
+	alph_FDR = spm_input('FDR-Corrected p value threshold','+0','r',0.05,1,[0,1]);
+	alpha_ucp = snpm_uc_FDR(alph_FDR,[],'P',[],sSnPMucp');
 
-else  % GUI, interative inference specification
+	otherwise  %-Uncorrected: no adjustment
+	%%%% Now ask: Threshold statistic image or Uncorr P-value Image ?
+	%%%% If stats image, maybe do ST, no FDR-level of thresh;
+	%%%% If P-value image, no ST, can find FDR-level of thresh
 
-  str_img =[STAT,'|P'];
-  switch spm_input('Results for which img?','+1','b',str_img,[],1)
-    
-   case 'P' % Use the P-image
-    bSpatEx = 0; % Cluster-wise inference won't be performed anyway. 
-    str = 'FDR|None';
-    switch spm_input('Use corrected threshold?','+1','b',str,[],1)
+	% p for conjunctions is p of the conjunction SPM
+   	%---------------------------------------------------------------
+	alpha_ucp = spm_input('Uncorrected p value threshold','+0','r',0.01,1,[0,1]);
+	alph_FDR = snpm_P_FDR(alpha_ucp,[],'P',[],sSnPMucp');
+  end 
+  
+  case STAT % Use the T-image
+  %-Ask whether SupraThreshold cluster size test required
+  %----------------------------------------------------------------------- 
+  %-To have cluster size inference, need
+  %  1. Spatial extent information was collected (bST=1),
+  %  2. SnPM_ST.mat or STCS.mat file exists
+  bSpatEx = bST & (exist(fullfile(CWD,'SnPM_ST.mat'))==2|exist(fullfile(CWD,'STCS.mat'))==2);
+  
+  if bSpatEx
+    str = 'Voxelwise|Clusterwise';
+    bSpatEx = spm_input('Inference method?','+1','b',str,[1 2],1)==2;
+  else
+    str = 'Voxelwise';
+    spm_input('Inference method:','+1','b',str,1);
+  end
+   
+  if ~bSpatEx % Voxel-wise inference
+    str = 'FWE|None';
+    switch spm_input('Voxelwise: Use corrected thresh?','+1','b',str, ...
+		     [],1)
       
-     case 'FDR' % False discovery rate
-      %---------------------------------------------------------------	
-      alph_FDR = spm_input('FDR-Corrected p value threshold','+0','r',0.05,1,[0,1]);
-      alpha_ucp = snpm_uc_FDR(alph_FDR,[],'P',[],sSnPMucp');
-		
-     otherwise  %-Uncorrected: no adjustment
-      %%%% Now ask: Threshold statistic image or Uncorr P-value Image ?
-      %%%% If stats image, maybe do ST, no FDR-level of thresh;
-      %%%% If P-value image, no ST, can find FDR-level of thresh
-
-      % p for conjunctions is p of the conjunction SPM
-      %---------------------------------------------------------------
-      alpha_ucp = spm_input('Uncorrected p value threshold','+0','r',0.01,1,[0,1]);
-      alph_FDR = snpm_P_FDR(alpha_ucp,[],'P',[],sSnPMucp');
-    end 
-  
-   case STAT % Use the T-image
-    %-Ask whether SupraThreshold cluster size test required
-    %----------------------------------------------------------------------- 
-    %-To have cluster size inference, need
-    %  1. Spatial extent information was collected (bST=1),
-    %  2. SnPM_ST.mat or STCS.mat file exists
-    bSpatEx = bST & (exist(fullfile(CWD,'SnPM_ST.mat'))==2|exist(fullfile(CWD,'STCS.mat'))==2);
-    
-    if bSpatEx
-      str = 'Voxelwise|Clusterwise';
-      bSpatEx = spm_input('Inference method?','+1','b',str,[1 2],1)==2;
-    else
-      str = 'Voxelwise';
-      spm_input('Inference method:','+1','b',str,1);
-    end
-    
-    if ~bSpatEx % Voxel-wise inference
-      str = 'FWE|None';
-      switch spm_input('Voxelwise: Use corrected thresh?','+1','b',str,[],1)
-	
-       case 'FWE' % family-wise false positive rate
-	%---------------------------------------------------------------
+      
+	case 'FWE' % family-wise false positive rate
+        %---------------------------------------------------------------
 	alph_FWE  = spm_input('FWE-Corrected p value threshold','+0','r',0.05,1,[0,1]);
 	iFWE=ceil((1-alph_FWE)*nPermReal);
 	if alph_FWE<1
@@ -636,7 +493,7 @@ else  % GUI, interative inference specification
 	end
 	u = C_MaxT;
 	
-       otherwise  %-NB: no adjustment
+	otherwise  %-NB: no adjustment
 	%%%% Now ask: Threshold statistic image or Uncorr P-value Image ?
 	%%%% If stats image, maybe do ST, no FDR-level of thresh;
 	%%%% If P-value image, no ST, can find FDR-level of thresh
@@ -646,75 +503,74 @@ else  % GUI, interative inference specification
 	if bVarSm, str = 'pseudo t'; else, str = sprintf('t_{%d}',df); end
 	u  = spm_input(['threshold (',str,')'],'+0','r',0.01,1,[0,Inf]);
 	alph_FWE = sum(MaxT > u -tol) / nPermReal;
-      end
+    end
     
-    else % Cluster-wise inference
+  else % Cluster-wise inference
     
-      if pU_ST_Ut==-1  % No threshold was set in snpm_ui.
-        %-Get primary threshold for STC analysis if requested
-	%-----------------------------------------------------------------------
-	% Save original ST_Ut
-	ST_Ut_0 = ST_Ut;
-	%-Threshold must be greater or equal to that (ST_Ut) used to collect
-	% suprathreshold data in snpm_cp
-	%-If a test level alpha has been set, then it there's no sense in having
-	% the threshold greater than C_MaxT, above which voxels are individually 
-	% significant
-	tmp = 0;
-	if bVarSm
-	  %-If using pseudo-statistics then can't use (uncorrected) 
-	  % upper tail p-values to specify primary threshold
-	  while ~(tmp>=ST_Ut-tol)
-	    tmp = spm_input(sprintf(...
-		'Clus-def thresh(pseudo t>%4.2f)',ST_Ut),'+0');
-	  end
-	  if (abs(tmp-ST_Ut)<=tol)
+    if pU_ST_Ut==-1  % No threshold was set in snpm_ui.
+      %-Get primary threshold for STC analysis if requested
+      %-----------------------------------------------------------------------
+      % Save original ST_Ut
+      ST_Ut_0 = ST_Ut;
+      %-Threshold must be greater or equal to that (ST_Ut) used to collect
+      % suprathreshold data in snpm_cp
+      %-If a test level alpha has been set, then it there's no sense in having
+      % the threshold greater than C_MaxT, above which voxels are individually 
+      % significant
+      tmp = 0;
+      if bVarSm
+	%-If using pseudo-statistics then can't use (uncorrected) 
+	% upper tail p-values to specify primary threshold
+	while ~(tmp>=ST_Ut-tol)
+	  tmp = spm_input(sprintf(...
+	      'Clus-def thresh(pseudo t>%4.2f)',ST_Ut),'+0');
+	end
+	if (abs(tmp-ST_Ut)<=tol)
 	  tmp=ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
-	  end
-	else
-	  %-Statistic image is t with df degrees of freedom
-	  p_ST_Ut  = STalpha;
-	  while ~( tmp>=ST_Ut-tol | (tmp>0 & tmp<=p_ST_Ut))
-	    tmp = spm_input(sprintf(...
-		'Clus-def thresh(p<=%4.2fIt>=%4.2f)',p_ST_Ut,ST_Ut),'+0','r',ST_Ut,1); 
-	  end
-	  clear p_ST_Ut
-	  if (tmp < 1)
-	    tmp = spm_invTcdf(1-tmp,df);
-	  else 
-	    if (abs(tmp-ST_Ut)<=tol)
-	      tmp=ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
-	    end
+	end
+      else
+	%-Statistic image is t with df degrees of freedom
+	p_ST_Ut  = STalpha;
+	while ~( tmp>=ST_Ut-tol | (tmp>0 & tmp<=p_ST_Ut))
+	  tmp = spm_input(sprintf(...
+	      'Clus-def thresh(p<=%4.2fIt>=%4.2f)',p_ST_Ut,ST_Ut),'+0','r',ST_Ut,1); 
+	end
+	clear p_ST_Ut
+	if (tmp < 1)
+	  tmp = spm_invTcdf(1-tmp,df);
+	else 
+	  if (abs(tmp-ST_Ut)<=tol)
+	    tmp=ST_Ut; % If tmp is very close to ST_Ut, set tmp equal to ST_Ut.
 	  end
 	end
-	ST_Ut = tmp;
+	
       end
-      u=ST_Ut; % Flag use of a statistic-value threshold
-
-      str = 'FWE|Uncorr';
-      switch spm_input('Clusterwise: Use corrected thresh?','+1','b',str,[],1)
-       case 'FWE' % family-wise false positive rate
+      ST_Ut = tmp;
+    end
+    
+    str = 'FWE|Uncorr';
+    switch spm_input('Clusterwise: Use corrected thresh?','+1','b', ...
+		     str,[],1)
+        case 'FWE' % family-wise false positive rate
         %---------------------------------------------------------------
 	alph_FWE  = spm_input('FWE-Corrected p value threshold','+0','r',0.05,1,[0,1]);
 	iFWE=ceil((1-alph_FWE)*nPermReal);
-	
-       case 'Uncorr' %Uncorrected cluster size threshold
-	
-	str = 'ClusterSize|P-value';
-	switch spm_input('Define uncorrected','+1','b',str,[],1)
-	  
-	 case 'ClusterSize'
-	  C_STCS = spm_input('Uncorr cluster size threshold','+0','w',0,1);
-	  
-	 case 'P-value'
-	  alpha_ucp = spm_input('Uncorrected p value threshold','+0','r',0.01,1,[0,1]);
-	  
-	end
-      end
-    end	
-  end
-end
+      
+        case 'Uncorr' %Uncorrected cluster size threshold
+	   
+	   str = 'ClusterSize|P-value';
+	   switch spm_input('Define uncorrected','+1','b',str,[],1)
 
+	     case 'ClusterSize'
+	     C_STCS = spm_input('Uncorr cluster size threshold','+0','w',0,1);
+
+	     case 'P-value'
+	     alpha_ucp = spm_input('Uncorrected p value threshold','+0','r',0.01,1,[0,1]);
+	   
+	   end
+    end
+  end	
+end
 
 
 % Workflow for statistical Inference:
@@ -750,6 +606,11 @@ end
 
 
 
+%-Show permutation distributions?
+%-----------------------------------------------------------------------
+%ShwDst = spm_input('Display permutation distribution[s]?','+1','y/n',[1,0],1);
+ShwDst = 1;
+
 %=======================================================================
 %- C O M P U T A T I O N
 %=======================================================================
@@ -768,35 +629,32 @@ if bSpatEx
 	XYZ   = XYZ(:,Q);
 	
 	if isempty(Q)
-	  set(Finter,'Pointer','Arrow')
-	  figure(Fgraph)
-	  axis off
-	  text(0,0.97,CWD,'Fontsize',16,'FontWeight','Bold');
-	  str=sprintf('No voxels above threshold %4.2f\n',ST_Ut);
-	  text(0,0.93,str);
-	  fprintf(['WARNING: ' str])
-	  if length(strmatch('FWEreport',Report))>0
-	    ShowDist(MaxT,C_MaxT,alph_FWE,[],[],[],'max');
-	    if ~BATCH
-	      if spm_input('Review permutation distributions.',1,'bd',...
-			   'Print & Continue|Continue',[1,0],1)
-		spm_print
-	      end
-	      spm_clf(Fgraph)
-	    end
-	  end
-	  if length(strmatch('FDRreport',Report))>0
-	    axis off
-	    text(0,0.97,'Uncorrected P Permutation Distributions','Fontsize',16,'FontWeight',...
-		 'Bold');
-	    ShowDist(SnPMucp,alpha_ucp,alph_FDR,[],[],[],'uncor');
-	    if ~BATCH
-	      if spm_input('Review permutation distributions.',1,'bd',...
-			   'Print|Done',[1,0],1)
-		spm_print
-	      end
-	    end
-	  end
+		set(Finter,'Pointer','Arrow')
+		figure(Fgraph)
+		axis off
+		text(0,0.97,CWD,'Fontsize',16,'FontWeight','Bold');
+		text(0,0.93,sprintf('No voxels above threshold %4.2f',ST_Ut));
+		ShowDist(MaxT,C_MaxT,alph_FWE,[],[],[],'max');
+		if (ShwDst_ucp)
+		 % disp('Press <RETURN> to continue'); pause
+		 if spm_input('Review permutation distributions.',1,'bd',...
+                  'Print & Continue|Continue',[1,0],1)
+		   spm_print
+		 end
+		 
+		 
+		 spm_clf(Fgraph)
+ 
+		  axis off
+ 
+		  text(0,0.97,'Uncorrected P Permutation Distributions','Fontsize',16,'FontWeight',...
+		       'Bold');
+		  ShowDist(SnPMucp,alpha_ucp,alph_FDR,[],[],[],'uncor');
+		end
+	  	if spm_input('Review permutation distributions.',1,'bd',...
+                  'Print|Done',[1,0],1)
+		  spm_print
+		end
 	  return
 	end
 	fprintf('done\n')
@@ -836,39 +694,39 @@ if bSpatEx
 	      loop = 1:2;
 	    end
 	    
-        for isPos= loop  %1 for positive; 2 for negative
-            if isPos==1
-                SnPM_ST = SnPM_ST_Pos;
-            else
-                SnPM_ST = SnPM_ST_Neg;
-            end
-            tQ = (SnPM_ST(5,:)==i);
-            if any(tQ)
-                %-Compute cluster labellings for this perm
-                Locs_mm = SnPM_ST(1:3,tQ);
-                Locs_mm (4,:) = 1;
-                Locs_vox = IMAT * Locs_mm;
-
-                STCS = snpm_STcalc('update',STCS, SnPM_ST(4,tQ),...
-                   Locs_vox(1:3,:),isPos,i,ST_Ut,df);
-            end
-            if i==1
-                %-Save perm 1 stats for use later - [X;Y;Z;T;perm;STCno]
-                tmp = spm_clusters(Locs_vox(1:3,:));
-                if isPos==1
-                    STCstats_Pos = [ SnPM_ST(:,tQ); tmp];
-                    if bNeg==0
-                        STCstats=STCstats_Pos;
-                    end
-                else
-                    STCstats_Neg = [ SnPM_ST(:,tQ); tmp];
-                    if bNeg==1
-                        STCstats=STCstats_Neg;
-                    end
-                end
-            end
-        end
-    end
+	    for isPos= loop  %1 for positive; 2 for negative
+	      if isPos==1
+		SnPM_ST = SnPM_ST_Pos;
+	      else
+		SnPM_ST = SnPM_ST_Neg;
+	      end
+	      tQ = (SnPM_ST(5,:)==i);
+	      if any(tQ)
+		%-Compute cluster labellings for this perm
+		Locs_mm = SnPM_ST(1:3,tQ);
+		Locs_mm (4,:) = 1;
+		Locs_vox = IMAT * Locs_mm;
+		
+		STCS = snpm_STcalc('update',STCS, SnPM_ST(4,tQ),...
+				   Locs_vox(1:3,:),isPos,i,ST_Ut,df);
+	      end
+	      if i==1
+		%-Save perm 1 stats for use later - [X;Y;Z;T;perm;STCno]
+		tmp = spm_clusters(Locs_vox(1:3,:));
+		if isPos==1
+		  STCstats_Pos = [ SnPM_ST(:,tQ); tmp];
+		  if bNeg==0
+		    STCstats=STCstats_Pos;
+		  end
+		else
+		  STCstats_Neg = [ SnPM_ST(:,tQ); tmp];
+		  if bNeg==1
+		    STCstats=STCstats_Neg;
+		  end
+		end
+	      end
+	    end
+	  end
 	  fprintf('\b\b\b\bdone\n');
 	  
 	  if bhPerms   %Double the STCS variables.
@@ -1009,52 +867,49 @@ if isempty(Q)
 	axis off
 	text(0,0.97,CWD,'Fontsize',16,'FontWeight','Bold');
 	tmp='voxels'; if bSpatEx, tmp='suprathreshold clusters'; end
-	str='';
 	if ~isnan(u)
 	  if bSpatEx
-	    str=sprintf(...
-		'No %s significant at k>=%d (alpha=%6.4f FWE-corrected)\n',...
-		tmp,C_STCS,alph_FWE);
+	    text(0,0.93,sprintf(...
+		'No %s significant at k>=%d (alpha=%6.4f FWE-corrected)',...
+		tmp,C_STCS,alph_FWE));
 	  else
-	    str=sprintf(...
-		'No %s significant at u>=%0.2f (alpha=%6.4f FWE-corrected)\n',...
-		tmp,u,alph_FWE);
+	    text(0,0.93,sprintf(...
+		'No %s significant at u>=%d (alpha=%6.4f FWE-corrected)',...
+		tmp,u,alph_FWE));
 	  end
 	else
-	  str=sprintf(...
-	      'No %s significant at alpha=%6.4f (alpha=%6.4f FDR-corrected)\n',...
-	      tmp,alpha_ucp,alph_FDR);
+	  text(0,0.93,sprintf(...
+	      'No %s significant at alpha=%6.4f (alpha=%6.4f FDR-corrected)',...
+	      tmp,alpha_ucp,alph_FDR));
 	end
-	if ~isempty(str)
-	  text(0,0.93,str);
-	  fprintf(['WARNING: ' str])
+	if bSpatEx,
+	  ShowDist(MaxT,C_MaxT,alph_FWE,STCS_MxK,C_STCS,alph_FWE, ...
+		     'max');
+	else	   
+	  ShowDist(MaxT,C_MaxT,alph_FWE,[],[],[],'max');
 	end
-	if length(strmatch('FWEreport',Report))>0
-	  if bSpatEx,
-	    ShowDist(MaxT,C_MaxT,alph_FWE,STCS_MxK,C_STCS,alph_FWE,'max');
-	  else	   
-	    ShowDist(MaxT,C_MaxT,alph_FWE,[],[],[],'max');
+	
+	if (ShwDst_ucp)
+	  %disp('Press <RETURN> to continue'); pause
+	  
+	  if spm_input('Review permutation distributions.',1,'bd',...
+                  'Print & Continue|Continue',[1,0],1)
+	    spm_print
 	  end
-	  if ~BATCH
-	    if spm_input('Review permutation distributions.',1,'bd',...
-			 'Print & Continue|Continue',[1,0],1)
-	      spm_print
-	    end
-	  end
-	end
-	if length(strmatch('FDRreport',Report))>0
+	  
 	  spm_clf(Fgraph)
+ 
 	  axis off
+ 
 	  text(0,0.97,'Uncorrected P Permutation Distributions','Fontsize',16,'FontWeight',...
 	       'Bold');
 	  ShowDist(SnPMucp,alpha_ucp,alph_FDR,[],[],[],'uncor');
-	  if ~BATCH
-	    if spm_input('Review permutation distributions.',1,'bd',...
-			 'Print|Done',[1,0],1)
-	      spm_print
-	    end  
-	  end
+	  %spm_print
 	end
+	if spm_input('Review permutation distributions.',1,'bd',...
+                  'Print|Done',[1,0],1)
+	  spm_print
+	end  
 	return
 end
 
@@ -1103,13 +958,12 @@ end
 
 
 %=======================================================================
-%-D I S P L A Y :   Max report
+%-D I S P L A Y
 %=======================================================================
+figure(Fgraph)
 
-if length(strmatch('FWEreport',Report))>0
 
-  spm_clf(Fgraph)
-  figure(Fgraph)
+if (ShwDst)
   axis off
   if (bSpatEx)
     text(0,0.97,'Permutation Distribution','Fontsize',16,'FontWeight', ...
@@ -1120,241 +974,253 @@ if length(strmatch('FWEreport',Report))>0
     text(0,0.97,'Permutation Distributions','Fontsize',16,'FontWeight','Bold');
     ShowDist(MaxT,C_MaxT,alph_FWE,[],[],[],'max');
   end
-  
-  if ~BATCH
-    if spm_input('Review permutation distributions.',1,'bd',...
-		 'Print & Continue|Continue',[1,0],1)
-      spm_print
-    end
-  end
 end
 
+% Change the style of pressing ' return' to clicking on a new button. 
+%spm_print
+%disp('Press <RETURN> to continue'); pause
+if spm_input('Review permutation distributions.',1,'bd',...
+                  'Print & Continue|Continue',[1,0],1)
+spm_print
+end
+spm_clf(Fgraph)
 
 %=======================================================================
-%-D I S P L A Y :   FDR (uncorrected P-values) report
+%-D I S P L A Y (uncorrected P-values)
 %=======================================================================
-
-if length(strmatch('FDRreport',Report))>0
-
+if (ShwDst_ucp)
   spm_clf(Fgraph)
-  figure(Fgraph)
+ 
   axis off
+ 
   text(0,0.97,'Uncorrected P Permutation Distributions','Fontsize',16,'FontWeight',...
        'Bold');
   ShowDist(SnPMucp,alpha_ucp,alph_FDR,[],[],[],'uncor');
-
-  if ~BATCH
-    if spm_input('Review permutation distributions.',1,'bd',...
+%  spm_print
+%  disp('Press <RETURN> to continue'); pause
+if  spm_input('Review permutation distributions.',1,'bd',...
                   'Print & Continue|Continue',[1,0],1)
-      spm_print
-    end
-  end
-
+spm_print
 end
 
+spm_clf(Fgraph)
+end
 
-
+%-Maximium intenisty projection of SPM{Z}
 %=======================================================================
-%-D I S P L A Y :   Maximium intenisty projection of SPM{Z}
+hmip = axes('Position',[0.05 0.5 0.5 0.5]);
+snpm_mip(SnPMt,XYZ,MAT,DIM); axis image
+if bVarSm
+	title('SnPM{Pseudo-t}','FontSize',16,'Fontweight','Bold')
+else
+	title(sprintf('SnPM{%s}',STAT),'FontSize',16,'Fontweight','Bold')
+end
+
+%-Design matrix and contrast
 %=======================================================================
-
-if length(strmatch('MIPtable',Report))>0
-
-  spm_clf(Fgraph)
-  figure(Fgraph)
+hDesMtx = axes('Position',[0.65 0.6 0.2 0.2]);
+image((spm_DesMtx('Sca', [H,C,B,G],HCBGnames) + 1)*32)
+xlabel 'Design Matrix'
+set(hDesMtx,'XTick',[],'XTickLabel','')
+nPar   = size([H,C,B,G],2);
+hConAxes = axes('Position',[0.65 0.81 0.2 0.1]);
+if STAT == 'F'
+   imagesc(CONT,[-1 1]);
+   set(gca,'Tag','ConGrphAx',...
+	   'Box','on','TickDir','out',...
+	   'XTick',spm_DesRep('ScanTick',nPar,10),'XTickLabel','',...
+	   'XLim',	[0,nPar]+0.5,...
+	   'YTick',[1:size(CONT,1)],....
+	   'YTickLabel','',...
+	   'YLim',	[0,size(CONT,1)]+0.5	)
+else
+  h = bar(CONT(1,:));  if MLver=='7', h=get(h,'children'); end
+  set(h,'FaceColor',[1 1 1]*.8)
+  tX = get(h,'Xdata'); tY = get(h,'Ydata');
+  set(gca,'Xlim',[min(tX(:)) max(tX(:))]) 
   axis off
-  
-  hmip = axes('Position',[0.05 0.5 0.5 0.5]);
-  snpm_mip(SnPMt,XYZ,MAT,DIM); axis image
-  if bVarSm
-    title('SnPM{Pseudo-t}','FontSize',16,'Fontweight','Bold')
-  else
-    title(sprintf('SnPM{%s}',STAT),'FontSize',16,'Fontweight','Bold')
-  end
-  
-  %-Design matrix and contrast
-  %=======================================================================
-  hDesMtx = axes('Position',[0.65 0.6 0.2 0.2]);
-  image((spm_DesMtx('Sca', [H,C,B,G],HCBGnames) + 1)*32)
-  xlabel 'Design Matrix'
-  set(hDesMtx,'XTick',[],'XTickLabel','')
-  nPar   = size([H,C,B,G],2);
-  hConAxes = axes('Position',[0.65 0.81 0.2 0.1]);
-  if STAT == 'F'
-    imagesc(CONT,[-1 1]);
-    set(gca,'Tag','ConGrphAx',...
-	    'Box','on','TickDir','out',...
-	    'XTick',spm_DesRep('ScanTick',nPar,10),'XTickLabel','',...
-	    'XLim',	[0,nPar]+0.5,...
-	    'YTick',[1:size(CONT,1)],....
-	    'YTickLabel','',...
-	    'YLim',	[0,size(CONT,1)]+0.5	)
-  else
-    h = bar(CONT(1,:));  if str2num(MLver)>=7, h=get(h,'children'); end
-    set(h,'FaceColor',[1 1 1]*.8)
-    tX = get(h,'Xdata'); tY = get(h,'Ydata');
-    set(gca,'Xlim',[min(tX(:)) max(tX(:))]) 
-    axis off
-  end
-  title 'contrast'; 
-  
-
-  %-Table of regional effects
-  %=======================================================================
-  %-Table headings
-  %-----------------------------------------------------------------------
-  hTable = axes('Position',[0.1 0.1 0.8 0.46],...
-		'YLim',[0,27],'YLimMode','manual',...
-		'DefaultTextInterpreter','Tex',...
-		'DefaultTextVerticalAlignment','Baseline',...
-		'Visible','off');
-  %	      'DefaultHorizontalAlignment','right',...
-  y = 26;
-  dy=1;
-  text(0,y,['P values & statistics:   ',spm_str_manip(CWD,'a40')],...
-       'FontSize',12,'FontWeight','Bold','Interpreter','none');
-  y  = y -dy;
-  line([0 1],[y y],'LineWidth',3,'Color','r')
-  y = y -dy;
-  
-  tCol       = [  0.00      0.12    0.26             ...	%-Cluster
-		  0.34      0.46    0.63      0.72   ...  %-Voxel
-		  0.88     0.94    1.00];        	%-XYZ
-  
-  PF    = spm_platform('fonts');   %-Font names (for this platform)
+end
+title 'contrast'; 
 
 
-  %-Construct table header
-  %-----------------------------------------------------------------------
-  set(gca,'DefaultTextFontName',PF.helvetica,'DefaultTextFontSize',10)
-  
-  Hp = [];
-  h  = text(0.10,y,	'cluster-level','FontSize',10,'HorizontalAlignment','Center');		
-  h  = line([tCol(1),0.30],[1,1]*(y-dy/4),'LineWidth',0.5,'Color','r');	
-  h  = text(tCol(1),y-9*dy/8,	'\itp_{FWE-corr}');        Hp = [Hp,h];
-  h  = text(tCol(2),y-9*dy/8,	'\itp_{uncorr}');      Hp = [Hp,h];
-  h  = text(tCol(3),y-9*dy/8,	'\itk ');			
-  
-  text(0.50,y,		'voxel-level','FontSize',10,'HorizontalAlignment','Center');
-  line([tCol(4),0.80],[1,1]*(y-dy/4),'LineWidth',0.5,'Color','r');
-  h  = text(tCol(4),y-9*dy/8,	'\itp_{FWE-corr}');	
-  h  = text(tCol(5),y-9*dy/8,	'\itp_{FDR-corr}');	
-  
-  if ~bVarSm
-    h  = text(tCol(6),y-9*dy/8,	sprintf('\\it%s',STAT));
-  else 
-    h  = text(tCol(6)-0.02,y-9*dy/8,	'Pseudo-t');
-  end 
-  
-  h  = text(tCol(7),y-9*dy/8,	'\itp_{uncorr}');
-  
-  text(tCol(8),y-dy/2,'{x,y,z} mm','FontSize',10);
-  
-  
-  y     = y - 7*dy/4;
-  line([0 1],[y y],'LineWidth',1,'Color','r')
-  y     = y - 5*dy/4;
-  
-  Fmtst = {	'%0.4f', '%0.4f', '%0.0f', ...                  %-Cluster
+%-Table of regional effects
+%=======================================================================
+%-Table headings
+%-----------------------------------------------------------------------
+hTable = axes('Position',[0.1 0.1 0.8 0.46],...
+	      'YLim',[0,27],'YLimMode','manual',...
+	      'DefaultTextInterpreter','Tex',...
+	      'DefaultTextVerticalAlignment','Baseline',...
+	      'Visible','off');
+%	      'DefaultHorizontalAlignment','right',...
+y = 26;
+dy=1;
+text(0,y,['P values & statistics:   ',spm_str_manip(CWD,'a40')],...
+	'FontSize',12,'FontWeight','Bold','Interpreter','none');
+y  = y -dy;
+line([0 1],[y y],'LineWidth',3,'Color','r')
+y = y -dy;
+
+tCol       = [  0.00      0.12    0.26             ...	%-Cluster
+	        0.34      0.46    0.63      0.72   ...  %-Voxel
+                0.88     0.94    1.00];        	%-XYZ
+
+PF    = spm_platform('fonts');   %-Font names (for this platform)
+
+
+%-Construct table header
+%-----------------------------------------------------------------------
+set(gca,'DefaultTextFontName',PF.helvetica,'DefaultTextFontSize',10)
+
+Hp = [];
+h  = text(0.10,y,	'cluster-level','FontSize',10,'HorizontalAlignment','Center');		
+h  = line([tCol(1),0.30],[1,1]*(y-dy/4),'LineWidth',0.5,'Color','r');	
+h  = text(tCol(1),y-9*dy/8,	'\itp_{FWE-corr}');        Hp = [Hp,h];
+h  = text(tCol(2),y-9*dy/8,	'\itp_{uncorr}');      Hp = [Hp,h];
+h  = text(tCol(3),y-9*dy/8,	'\itk ');			
+								
+text(0.50,y,		'voxel-level','FontSize',10,'HorizontalAlignment','Center');
+line([tCol(4),0.80],[1,1]*(y-dy/4),'LineWidth',0.5,'Color','r');
+h  = text(tCol(4),y-9*dy/8,	'\itp_{FWE-corr}');	
+h  = text(tCol(5),y-9*dy/8,	'\itp_{FDR-corr}');	
+
+if ~bVarSm
+h  = text(tCol(6),y-9*dy/8,	sprintf('\\it%s',STAT));
+else 
+h  = text(tCol(6)-0.02,y-9*dy/8,	'Pseudo-t');
+end 
+
+h  = text(tCol(7),y-9*dy/8,	'\itp_{uncorr}');
+
+text(tCol(8),y-dy/2,'{x,y,z} mm','FontSize',10);
+
+
+y     = y - 7*dy/4;
+line([0 1],[y y],'LineWidth',1,'Color','r')
+y     = y - 5*dy/4;
+
+
+%%    text(0.00,y,'region','FontSize',10);
+%text(0.00,y,'size {k}','FontSize',10);
+%if bSpatEx
+%	text(0.24,y,'P(K_{max}>= k)','FontSize',10);
+%end
+%if ~bVarSm
+%	text(0.44,y,'t','FontSize',10);
+%else
+%	text(0.42,y,'Pseudo-t','FontSize',10);
+%end
+%text(0.51,y,'P(T_{max}>= u)','FontSize',10);
+%text(0.67,y,'uncorrected','Fontsize',8);
+%text(0.84,y,'{x,y,z} mm','FontSize',10);
+%y = y -0.8;
+%line([0 1],[y y],'LineWidth',3,'Color',[0 0 0])
+%y  = y -1;
+
+%Fmtst = {	'%0.0f','%-0.3f',...				%-Cluster
+%		'%6.2f', '%0.3f', '%0.4f',...			%-Voxel
+%		'%3.0f','%3.0f','%3.0f'};			%-XYZ
+
+Fmtst = {	'%0.4f', '%0.4f', '%0.0f', ...                  %-Cluster
 		'%0.4f', '%0.4f', '%6.2f','%0.4f', ...		%-Voxel
 		'%3.0f','%3.0f','%3.0f'};			%-XYZ
-  
-  %-Column Locations
-  %-----------------------------------------------------------------------
-  %tCol       = [  0.07      0.30  ...			%-Cluster
-  %	           0.50      0.62      0.77           ...  %-Voxel
-  %                0.86 0.93 1.00];			%-XYZ
-  
-  %-List of maxima
-  %-----------------------------------------------------------------------
-  r = 1;
-  bUsed = zeros(size(STC_SnPMt));
-  while max(STC_SnPMt.*(~bUsed)) & (y > 3)
-    
-    [null, i] = max(STC_SnPMt.*(~bUsed));	% Largest t value
-    j         = find(STC_r == STC_r(i));	% Maxima in same region
-    
-    %-Print region and largest maximum
-    %-------------------------------------------------------------------
-    
-    StrAttr = {'Fontsize',10,'ButtonDownFcn','get(gcbo, ''UserData'')',...
-	       'HorizontalAlignment','right'};
-    StrAttrB = {StrAttr{:},'FontWeight','Bold'};
-    %	text(0.00,y,sprintf('%0.0f',r),'UserData',r,StrAttrB{:})
-    if bSpatEx
-      text(tCol(1)+0.09,y,sprintf(Fmtst{1},Pn(i)),'UserData',Pn(i), ...
-	   StrAttrB{:})
-      text(tCol(2)+0.09,y,sprintf(Fmtst{2},Pun(i)),'UserData',Pun(i), ...
-	   StrAttrB{:})
-    else
-      set(Hp,'Visible','off')
-    end
-    
-    text(tCol(3)+0.04,y,sprintf(Fmtst{3},STC_N(i)),'UserData',STC_N(i),StrAttrB{:})
-    text(tCol(4)+0.08,y,sprintf(Fmtst{4},Pt(i)),'UserData',Pt(i),StrAttrB{:})
-    text(tCol(5)+0.09,y,sprintf(Fmtst{5},Pfdr(i)),'UserData',Pfdr(i),StrAttrB{:})
-    text(tCol(6)+0.04,y,sprintf(Fmtst{6},STC_SnPMt(i)),'UserData',STC_SnPMt(i),StrAttrB{:})
-    
-    text(tCol(7)+0.09,y,sprintf(Fmtst{7},Pu(i)),'UserData',Pu(i),StrAttr{:})
-    text(tCol(8),y,sprintf(Fmtst{8},STC_XYZ(1,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
-    text(tCol(9),y,sprintf(Fmtst{9},STC_XYZ(2,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
-    text(tCol(10),y,sprintf(Fmtst{10},STC_XYZ(3,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
-    y = y -1;
-    
-    %-Print up to 3 secondary maxima (>8mm apart)
-    %-------------------------------------------------------------------
-    [null, k] = sort(-STC_SnPMt(j));	% Sort on t value
-    D         = i;
-    for i = 1:length(k)
-      d     = j(k(i));
-      if min( sqrt( sum((STC_XYZ(:,D) - ...
-			 STC_XYZ(:,d)*ones(1,size(D,2))).^2) ) ) > 8;
-	if length(D) < 3
-	  text(tCol(4)+0.08,y,sprintf(Fmtst{4}, Pt(d)),'UserData',Pt(d),StrAttr{:})
-	  text(tCol(5)+0.09,y,sprintf(Fmtst{5}, Pfdr(d)),'UserData',Pfdr(d),StrAttr{:})
-	  text(tCol(6)+0.04,y,sprintf(Fmtst{6}, STC_SnPMt(d)), 'UserData',STC_SnPMt(d),StrAttr{:})
-	  
-	  text(tCol(7)+0.09,y,sprintf(Fmtst{7}, Pu(d)),'UserData',Pu(d),StrAttr{:})
-	  text(tCol(8),y,sprintf(Fmtst{8}, STC_XYZ(1,d)),'UserData',STC_XYZ(:,d),StrAttr{:})
-	  text(tCol(9),y,sprintf(Fmtst{9}, STC_XYZ(2,d)),'UserData',STC_XYZ(:,d),StrAttr{:})
-	  text(tCol(10),y,sprintf(Fmtst{10}, STC_XYZ(3,d)),'UserData',STC_XYZ(:,d),StrAttr{:})
-	  
-	  D = [D d];
-	  y = y -1;
+
+%-Column Locations
+%-----------------------------------------------------------------------
+%tCol       = [  0.07      0.30  ...			%-Cluster
+%	        0.50      0.62      0.77           ...  %-Voxel
+%                0.86 0.93 1.00];			%-XYZ
+
+%-List of maxima
+%-----------------------------------------------------------------------
+r = 1;
+bUsed = zeros(size(STC_SnPMt));
+while max(STC_SnPMt.*(~bUsed)) & (y > 3)
+
+	[null, i] = max(STC_SnPMt.*(~bUsed));	% Largest t value
+	j         = find(STC_r == STC_r(i));	% Maxima in same region
+
+	%-Print region and largest maximum
+	%-------------------------------------------------------------------
+
+	StrAttr = {'Fontsize',10,'ButtonDownFcn','get(gcbo, ''UserData'')',...
+		  'HorizontalAlignment','right'};
+	StrAttrB = {StrAttr{:},'FontWeight','Bold'};
+%	text(0.00,y,sprintf('%0.0f',r),'UserData',r,StrAttrB{:})
+	if bSpatEx
+	  text(tCol(1)+0.09,y,sprintf(Fmtst{1},Pn(i)),'UserData',Pn(i), ...
+	       StrAttrB{:})
+	  text(tCol(2)+0.09,y,sprintf(Fmtst{2},Pun(i)),'UserData',Pun(i), ...
+		 StrAttrB{:})
+	else
+	  set(Hp,'Visible','off')
 	end
-      end
-    end
-    
-    bUsed(j) = (bUsed(j) | 1 );		%-Mark maxima as "used"
-    r = r + 1;				% Next region
-  end
-  clear i j k D d r
-  
-  
-  %-Footnote with SnPM parameters
-  %=======================================================================
-  line([0,1],[0.5,0.5],'LineWidth',1,'Color','r')
-  y = 0;
-  if bSpatEx
+	
+        text(tCol(3)+0.04,y,sprintf(Fmtst{3},STC_N(i)),'UserData',STC_N(i),StrAttrB{:})
+	text(tCol(4)+0.08,y,sprintf(Fmtst{4},Pt(i)),'UserData',Pt(i),StrAttrB{:})
+	text(tCol(5)+0.09,y,sprintf(Fmtst{5},Pfdr(i)),'UserData',Pfdr(i),StrAttrB{:})
+	text(tCol(6)+0.04,y,sprintf(Fmtst{6},STC_SnPMt(i)),'UserData',STC_SnPMt(i),StrAttrB{:})
+	
+	text(tCol(7)+0.09,y,sprintf(Fmtst{7},Pu(i)),'UserData',Pu(i),StrAttr{:})
+	text(tCol(8),y,sprintf(Fmtst{8},STC_XYZ(1,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
+	text(tCol(9),y,sprintf(Fmtst{9},STC_XYZ(2,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
+	text(tCol(10),y,sprintf(Fmtst{10},STC_XYZ(3,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
+	y = y -1;
+
+	%-Print up to 3 secondary maxima (>8mm apart)
+	%-------------------------------------------------------------------
+	[null, k] = sort(-STC_SnPMt(j));	% Sort on t value
+	D         = i;
+	for i = 1:length(k)
+	  d     = j(k(i));
+	  if min( sqrt( sum((STC_XYZ(:,D) - ...
+			     STC_XYZ(:,d)*ones(1,size(D,2))).^2) ) ) > 8;
+	    if length(D) < 3
+	      text(tCol(4)+0.08,y,sprintf(Fmtst{4}, Pt(d)),'UserData',Pt(d),StrAttr{:})
+	      text(tCol(5)+0.09,y,sprintf(Fmtst{5}, Pfdr(d)),'UserData',Pfdr(d),StrAttr{:})
+	      text(tCol(6)+0.04,y,sprintf(Fmtst{6}, STC_SnPMt(d)), 'UserData',STC_SnPMt(d),StrAttr{:})
+	      
+	      text(tCol(7)+0.09,y,sprintf(Fmtst{7}, Pu(d)),'UserData',Pu(d),StrAttr{:})
+	      text(tCol(8),y,sprintf(Fmtst{8}, STC_XYZ(1,d)),'UserData',STC_XYZ(:,d),StrAttr{:})
+	      text(tCol(9),y,sprintf(Fmtst{9}, STC_XYZ(2,d)),'UserData',STC_XYZ(:,d),StrAttr{:})
+	      text(tCol(10),y,sprintf(Fmtst{10}, STC_XYZ(3,d)),'UserData',STC_XYZ(:,d),StrAttr{:})
+	      
+	      D = [D d];
+	      y = y -1;
+	    end
+	  end
+	end
+
+	bUsed(j) = (bUsed(j) | 1 );		%-Mark maxima as "used"
+	r = r + 1;				% Next region
+end
+clear i j k D d r
+
+
+%-Footnote with SnPM parameters
+%=======================================================================
+line([0,1],[0.5,0.5],'LineWidth',1,'Color','r')
+y = 0;
+if bSpatEx
     tmp = sprintf('Cluster-defining thresh. = %7.4f',ST_Ut);
     if ~bVarSm
-      tmp=[tmp,sprintf(' (p = %6.4f)',spm_Tcdf(-ST_Ut,df))];
+	tmp=[tmp,sprintf(' (p = %6.4f)',spm_Tcdf(-ST_Ut,df))];
     end
     text(0,y,tmp,'FontSize',8)
     text(0.7,y,sprintf('Critical STCS = %d voxels',C_STCS),'FontSize',8)
     y = y -0.8;
     if ~isnan(alph_FWE)
-      tmp = sprintf('Cluster threshold: FWE-corr. P value= %6.4f', ...
-		    alph_FWE);
+        tmp = sprintf('Cluster threshold: FWE-corr. P value= %6.4f', ...
+		      alph_FWE);
     elseif ~isnan(alpha_ucp)
-      tmp = sprintf('Cluster threshold: Uncorr. P value= %6.4f', ...
-		    alpha_ucp);
+        tmp = sprintf('Cluster threshold: Uncorr. P value= %6.4f', ...
+		      alpha_ucp);
     else
-      tmp = sprintf('Cluster threshold: Uncorr. cluster size STCS= %d', ...
-		    C_STCS);
+        tmp = sprintf('Cluster threshold: Uncorr. cluster size STCS= %d', ...
+		      C_STCS);
     end
     text(0,y,tmp, 'FontSize',8)
-  else
+else
     %make the format similar as spm.
     %text(0,y,sprintf('alpha = %6.4f, df = %d',alpha,df),'FontSize',8)
     if ~isnan(u)
@@ -1362,90 +1228,90 @@ if length(strmatch('MIPtable',Report))>0
     else
       text(0,y,sprintf('Height threshold: Nonparam. P value alpha= %0.4f (%0.4f FDR)',alpha_ucp, alph_FDR), 'FontSize',8)   
     end
-    
-  end
-  
-  if bVarSm
-    str = 'n/a (variance smoothing)';
-  else
-    str = sprintf('[%d %d]',df1,df);
-  end
-  text(0.7,y,['Degrees of freedom = ', str], 'FontSize',8)
-  y=y-0.8;
-  text(0,y,sprintf('Design: %s',sDesign),'FontSize',8);
-  y=y-0.8;
-  text(0,y,sprintf('Search vol: %d cmm, %d voxels',S*abs(prod(VOX)),S), 'FontSize',8)
-  y=y-0.8;
-  text(0.7,y,sprintf('Voxel size: [%5.2f, %5.2f, %5.2f] mm',abs(VOX)), ...
-       'FontSize', 8)
-  
-  text(0,y,sprintf('Perms: %s',sPiCond),'FontSize',8);
-  if bVarSm
-    y = y -0.8;
-    text(0,y,sVarSm,'FontSize',8)
-  end
-  
-
-  if ~BATCH
-    %Set a button, so the user can decide whether to print the page of
-    %results to spm2.ps.
-    if spm_input('Review results.',1,'bd','Print|Done',[1,0],1)
-      spm_print
-    end 
-  end
-  
-  set(Finter,'Pointer','Arrow')
 
 end
+  
+%text(0.7,y,sprintf('Critical threshold = %7.4f',C_MaxT),'FontSize',8)
+%y = y -0.8;
+%text(0,y,sprintf('Volume = %d %5.2fx%5.2fx%5.2f mm voxels',...
+%	S,VOX(1),VOX(2),VOX(3)),'FontSize',8);
+if bVarSm
+  str = 'n/a (variance smoothing)';
+else
+  str = sprintf('[%d %d]',df1,df);
+end
+text(0.7,y,['Degrees of freedom = ', str], 'FontSize',8)
+y=y-0.8;
+text(0,y,sprintf('Design: %s',sDesign),'FontSize',8);
+y=y-0.8;
+text(0,y,sprintf('Search vol: %d cmm, %d voxels',S*abs(prod(VOX)),S), 'FontSize',8)
+y=y-0.8;
+text(0.7,y,sprintf('Voxel size: [%5.2f, %5.2f, %5.2f] mm',abs(VOX)), ...
+     'FontSize', 8)
+
+text(0,y,sprintf('Perms: %s',sPiCond),'FontSize',8);
+if bVarSm
+	y = y -0.8;
+	text(0,y,sVarSm,'FontSize',8)
+end
+
+
+%Set a button, so the user can decide whether to print the page of
+%results to spm2.ps.
+if spm_input('Review results.',1,'bd','Print|Done',[1,0],1)
+spm_print
+end 
+
+set(Finter,'Pointer','Arrow')
 
 %- Image output?
 %=======================================================================
 %-Write out filtered SnPMt?
 if WrtFlt
 	
-  Fname = WrtFltFn;
-  
-  %-Set name string
-  %---------------------------------------------------------------
-  if ~bVarSm
-    tmp = sprintf('SPMt - %d df',df);
-  else
-    tmp = 'SnPMt - pseudo t';
-  end
-  
-  %-Reconstruct filtered image from XYZ & SnPMt
-  %---------------------------------------------------------------
-  t = zeros(1,prod(DIM))*NaN;
-  t(spm_xyz2e(XYZ,V)) = SnPMt;
-  if ~bSpatEx
-    if ~isnan(u)
-      tmp=sprintf('%s p<%10g FWE-corr @ voxel level',tmp,alph_FWE);
-    else
-      tmp=sprintf('%s p<%10g uncorr @ voxel level',tmp,alpha_ucp);
-    end
-  else
-    if ~isnan(alph_FWE)
-      tmp=sprintf('%s p<%10g corrected @ cluster level, u=%4.2f',...
-		  tmp,alph_FWE,ST_Ut);
-    elseif ~isnan(alpha_ucp)
-      tmp=sprintf('%s p<%10g uncorrected @ cluster level, u=%4.2f',...
-		  tmp,alpha_ucp,ST_Ut);
-    else
-      tmp=sprintf('%s cluster size >%d @ cluster level, u=%4.2f',...
-		  tmp,C_STCS,ST_Ut);
-    end    
-  end
-  
-  %-Write out to image file
-  %---------------------------------------------------------------
-  Vs = snpm_clone_vol(Vs0, Fname, tmp); 
-  Vs =  spm_create_vol(Vs);
-  t = reshape(t,DIM);
-  for p=1:Vs.dim(3)
-    Vs = spm_write_plane(Vs,t(:,:,p),p);
-  end
-  Vs =  sf_close_vol(Vs);
-  clear t
+	Fname = WrtFltFn;
+
+	%-Set name string
+	%---------------------------------------------------------------
+	if ~bVarSm
+	    tmp = sprintf('SPMt - %d df',df);
+	else
+	    tmp = 'SnPMt - pseudo t';
+	end
+
+	%-Reconstruct filtered image from XYZ & SnPMt
+	%---------------------------------------------------------------
+	t = zeros(1,prod(DIM));
+	t(spm_xyz2e(XYZ,V)) = SnPMt;
+	if ~bSpatEx
+	  if ~isnan(u)
+	    tmp=sprintf('%s p<%10g FWE-corr @ voxel level',tmp,alph_FWE);
+	  else
+	    tmp=sprintf('%s p<%10g uncorr @ voxel level',tmp,alpha_ucp);
+	  end
+	else
+	  if ~isnan(alph_FWE)
+	    tmp=sprintf('%s p<%10g corrected @ cluster level, u=%4.2f',...
+		      tmp,alph_FWE,ST_Ut);
+	  elseif ~isnan(alpha_ucp)
+	    tmp=sprintf('%s p<%10g uncorrected @ cluster level, u=%4.2f',...
+		      tmp,alpha_ucp,ST_Ut);
+	  else
+	    tmp=sprintf('%s cluster size >%d @ cluster level, u=%4.2f',...
+		      tmp,C_STCS,ST_Ut);
+	  end    
+	end
+
+	%-Write out to analyze file
+	%---------------------------------------------------------------
+	Vs = snpm_clone_vol(Vs0, Fname, tmp); 
+	Vs =  spm_create_vol(Vs);
+	t = reshape(t,DIM);
+	for p=1:Vs.dim(3)
+	  Vs = spm_write_plane(Vs,t(:,:,p),p);
+	end
+	Vs =  sf_close_vol(Vs);
+	clear t
 end
 
 %-Reset Interactive Window
@@ -1599,12 +1465,4 @@ switch spm('ver')
   % Vs = spm_close_vol(Vs);
   % Don't need to close images in SPM5??
 end         
-return
-
-function v = BoundCheck(val,Range,ErrMsg)
-if val<Range(1) | val>Range(2)
-  error([ErrMsg ': ' num2str(val)])
-else
-  v=val;
-end
 return

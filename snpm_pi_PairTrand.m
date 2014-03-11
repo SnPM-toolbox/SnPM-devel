@@ -95,7 +95,7 @@
 %-Initialisation
 %-----------------------------------------------------------------------
 nCond    = 2;			% Number of conditions
-iGloNorm = '123';		% Allowable Global norm. codes
+iGloNorm = '1234';		% Allowable Global norm. codes
 sDesSave = 'iCond iRepl PiSubj';
 				% PlugIn variables to save in cfg file
 
