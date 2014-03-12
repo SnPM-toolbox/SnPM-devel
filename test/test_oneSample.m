@@ -98,17 +98,7 @@ classdef test_oneSample < generic_test_snpm
             testCase.testName = 'onesample_approx';
             
             rand('seed',200);
-            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P(end+1:end+8) = {
-                 fullfile(testCase.testDataDir, 'su_control06', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control07', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control08', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control09', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control10', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control11', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control12', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control13', 'cn_sess1', 'con_0001.img,1')
-                 };
-            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.nPerm = 100;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.nPerm = 15;
         end
         
         % Global normalisation, normalisation: Proportional scaling scaled 
