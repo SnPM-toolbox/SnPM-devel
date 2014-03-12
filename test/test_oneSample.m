@@ -146,21 +146,11 @@ classdef test_oneSample < generic_test_snpm
             testCase.testName = 'onesample_slice';
             
             rand('seed',200);
-            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P(end+1:end+12) = {
-                 fullfile(testCase.testDataDir, 'su_control06', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control07', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control08', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control09', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control10', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control11', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control12', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control13', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control01', 'cn_sess2', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control01', 'cn_sess3', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control01', 'cn_sess4', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control02', 'cn_sess2', 'con_0001.img,1')
-                 };
-            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.nPerm = 100;
+            for i = 6:17
+                testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P{end+1} = ...
+                    fullfile(testCase.testDataDir, ['su_control' num2str(i, '%02.0f')], 'cn_sess1', 'con_0001.img,1');
+            end
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.nPerm = 15;
             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.bVolm = 0;
         end
         
