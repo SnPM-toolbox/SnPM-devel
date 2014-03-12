@@ -38,7 +38,7 @@ switch buttonName,
         
         cwd = pwd;
         
-        testOneSample = {'onesample_1'} %{'onesample_propscaling', 'onesample_approx', 'onesample_var', 'onesample_cov3', 'onesample_cov', 'onesample_cluster_predefined', 'onesample_cluster'} % };
+        testOneSample = {'onesample_cluster'}%, 'onesample_cluster_predefined'} %{'onesample_1', 'onesample_propscaling', 'onesample_approx', 'onesample_var', 'onesample_cov3', 'onesample_cov', , } % };
         allTests = testOneSample;
         
         for i = 1:numel(allTests)
