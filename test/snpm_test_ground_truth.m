@@ -67,7 +67,7 @@ switch buttonName,
                 case {'onesample_cov3'}
                     if isempty(cfgFile) || redo
                         design_one_sample_test(testDataDir, resDir, '3', ...
-                            {'1 5 2 21 0', '0 21 15 18 3', '-1 -0.5 -1 1 0'}, '0')
+                            {'1 1 2 3 1', '0 21 15 18 3', '-1 -0.5 -1 1 0'}, '0')
                     end
                     
                 case {'onesample_var'}
