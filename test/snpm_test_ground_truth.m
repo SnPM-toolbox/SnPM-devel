@@ -38,7 +38,7 @@ switch buttonName,
         
         cwd = pwd;
         
-        testOneSample = {'onesample_cluster'}%, 'onesample_cluster_predefined'} %{'onesample_1', 'onesample_propscaling', 'onesample_approx', 'onesample_var', 'onesample_cov3', 'onesample_cov', , } % };
+        testOneSample = {'onesample_approx'}%, 'onesample_cluster_predefined'} %{'onesample_1', 'onesample_propscaling', 'onesample_approx', 'onesample_var', 'onesample_cov3', 'onesample_cov', , } % };
         allTests = testOneSample;
         
         for i = 1:numel(allTests)
@@ -77,7 +77,8 @@ switch buttonName,
                     
                 case {'onesample_approx'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, '0', {}, '0', 13, '100')
+                        rand('seed',200);
+                        design_one_sample_test(testDataDir, resDir, '0', {}, '0', 5, '10')
                     end
                     
                     
