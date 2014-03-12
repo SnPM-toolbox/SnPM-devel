@@ -215,7 +215,7 @@ function design_one_sample_test(testDataDir, resDir, numCovariates, ...
     elseif strcmp(propScaling, 'proportional scaling')
         disp(['* Select global normalisation: ' propScaling])
         disp('* Propsca global mean to: 50')
-        disp('global calc is it useful??')
+        disp('* Select global calculation...: mean voxel value (within per image fullmean/8 mask)')
     end
     disp('* grand mean scaling: <no grand Mean scaling>')
     disp('* Threshold masking: none')
