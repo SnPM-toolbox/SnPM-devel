@@ -23,7 +23,7 @@ function snpm_test_ground_truth()
 
   switch buttonName,
     case 'no',
-      error('Re-computation of groung truth stopped!');
+      error('Re-computation of ground truth stopped!');
     case 'yes',
       disp('Start re-computation of ground truth')
       
