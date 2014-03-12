@@ -78,7 +78,7 @@ switch buttonName,
                 case {'onesample_approx'}
                     if isempty(cfgFile) || redo
                         rand('seed',200);
-                        design_one_sample_test(testDataDir, resDir, '0', {}, '0', 5, '10')
+                        design_one_sample_test(testDataDir, resDir, '0', {}, '0', 5, '15')
                     end
                     
                     
