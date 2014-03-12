@@ -38,7 +38,7 @@ switch buttonName,
         
         cwd = pwd;
         
-        testOneSample = {'onesample_propscaling_to_user'}%'onesample_propscaling','onesample_cluster' 'onesample_cluster_predefined'} %{'onesample_1', 'onesample_propscaling', 'onesample_approx', 'onesample_var', 'onesample_cov3', 'onesample_cov', , } % };
+        testOneSample = {'onesample_grandmean_145'}%'onesample_propscaling_to_user', 'onesample_propscaling','onesample_cluster' 'onesample_cluster_predefined'} %{'onesample_1', 'onesample_propscaling', 'onesample_approx', 'onesample_var', 'onesample_cov3', 'onesample_cov', , } % };
         allTests = testOneSample;
         
         for i = 1:numel(allTests)
@@ -91,6 +91,12 @@ switch buttonName,
                     if isempty(cfgFile) || redo
                         design_one_sample_test(testDataDir, resDir, ...
                             '0', {}, '0', 5, '', 'proportional scaling', '145')
+                    end
+                    
+                case {'onesample_grandmean_145'}
+                    if isempty(cfgFile) || redo
+                        design_one_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 5, '', '', '', 'scaling to overall grand mean', '145')
                     end
                     
                     
@@ -146,7 +152,7 @@ switch buttonName,
                     
                 case {'onesample_cov', 'onesample_cov3', 'onesample_var', ...
                         'onesample_approx', 'onesample_propscaling', ...
-                        'onesample_propscaling_to_user'}
+                        'onesample_propscaling_to_user', 'onesample_grandmean_145'}
                     interactive_results(resDir, 'SnPM_filtered_10none', 'P', 'None', '0.1');
                     
                 otherwise
@@ -182,15 +188,18 @@ end
 
 function design_one_sample_test(testDataDir, resDir, numCovariates, ...
                 valueCov, varSmoothing, nSubjects, nPerm, propScaling, ...
-                userPropScaling)
-    if nargin < 9
-        userPropScaling = '50';
-        if nargin < 8
-            propScaling = '';
-            if nargin < 7
-                nPerm = '';
-                if nargin < 6
-                    nSubjects = 5;
+                userPropScaling, grandMeanScaling, userGrandMean)
+    if nargin < 10
+        grandMeanScaling = '';
+        if nargin < 9
+            userPropScaling = '50';
+            if nargin < 8
+                propScaling = '';
+                if nargin < 7
+                    nPerm = '';
+                    if nargin < 6
+                        nSubjects = 5;
+                    end
                 end
             end
         end
@@ -228,7 +237,13 @@ function design_one_sample_test(testDataDir, resDir, numCovariates, ...
         disp(['* Propsca global mean to: ' userPropScaling])
         disp('* Select global calculation...: mean voxel value (within per image fullmean/8 mask)')
     end
-    disp('* grand mean scaling: <no grand Mean scaling>')
+    if isempty(grandMeanScaling)
+        disp('* grand mean scaling: <no grand Mean scaling>')
+    else
+        disp(['* grand mean scaling: ' grandMeanScaling])
+        disp(['scale overall grand mean to...: ' userGrandMean])
+        disp('* Select global calculation...: mean voxel value (within per image fullmean/8 mask)')
+    end
     disp('* Threshold masking: none')
     disp('* Analysis mask?: No')
     snpm_ui
