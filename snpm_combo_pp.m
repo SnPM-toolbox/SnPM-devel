@@ -912,16 +912,13 @@ if WrtFlt
 
 	%-Write out to analyze file
 	%---------------------------------------------------------------
-	Vs = Vs0; 
-	Vs.fname = Fname; Vs.descrip = tmp;
-    Vs.private.dat.fname = Vs.fname;
-	Vs.dim   = Vs.dim(1:3);
-	Vs = sf_create_vol(Vs);
+	Vs = snpm_clone_vol(Vs0, Fname, tmp); 
+	Vs =  spm_create_vol(Vs);
 	t = reshape(t,DIM);
 	for p=1:Vs.dim(3)
 	  Vs = spm_write_plane(Vs,t(:,:,p),p);
 	end
-	Vs = sf_close_vol(Vs);
+	Vs =  sf_close_vol(Vs);
 	clear t
 end
 
