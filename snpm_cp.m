@@ -248,7 +248,10 @@ if ~bVolm & pU_ST_Ut>=0
 end
 % Re-map files to avoid Endian headaches
 for i = 1:length(V)
-  V(i) = spm_vol([V(i).fname ',' num2str(V(i).n)]);
+    curr_pinfo = V(i).pinfo;% Added to keep scaling
+    V(i) = spm_vol([V(i).fname ',' num2str(V(i).n)]);
+    original_pinfo = V(i).pinfo;
+    V(i).pinfo = curr_pinfo;
 end
 
 %-Delete files from previous analyses, if they exist
