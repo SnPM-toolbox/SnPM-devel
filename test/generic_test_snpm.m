@@ -32,6 +32,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             TEST = true;
 
             snpm_test_config;
+            cd(spm_str_manip(which('snpm_test_config'), 'h'))
             global testDataDir;
             global SnPMrefVersion;
             testCase.SnPMrefVersion = SnPMrefVersion;
