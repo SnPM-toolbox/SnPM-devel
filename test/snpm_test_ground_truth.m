@@ -29,7 +29,7 @@ buttonName = questdlg(['Current version of SnPM: ' snpm('ver') '. Is that ok?'],
 
 switch buttonName,
     case 'no',
-        error('Re-computation of groung truth stopped!');
+        error('Re-computation of ground truth stopped!');
     case 'yes',
         disp('Start re-computation of ground truth')
         
@@ -38,7 +38,7 @@ switch buttonName,
         
         cwd = pwd;
         
-        testOneSample = {'onesample_approx'}%, 'onesample_cluster_predefined'} %{'onesample_1', 'onesample_propscaling', 'onesample_approx', 'onesample_var', 'onesample_cov3', 'onesample_cov', , } % };
+        testOneSample = {'onesample_propscaling'}%,'onesample_cluster' 'onesample_cluster_predefined'} %{'onesample_1', 'onesample_propscaling', 'onesample_approx', 'onesample_var', 'onesample_cov3', 'onesample_cov', , } % };
         allTests = testOneSample;
         
         for i = 1:numel(allTests)
@@ -79,6 +79,12 @@ switch buttonName,
                     if isempty(cfgFile) || redo
                         rand('seed',200);
                         design_one_sample_test(testDataDir, resDir, '0', {}, '0', 5, '15')
+                    end
+                
+                case {'onesample_propscaling'}
+                    if isempty(cfgFile) || redo
+                        design_one_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 5, '', 'proportional scaling')
                     end
                     
                     
@@ -132,7 +138,8 @@ switch buttonName,
                 case {'onesample_cluster_predefined'}
                     additional_interactive_predefined_cluster_results(resDir)
                     
-                case {'onesample_cov', 'onesample_cov3', 'onesample_var', 'onesample_approx'}
+                case {'onesample_cov', 'onesample_cov3', 'onesample_var', ...
+                        'onesample_approx', 'onesample_propscaling'}
                     interactive_results(resDir, 'SnPM_filtered_10none', 'P', 'None', '0.1');
                     
                 otherwise
@@ -166,13 +173,15 @@ interactive_results(resDir, 'SnPMt_filtered_clus_4_fwe_p50', 'T', 'FWE', '0.5', 
 interactive_results(resDir, 'SnPMt_filtered_clus_5_fwe_p50', 'T', 'FWE', '0.5', 'Clusterwise', '5', 'P-value');
 end
 
-% design_one_sample_test(resDir, 0)
 function design_one_sample_test(testDataDir, resDir, numCovariates, ...
-                valueCov, varSmoothing, nSubjects, nPerm)
-    if nargin < 7
-        nPerm = '';
-        if nargin < 6
-            nSubjects = 5;
+                valueCov, varSmoothing, nSubjects, nPerm, propScaling)
+    if nargin < 8
+        propScaling = '';
+        if nargin < 7
+            nPerm = '';
+            if nargin < 6
+                nSubjects = 5;
+            end
         end
     end
     
@@ -201,7 +210,13 @@ function design_one_sample_test(testDataDir, resDir, numCovariates, ...
     end
     disp(['* FWHM(mm) for Variance smooth: ' varSmoothing])
     disp('* Collect Supra-Threshold stats?: No')
-    disp('* Select global normalisation: <no Global normalisation>')
+    if isempty(propScaling)
+        disp('* Select global normalisation: <no Global normalisation>')
+    elseif strcmp(propScaling, 'proportional scaling')
+        disp(['* Select global normalisation: ' propScaling])
+        disp('* Propsca global mean to: 50')
+        disp('global calc is it useful??')
+    end
     disp('* grand mean scaling: <no grand Mean scaling>')
     disp('* Threshold masking: none')
     disp('* Analysis mask?: No')
