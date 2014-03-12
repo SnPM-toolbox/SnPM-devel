@@ -38,7 +38,7 @@ switch buttonName,
         
         cwd = pwd;
         
-        testOneSample = {'onesample_ancova'}%'onesample_grandmean_50', 'onesample_grandmean_145','onesample_propscaling_to_user', 'onesample_propscaling','onesample_cluster' 'onesample_cluster_predefined'} %{'onesample_1', 'onesample_propscaling', 'onesample_approx', 'onesample_var', 'onesample_cov3', 'onesample_cov', , } % };
+        testOneSample = {'onesample_slice'}%'onesample_ancova', 'onesample_grandmean_50', 'onesample_grandmean_145','onesample_propscaling_to_user', 'onesample_propscaling','onesample_cluster' 'onesample_cluster_predefined'} %{'onesample_1', 'onesample_propscaling', 'onesample_approx', 'onesample_var', 'onesample_cov3', 'onesample_cov', , } % };
         allTests = testOneSample;
         
         for i = 1:numel(allTests)
@@ -111,6 +111,13 @@ switch buttonName,
                             '0', {}, '0', 5, '', 'AnCova', '')
                     end
                     
+                case {'onesample_slice'}
+                    rand('seed',200);
+                    if isempty(cfgFile) || redo
+                        design_one_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 17, '15')
+                    end
+                    
                 case {'onesample_cluster', 'onesample_cluster_predefined'}
                     nominalCfg = spm_select('FPList', fullfile(spm_str_manip(resDir, 'h'), 'onesample_1'), '^SnPMcfg\.mat$');
                     if isempty(nominalCfg)
@@ -165,7 +172,7 @@ switch buttonName,
                         'onesample_approx', 'onesample_propscaling', ...
                         'onesample_propscaling_to_user', ...
                         'onesample_grandmean_145', 'onesample_grandmean_50',...
-                        'onesample_ancova'}
+                        'onesample_ancova', 'onesample_slice'}
                     interactive_results(resDir, 'SnPM_filtered_10none', 'P', 'None', '0.1');
                     
                 otherwise
@@ -242,6 +249,9 @@ function design_one_sample_test(testDataDir, resDir, numCovariates, ...
         disp(['* # perms. to use? (Max ' num2str(2^nSubjects) '): ' nPerm])
     end
     disp(['* FWHM(mm) for Variance smooth: ' varSmoothing])
+    if nSubjects > 5
+        disp(['* 17 scans: Work volumetrically?: no'])
+    end
     disp('* Collect Supra-Threshold stats?: No')
     if isempty(propScaling)
         disp('* Select global normalisation: <no Global normalisation>')
