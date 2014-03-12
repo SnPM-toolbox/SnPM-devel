@@ -81,7 +81,7 @@ switch buttonName,
                     end
                     
                     
-                case {'onesample_cluster', 'onesample_cluster_predefined', 'onesample_var'}
+                case {'onesample_cluster', 'onesample_cluster_predefined'}
                     nominalCfg = spm_select('FPList', fullfile(spm_str_manip(resDir, 'h'), 'onesample_1'), '^SnPMcfg\.mat$');
                     if isempty(nominalCfg)
                         error('No nominal config file for SnPM');
