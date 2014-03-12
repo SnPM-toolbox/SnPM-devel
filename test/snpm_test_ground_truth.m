@@ -38,7 +38,7 @@ switch buttonName,
         
         cwd = pwd;
         
-        testOneSample = {'onesample_grandmean_145'}%'onesample_propscaling_to_user', 'onesample_propscaling','onesample_cluster' 'onesample_cluster_predefined'} %{'onesample_1', 'onesample_propscaling', 'onesample_approx', 'onesample_var', 'onesample_cov3', 'onesample_cov', , } % };
+        testOneSample = {'onesample_grandmean_50'}%'onesample_grandmean_145','onesample_propscaling_to_user', 'onesample_propscaling','onesample_cluster' 'onesample_cluster_predefined'} %{'onesample_1', 'onesample_propscaling', 'onesample_approx', 'onesample_var', 'onesample_cov3', 'onesample_cov', , } % };
         allTests = testOneSample;
         
         for i = 1:numel(allTests)
@@ -99,6 +99,11 @@ switch buttonName,
                             '0', {}, '0', 5, '', '', '', 'scaling to overall grand mean', '145')
                     end
                     
+                case {'onesample_grandmean_50'}
+                    if isempty(cfgFile) || redo
+                        design_one_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 5, '', '', '', 'scaling to overall grand mean', '50')
+                    end
                     
                 case {'onesample_cluster', 'onesample_cluster_predefined'}
                     nominalCfg = spm_select('FPList', fullfile(spm_str_manip(resDir, 'h'), 'onesample_1'), '^SnPMcfg\.mat$');
@@ -152,7 +157,8 @@ switch buttonName,
                     
                 case {'onesample_cov', 'onesample_cov3', 'onesample_var', ...
                         'onesample_approx', 'onesample_propscaling', ...
-                        'onesample_propscaling_to_user', 'onesample_grandmean_145'}
+                        'onesample_propscaling_to_user', ...
+                        'onesample_grandmean_145', 'onesample_grandmean_50'}
                     interactive_results(resDir, 'SnPM_filtered_10none', 'P', 'None', '0.1');
                     
                 otherwise
