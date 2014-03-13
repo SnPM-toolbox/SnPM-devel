@@ -14,20 +14,10 @@ classdef test_onesub_twocondrepl < generic_test_snpm
             testCase.compaWithSpm = false;
             
             % Fill the design part in the batch
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.P = {
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em01R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em02R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em03R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em04R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em05R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em06R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em07R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em08R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em09R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em10R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em11R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em12R.img,1')
-                 };
+            for i = 1:12
+                testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.P{i} = ...
+                     fullfile(testCase.testDataDir, ['test_data_', num2str(i, '%02.0f') '.nii']);
+            end
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.condidx = [1 2 1 2 1 2 1 2 1 2 1 2];
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.Tss_repc = 6;
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.TwosampTss_Block = 4;
