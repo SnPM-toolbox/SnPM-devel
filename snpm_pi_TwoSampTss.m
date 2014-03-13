@@ -104,12 +104,16 @@ iXblk    = meshgrid(1:nXblk,1:Xblk); iXblk = iXblk(:)';
 %-Compute permutations for a single exchangability block
 %-----------------------------------------------------------------------
 %-Generate all labellings of Xblk scans as +/- 1
-XblkPiCond=[];
-for i=0:Xblk-1
-	XblkPiCond=[ones(2^i,1),XblkPiCond;-ones(2^i,1),XblkPiCond];
-end
-%-Trim to labellings with balance of conditions
-XblkPiCond=XblkPiCond(sum(XblkPiCond')==0,:);
+% XblkPiCond=[];
+% for i=0:Xblk-1
+% 	XblkPiCond=[ones(2^i,1),XblkPiCond;-ones(2^i,1),XblkPiCond];
+% end
+% %-Trim to labellings with balance of conditions
+% XblkPiCond=XblkPiCond(sum(XblkPiCond')==0,:);
+XblkPiCond = -ones(nRepl, Xblk);
+% Label affected to group label "-1"
+alternativeGroup = nchoosek(1:Xblk,Xblk/2);
+XblkPiCond(sub2ind(size(XblkPiCond), repmat(1:nRepl, Xblk/2,1)', alternativeGroup)) = 1;
 
 %-Now build up the complete set of possibe labellings: PiConds
 %-----------------------------------------------------------------------
