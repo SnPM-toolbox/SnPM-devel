@@ -46,7 +46,11 @@ switch buttonName,
 %             'onesample_var', 'onesample_cov3', 'onesample_cov'
 %             } ;
          
-        testTwoSample = {'twosample_cluster_predef_stat'}; %'twosample_cluster_predefined', 'twosample_cluster', 'twosample_1'
+        testTwoSample = {'twosample_var', ...
+                        'twosample_approx', 'twosample_propscaling', ...
+                        'twosample_propscaling_to_user', ...
+                        'twosample_grandmean_145', 'twosample_grandmean_50',...
+                        'twosample_ancova'}%'twosample_cov', 'twosample_cov3' 'twosample_cluster_predef_stat'}; %'twosample_cluster_predefined', 'twosample_cluster', 'twosample_1'
         testOneSubTwoSample = {}% {'onesub_twocondrepl_1_other_design', ...
 %              'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
         allTests = [testOneSample testTwoSample testOneSubTwoSample];
@@ -176,6 +180,58 @@ switch buttonName,
                             configSnPM.pU_ST_Ut = 2.03;  
                     end                    
                    save(cfgFile, '-struct', 'configSnPM')
+                   
+                case {'twosample_cov'}
+                    if isempty(cfgFile) || redo
+                        design_two_sample_test(testDataDir, resDir, '1', {'1 5 2 21 0 3'}, '0')
+                    end
+                    
+                case {'twosample_cov3'}
+                    if isempty(cfgFile) || redo
+                        design_two_sample_test(testDataDir, resDir, '3', ...
+                            {'1 5 2 21 0 3', '1 3 5 7 3 5', '-1 0.5 0.6 -0.1 2 1'}, '0')
+                    end
+                    
+                case {'twosample_var'}
+                    if isempty(cfgFile) || redo
+                        design_two_sample_test(testDataDir, resDir, '0', {}, '6')
+                    end
+                    
+                case {'twosample_approx'}
+                    if isempty(cfgFile) || redo
+                        rand('seed',200);
+                        design_two_sample_test(testDataDir, resDir, '0', {}, '0', 5, '15')
+                    end
+                
+                case {'twosample_propscaling'}
+                    if isempty(cfgFile) || redo
+                        design_two_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 5, '', 'proportional scaling')
+                    end
+                    
+                case {'twosample_propscaling_to_user'}
+                    if isempty(cfgFile) || redo
+                        design_two_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 5, '', 'proportional scaling', '145')
+                    end
+                    
+                case {'twosample_grandmean_145'}
+                    if isempty(cfgFile) || redo
+                        design_two_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 5, '', '', '', 'scaling to overall grand mean', '145')
+                    end
+                    
+                case {'twosample_grandmean_50'}
+                    if isempty(cfgFile) || redo
+                        design_two_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 5, '', '', '', 'scaling to overall grand mean', '50')
+                    end
+                    
+                case {'twosample_ancova'}
+                    if isempty(cfgFile) || redo
+                        design_two_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 5, '', 'AnCova', '')
+                    end
                 
                 % *** One-subject two-sample test ***
                     case {'onesub_twocondrepl_1'}
@@ -229,7 +285,12 @@ switch buttonName,
                         'onesample_grandmean_145', 'onesample_grandmean_50',...
                         'onesample_ancova', 'onesample_slice',...
                         'onesub_twocondrepl_1', 'onesub_twocondrepl_var', ...
-                        'onesub_twocondrepl_1_other_design', 'twosample_1'}
+                        'onesub_twocondrepl_1_other_design', ...
+                        'twosample_1', 'twosample_cov', 'twosample_cov3', 'twosample_var', ...
+                        'twosample_approx', 'twosample_propscaling', ...
+                        'twosample_propscaling_to_user', ...
+                        'twosample_grandmean_145', 'twosample_grandmean_50',...
+                        'twosample_ancova'}
                     interactive_results(resDir, 'SnPM_filtered_10none', 'P', 'None', '0.1');
                     
                 otherwise
