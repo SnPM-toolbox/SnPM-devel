@@ -110,10 +110,11 @@ iXblk    = meshgrid(1:nXblk,1:Xblk); iXblk = iXblk(:)';
 % end
 % %-Trim to labellings with balance of conditions
 % XblkPiCond=XblkPiCond(sum(XblkPiCond')==0,:);
-XblkPiCond = -ones(nRepl, Xblk);
+nOfPerm = nchoosek(Xblk,Xblk/2);
+XblkPiCond = -ones(nOfPerm, Xblk);
 % Label affected to group label "-1"
 alternativeGroup = nchoosek(1:Xblk,Xblk/2);
-XblkPiCond(sub2ind(size(XblkPiCond), repmat(1:nRepl, Xblk/2,1)', alternativeGroup)) = 1;
+XblkPiCond(sub2ind(size(XblkPiCond), repmat(1:nOfPerm, Xblk/2,1)', alternativeGroup)) = 1;
 
 %-Now build up the complete set of possibe labellings: PiConds
 %-----------------------------------------------------------------------

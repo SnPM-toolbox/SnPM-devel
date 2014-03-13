@@ -40,6 +40,21 @@ classdef test_onesub_twocondrepl < generic_test_snpm
             % Nominal test
             testCase.testName = 'onesub_twocondrepl_1';
         end
+        
+        % No covariate, no variance smoothing
+        function test_onesub_twocondrepl_1_other_design(testCase)
+            % Nominal test with alternative design
+            testCase.testName = 'onesub_twocondrepl_1_other_design';
+            % Discard last two volumes
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.P(end) = [];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.P(end) = [];
+            % Change conditions
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.condidx = [1 2 1 2 1 2 1 2 1 2];
+            % Change number of replications
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.Tss_repc = 5;
+            % Change exchangeability block size
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.TwosampTss_Block = 10;
+        end
 
         % With variance smoothing
         function test_onesub_twocondrepl_var(testCase)
