@@ -46,7 +46,7 @@ switch buttonName,
 %             'onesample_var', 'onesample_cov3', 'onesample_cov'
 %             } ;
          
-        testTwoSample = {'twosample_cluster'}; %'twosample_1'
+        testTwoSample = {'twosample_cluster_predefined'}; %'twosample_cluster', 'twosample_1'
         testOneSubTwoSample = {}% {'onesub_twocondrepl_1_other_design', ...
 %              'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
         allTests = [testOneSample testTwoSample testOneSubTwoSample];
