@@ -970,7 +970,8 @@ nBin   = floor((max(T)-min(T))/BinWd)+1;
 nBin   = min(max(nBin,10),50);
 
 hist(T,nBin);
-set(get(gca,'Children'),'FaceColor',[.5 .5 .5]) 
+h = findobj(gca,'Type','patch');
+set(h,'FaceColor',[.5 .5 .5]);
 title('Permutation Distribution:  Maximum Statistic','FontSize',14)
 Ylim = get(gca,'ylim'); Xlim = get(gca,'xlim');
 line(T(1)*[1 1],Ylim.*[1 0.95],'LineStyle',':');
@@ -990,7 +991,8 @@ if (nargin>2)
     nBin   = min(max(nBin,10),50);
     
     hist(C,nBin);
-    set(get(gca,'Children'),'FaceColor',[.5 .5 .5]) 
+    h = findobj(gca,'Type','patch');
+    set(h,'FaceColor',[.5 .5 .5]);
     title('Permutation Distribution: Maximum Cluster Size','FontSize',14)
     Ylim = get(gca,'ylim'); Xlim = get(gca,'xlim');
     line(C(1)*[1 1],Ylim.*[1 0.95],'LineStyle',':');
