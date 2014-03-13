@@ -74,6 +74,7 @@ classdef test_twoSample < generic_test_snpm
         function test_twosample_cov(testCase)
             testCase.compaWithSpm = false; % Not matching SPM orthog?
             
+            testCase.numBetas = 3;
             testCase.testName = 'twosample_cov';
             
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov.c = [1 5 2 21 0 3];
@@ -85,6 +86,7 @@ classdef test_twoSample < generic_test_snpm
             testCase.compaWithSpm = false; % Not matching SPM orthog?
             
             testCase.testName = 'twosample_cov3';
+            testCase.numBetas = 5;
             
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov(1).c = [1 5 2 21 0 3];
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov(1).cname = 'Age';
