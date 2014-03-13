@@ -190,10 +190,10 @@ snpm_check_nperm(nPiCond,nPiCond_mx);
 % absurdly long time, so exact is used.
 
 if nScan<=12 || ~bAproxTst                    % exact method    
-    PiCond = ones(nPiCond, nScan);
+    PiCond = -ones(nPiCond_mx, nScan);
     % Label affected to group label "-1"
     alternativeGroup = nchoosek(1:nScan,nFlip);
-    PiCond(sub2ind(size(PiCond), repmat(1:nPiCond, nFlip,1)', alternativeGroup)) = -1;
+    PiCond(sub2ind(size(PiCond), repmat(1:nPiCond_mx, nFlip,1)', alternativeGroup)) = 1;
 
     %-Only do half the work, if possible
     bhPerms=0;
