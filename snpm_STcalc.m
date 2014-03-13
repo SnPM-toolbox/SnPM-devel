@@ -133,7 +133,7 @@ switch (lower(varargin{1}))
   % Compute the stuff!
   STCS.MxK(perm,isPos) = max(N);
   STCS.C(perm,isPos) = max(A);
-  for i=1:max(A)
+  for i = unique(A)' %i=1:max(A) fix: A does not necessarily contain 1:max(A)
      d = find(A==i);
      Zd = Z(d);
 
