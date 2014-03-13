@@ -186,9 +186,9 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         end
         
         function complete_batch_and_run(testCase)
+            testCase.complete_batch();
             testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), ...
                 ['GT_' strrep(testCase.SnPMrefVersion, '.', '')], testCase.testName);
-            testCase.complete_batch();
             
             if ~exist(testCase.batchResDir, 'dir')
                 mkdir(testCase.batchResDir);
@@ -281,8 +281,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_output = substruct('.','SnPM');
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Vox.VoxSig.FWEth = 0.5;
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_vox_fwe_p50.nii'; 
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Vox.VoxSig.FWEth = 0.1;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_vox_fwe_p10.nii'; 
             
             % FDR voxel-wise p<0.5
             testCase.matlabbatch{end+1}.spm.tools.snpm.inference.SnPMmat(1) = cfg_dep;
@@ -291,8 +291,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).sname = 'Compute: SnPM.mat results file';
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_exbranch = substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1});
             testCase.matlabbatch{end}.spm.tools.snpm.inference.SnPMmat(1).src_output = substruct('.','SnPM');
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Vox.VoxSig.FDRth = 0.5;
-            testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_vox_fdr_p50.nii';  
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Vox.VoxSig.FDRth = 0.7;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_vox_fdr_p70.nii';  
         end
         
         function additional_cluster_results(testCase)

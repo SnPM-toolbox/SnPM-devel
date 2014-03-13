@@ -13,13 +13,10 @@ classdef test_oneSample < generic_test_snpm
         function create_basis_matlabbatch(testCase)
             testCase.numBetas = 1;
             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P = {
-                     fullfile(testCase.testDataDir, 'su_control01', 'cn_sess1', 'con_0001.img,1')
-                     fullfile(testCase.testDataDir, 'su_control02', 'cn_sess1', 'con_0001.img,1')
-                     fullfile(testCase.testDataDir, 'su_control03', 'cn_sess1', 'con_0001.img,1')
-                     fullfile(testCase.testDataDir, 'su_control04', 'cn_sess1', 'con_0001.img,1')
-                     fullfile(testCase.testDataDir, 'su_control05', 'cn_sess1', 'con_0001.img,1')
-                     };
+            for i = 1:5
+                testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P{i,1} = ...
+                     fullfile(testCase.testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii']);
+            end
         end
     end
 
@@ -148,7 +145,7 @@ classdef test_oneSample < generic_test_snpm
             rand('seed',200);
             for i = 6:17
                 testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P{end+1} = ...
-                    fullfile(testCase.testDataDir, ['su_control' num2str(i, '%02.0f')], 'cn_sess1', 'con_0001.img,1');
+                    fullfile(testCase.testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii']);
             end
             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.nPerm = 15;
             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.bVolm = 0;
