@@ -149,6 +149,7 @@ classdef test_twoSample < generic_test_snpm
         
         % Global normalisation, normalisation: ANCOVA
         function test_twosample_ancova(testCase)
+            testCase.compaWithSpm = false; % Not matching SPM orthog?
             testCase.testName = 'twosample_ancova';
             
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.globalm.glonorm = 3;
