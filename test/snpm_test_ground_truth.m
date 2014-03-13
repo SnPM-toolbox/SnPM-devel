@@ -46,7 +46,7 @@ switch buttonName,
 %             'onesample_var', 'onesample_cov3', 'onesample_cov'
 %             } ;
          
-        testTwoSample = {'twosample_cluster_predefined'}; %'twosample_cluster', 'twosample_1'
+        testTwoSample = {'twosample_cluster_predef_stat'}; %'twosample_cluster_predefined', 'twosample_cluster', 'twosample_1'
         testOneSubTwoSample = {}% {'onesub_twocondrepl_1_other_design', ...
 %              'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
         allTests = [testOneSample testTwoSample testOneSubTwoSample];
@@ -154,7 +154,8 @@ switch buttonName,
                         design_two_sample_test(testDataDir, resDir, '0', {}, '0')
                     end   
                     
-                case {'twosample_cluster', 'twosample_cluster_predefined'}
+                case {'twosample_cluster', 'twosample_cluster_predefined', ...
+                        'twosample_cluster_predef_stat'}
                     nominalCfg = spm_select('FPList', fullfile(spm_str_manip(resDir, 'h'), 'twosample_1'), '^SnPMcfg\.mat$');
                     if isempty(nominalCfg)
                         error('No nominal config file for SnPM');
@@ -169,7 +170,10 @@ switch buttonName,
                             configSnPM.pU_ST_Ut = -1;
                         case {'twosample_cluster_predefined'}
                             configSnPM.bST = 1;
-                            configSnPM.pU_ST_Ut = 0.1;     
+                            configSnPM.pU_ST_Ut = 0.1;  
+                        case {'twosample_cluster_predef_stat'}
+                            configSnPM.bST = 1;
+                            configSnPM.pU_ST_Ut = 2.03;  
                     end                    
                    save(cfgFile, '-struct', 'configSnPM')
                 
@@ -215,7 +219,8 @@ switch buttonName,
                     additional_interactive_cluster_results(resDir)
                     interactive_cluster_mass_results(resDir)
                     
-                case {'onesample_cluster_predefined', 'twosample_cluster_predefined'}
+                case {'onesample_cluster_predefined', 'twosample_cluster_predefined',...
+                        'twosample_cluster_predef_stat'}
                     additional_interactive_predefined_cluster_results(resDir)
                     
                 case {'onesample_cov', 'onesample_cov3', 'onesample_var', ...
