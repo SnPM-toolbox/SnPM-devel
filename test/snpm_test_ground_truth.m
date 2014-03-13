@@ -44,7 +44,7 @@ switch buttonName,
         % 'onesample_cluster' 'onesample_cluster_predefined', ...
         % 'onesample_1', 'onesample_propscaling', 'onesample_approx', ...
         % 'onesample_var', 'onesample_cov3', 'onesample_cov'} ;
-        testOneSubTwoSample = {'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
+        testOneSubTwoSample = {'onesub_twocondrepl_1_other_design'}%'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
         allTests = [testOneSample testOneSubTwoSample];
         
         for i = 1:numel(allTests)
@@ -150,6 +150,11 @@ switch buttonName,
                         design_one_sub_two_sample_test(testDataDir, resDir, '0')
                     end
                     
+                    case {'onesub_twocondrepl_1_other_design'}
+                    if isempty(cfgFile) || redo
+                        design_one_sub_two_sample_test(testDataDir, resDir, '0', 10)
+                    end
+                    
                     case {'onesub_twocondrepl_var'}
                     if isempty(cfgFile) || redo
                         design_one_sub_two_sample_test(testDataDir, resDir, '12')
@@ -189,7 +194,8 @@ switch buttonName,
                         'onesample_propscaling_to_user', ...
                         'onesample_grandmean_145', 'onesample_grandmean_50',...
                         'onesample_ancova', 'onesample_slice',...
-                        'onesub_twocondrepl_1', 'onesub_twocondrepl_var'}
+                        'onesub_twocondrepl_1', 'onesub_twocondrepl_var', ...
+                        'onesub_twocondrepl_1_other_design'}
                     interactive_results(resDir, 'SnPM_filtered_10none', 'P', 'None', '0.1');
                     
                 otherwise
@@ -224,21 +230,29 @@ interactive_results(resDir, 'SnPMt_filtered_clus_5_fwe_p50', 'T', 'FWE', '0.5', 
 end
 
 % Instructions for interactive one-subject two-sample test
-function design_one_sub_two_sample_test(testDataDir, resDir, varSmoothing)
+function design_one_sub_two_sample_test(testDataDir, resDir, varSmoothing, nSubjects)
+    if nargin < 4
+        nSubjects = 12;
+    end
+
     cwd = pwd;
     cd(resDir)
     % There is no snpmcfg.mat start snpm_ui and create it
     % interactively (with instructions for user)
     disp('* Select design type: SingleSub: Two Sample T test; 2 conditions');
-    disp('* # replications per condition: 6');
-    disp('* Size of exchangeability block: 4');
+    disp(['* # replications per condition: ' num2str(nSubjects/2)]);
+    if nSubjects == 12
+        disp('* Size of exchangeability block: 4');
+    else
+        disp('* Size of exchangeability block: 10');
+    end
     disp('* Select scans in time order:')
-    for i = 1:12
+    for i = 1:nSubjects
         disp(sprintf(['\t' ...
                     fullfile(testDataDir, 'PER_motor', ...
                     ['s8np01160em' num2str(i, '%02.0f') 'R.img'])]));
     end
-    disp('* Enter conditions index (B/A) [12]: ABABABABABAB');
+    disp(['* Enter conditions index (B/A) [' num2str(nSubjects) ']: ' repmat('AB', 1, nSubjects/2)]);
     common_choices(1, varSmoothing, '', '', '')
     snpm_ui
     cd(cwd);
