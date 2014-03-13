@@ -38,14 +38,16 @@ switch buttonName,
         
         cwd = pwd;
         
-        testOneSample = {}; %{'onesample_slice', 'onesample_ancova', ...
+        testOneSample = {'onesample_1'}; %{'onesample_slice', 'onesample_ancova', ...
         % 'onesample_grandmean_50', 'onesample_grandmean_145', ...
         % 'onesample_propscaling_to_user', 'onesample_propscaling', ...
         % 'onesample_cluster' 'onesample_cluster_predefined', ...
         % 'onesample_1', 'onesample_propscaling', 'onesample_approx', ...
         % 'onesample_var', 'onesample_cov3', 'onesample_cov'} ;
-        testOneSubTwoSample = {'onesub_twocondrepl_1_other_design'}%'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
-        allTests = [testOneSample testOneSubTwoSample];
+        testTwoSample = {};%{'twosample_1'}; 
+        testOneSubTwoSample = {}; %{'onesub_twocondrepl_1_other_design', ...
+%             'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
+        allTests = [testOneSample testTwoSample testOneSubTwoSample];
         
         for i = 1:numel(allTests)
             currTest = allTests{i};
@@ -144,6 +146,12 @@ switch buttonName,
                     end                    
                    save(cfgFile, '-struct', 'configSnPM')
                    
+                % *** Two-sample test ***
+                case {'twosample_1'}
+                    if isempty(cfgFile) || redo
+                        design_two_sample_test(testDataDir, resDir, '0', {}, '0')
+                    end   
+                
                 % *** One-subject two-sample test ***
                     case {'onesub_twocondrepl_1'}
                     if isempty(cfgFile) || redo
@@ -212,8 +220,8 @@ if nargin == 1
 end
 interactive_results(resDir, 'SnPMt_filtered_vox_unc_p10', 'P', 'None', '0.1');
 interactive_results(resDir, 'SnPMt_filtered_vox_unc_t16', 'T', 'None', '1.6', clusterInference);
-interactive_results(resDir, 'SnPMt_filtered_vox_fwe_p50', 'T', 'FWE', '0.5', clusterInference);
-interactive_results(resDir, 'SnPMt_filtered_vox_fdr_p50', 'P', 'FDR', '0.5');
+interactive_results(resDir, 'SnPMt_filtered_vox_fwe_p10', 'T', 'FWE', '0.1', clusterInference);
+interactive_results(resDir, 'SnPMt_filtered_vox_fdr_p70', 'P', 'FDR', '0.7');
 end
 
 function additional_interactive_predefined_cluster_results(resDir)
@@ -253,25 +261,31 @@ function design_one_sub_two_sample_test(testDataDir, resDir, varSmoothing, nSubj
                     ['s8np01160em' num2str(i, '%02.0f') 'R.img'])]));
     end
     disp(['* Enter conditions index (B/A) [' num2str(nSubjects) ']: ' repmat('AB', 1, nSubjects/2)]);
-    common_choices(1, varSmoothing, '', '', '')
+    common_choices(1, varSmoothing, '', '', '', '')
     snpm_ui
     cd(cwd);
 end
 
-% Instructions for interactive one-sample tests
-function design_one_sample_test(testDataDir, resDir, numCovariates, ...
+% Instructions for interactive two-sample tests
+function design_two_sample_test(testDataDir, resDir, numCovariates, ...
                 valueCov, varSmoothing, nSubjects, nPerm, propScaling, ...
                 userPropScaling, grandMeanScaling, userGrandMean)
-    if nargin < 10
-        grandMeanScaling = '';
-        if nargin < 9
-            userPropScaling = '50';
-            if nargin < 8
-                propScaling = '';
-                if nargin < 7
-                    nPerm = '';
-                    if nargin < 6
-                        nSubjects = 5;
+    if nargin < 11
+        userGrandMean = '';
+        if nargin < 10
+            grandMeanScaling = '';
+            if nargin < 9
+                userPropScaling = '50';
+                if nargin < 8
+                    propScaling = '';
+                    if nargin < 7
+                        nPerm = '';
+                        if nargin < 6
+                            nSubjects = 5;
+                            if nargin < 5
+                                varSmoothing = '0';
+                            end
+                        end
                     end
                 end
             end
@@ -282,7 +296,7 @@ function design_one_sample_test(testDataDir, resDir, numCovariates, ...
     cd(resDir)
     % There is no snpmcfg.mat start snpm_ui and create it
     % interactively (with instructions for user)
-    disp('* Select design type: MultiSub: One Sample T test on differences; 1 condition');
+    disp('* Select design type: 2 Groups: Two Sample T test; 1 scan/subject');
     disp('* Select all scans:');
     for i = 1:nSubjects
         disp(fullfile(testDataDir, ['su_control' num2str(i, '%02.0f')], ...
@@ -301,12 +315,70 @@ function design_one_sample_test(testDataDir, resDir, numCovariates, ...
     if ~isempty(nPerm)
         disp(['* # perms. to use? (Max ' num2str(2^nSubjects) '): ' nPerm])
     end
-    common_choices(varSmoothing, propScaling, grandMeanScaling, userGrandMean);
+    common_choices(varSmoothing, propScaling, grandMeanScaling, ...
+        userGrandMean, userPropScaling);
     snpm_ui
     cd(cwd);
 end
 
-function common_choices(nSubjects, varSmoothing, propScaling, grandMeanScaling, userGrandMean)
+% Instructions for interactive one-sample tests
+function design_one_sample_test(testDataDir, resDir, numCovariates, ...
+                valueCov, varSmoothing, nSubjects, nPerm, propScaling, ...
+                userPropScaling, grandMeanScaling, userGrandMean)
+    if nargin < 11
+        userGrandMean = '';
+        if nargin < 10
+            grandMeanScaling = '';
+            if nargin < 9
+                userPropScaling = '50';
+                if nargin < 8
+                    propScaling = '';
+                    if nargin < 7
+                        nPerm = '';
+                        if nargin < 6
+                            nSubjects = 5;
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    cwd = pwd;
+    cd(testDataDir)
+    % There is no snpmcfg.mat start snpm_ui and create it
+    % interactively (with instructions for user)
+    disp('* Select design type: MultiSub: One Sample T test on differences; 1 condition');
+    disp('* Select all scans:');
+    for i = 1:nSubjects
+        disp(sprintf(['\t' fullfile(testDataDir, ['test_data' num2str(i, '%02.0f') '.nii'])]))
+    end
+    disp(['* # of confounding covariates: ' numCovariates])
+    for i = 1:str2double(numCovariates)
+        disp(['* [5] - Covariate ' num2str(i) ': ' valueCov{i}])
+    end
+    if isempty(nPerm)
+        approx = 'No';
+    else
+        approx = 'Yes';
+    end
+    disp(['* ' num2str(2^nSubjects) ' Perms. Use approx. test?: ' approx])
+    if ~isempty(nPerm)
+        disp(['* # perms. to use? (Max ' num2str(2^nSubjects) '): ' nPerm])
+    end
+    common_choices(nSubjects, varSmoothing, propScaling, grandMeanScaling, ...
+        userGrandMean, userPropScaling);
+    snpm_ui
+    cfgFile = spm_select('FPList', pwd, '^SnPMcfg\.mat$');
+    if isempty(cfgFile)
+        error(['No SnPM configuration file in' pwd]);
+    end
+    movefile(cfgFile, resDir);
+    cd(cwd);
+end
+
+function common_choices(nSubjects, varSmoothing, propScaling, ...
+    grandMeanScaling, userGrandMean, userPropScaling)
     disp(['* FWHM(mm) for Variance smooth: ' varSmoothing])
     if nSubjects > 5
         disp(['* 17 scans: Work volumetrically?: no'])
