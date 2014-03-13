@@ -46,7 +46,7 @@ switch buttonName,
 %             'onesample_var', 'onesample_cov3', 'onesample_cov'
 %             } ;
          
-        testTwoSample = {'twosample_1'}; 
+        testTwoSample = {'twosample_cluster'}; %'twosample_1'
         testOneSubTwoSample = {}% {'onesub_twocondrepl_1_other_design', ...
 %              'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
         allTests = [testOneSample testTwoSample testOneSubTwoSample];
@@ -153,6 +153,25 @@ switch buttonName,
                     if isempty(cfgFile) || redo
                         design_two_sample_test(testDataDir, resDir, '0', {}, '0')
                     end   
+                    
+                case {'twosample_cluster', 'twosample_cluster_predefined'}
+                    nominalCfg = spm_select('FPList', fullfile(spm_str_manip(resDir, 'h'), 'twosample_1'), '^SnPMcfg\.mat$');
+                    if isempty(nominalCfg)
+                        error('No nominal config file for SnPM');
+                    end
+                    copyfile(nominalCfg, resDir);
+                    cfgFile = spm_select('FPList', resDir, '^SnPMcfg\.mat$');
+                    configSnPM = load(cfgFile);
+                    
+                    switch(allTests{i})
+                        case {'twosample_cluster'}
+                            configSnPM.bST = 1;
+                            configSnPM.pU_ST_Ut = -1;
+                        case {'twosample_cluster_predefined'}
+                            configSnPM.bST = 1;
+                            configSnPM.pU_ST_Ut = 0.1;     
+                    end                    
+                   save(cfgFile, '-struct', 'configSnPM')
                 
                 % *** One-subject two-sample test ***
                     case {'onesub_twocondrepl_1'}
@@ -191,12 +210,12 @@ switch buttonName,
                 case {'onesample_1'}
                     additional_interactive_results(resDir)
                     
-                case {'onesample_cluster'}
+                case {'onesample_cluster', 'twosample_cluster'}
                     additional_interactive_results(resDir, 'Voxelwise')
                     additional_interactive_cluster_results(resDir)
                     interactive_cluster_mass_results(resDir)
                     
-                case {'onesample_cluster_predefined'}
+                case {'onesample_cluster_predefined', 'twosample_cluster_predefined'}
                     additional_interactive_predefined_cluster_results(resDir)
                     
                 case {'onesample_cov', 'onesample_cov3', 'onesample_var', ...
