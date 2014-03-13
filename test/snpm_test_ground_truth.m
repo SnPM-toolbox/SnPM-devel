@@ -484,7 +484,7 @@ function common_choices(nSubjects, varSmoothing, propScaling, ...
             disp(['* Propsca global mean to: ' userPropScaling])
         end
     end
-    if isempty(propScaling)
+    if isempty(propScaling) || strcmp(propScaling, 'AnCova')
         if isempty(grandMeanScaling)
             disp('* grand mean scaling: <no grand Mean scaling>')
         else
