@@ -13,19 +13,14 @@ classdef test_twoSample < generic_test_snpm
         function create_basis_matlabbatch(testCase)
             testCase.numBetas = 2;
             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.scans1 = {...
-                 fullfile(testCase.testDataDir, 'su_control01', 'cn_sess1', 'con_0001.img,1'),...
-                 fullfile(testCase.testDataDir, 'su_control02', 'cn_sess1', 'con_0001.img,1'),...
-                 fullfile(testCase.testDataDir, 'su_control03', 'cn_sess1', 'con_0001.img,1'),...
-                 fullfile(testCase.testDataDir, 'su_control04', 'cn_sess1', 'con_0001.img,1'),...
-                 fullfile(testCase.testDataDir, 'su_control05', 'cn_sess1', 'con_0001.img,1')};
-             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.scans2 = {...
-                 fullfile(testCase.testDataDir, 'su_control06', 'cn_sess1', 'con_0001.img,1'),...
-                 fullfile(testCase.testDataDir, 'su_control07', 'cn_sess1', 'con_0001.img,1'),...
-                 fullfile(testCase.testDataDir, 'su_control08', 'cn_sess1', 'con_0001.img,1'),...
-                 fullfile(testCase.testDataDir, 'su_control09', 'cn_sess1', 'con_0001.img,1'),...
-                 fullfile(testCase.testDataDir, 'su_control10', 'cn_sess1', 'con_0001.img,1')};
-            %testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.group_memb = 'A A A A A B B B B B';
+            for k = 1:3
+                testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.scans1{k,1} = ...
+                     fullfile(testCase.testDataDir, ['test_data_', num2str(k, '%02.0f'), '.nii']);
+            end
+            for k = 18:20
+                testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.scans2{k-17,1} = ...
+                     fullfile(testCase.testDataDir, ['test_data_gr2_', num2str(k, '%02.0f'), '.nii']);
+            end
         end
     end
     
@@ -44,6 +39,7 @@ classdef test_twoSample < generic_test_snpm
             % Test FDR, FWE et uncorrected T thresh as well
             additional_results(testCase);
             additional_cluster_results(testCase);
+            additional_cluster_mass_results(testCase);
         end
 
         % No covariate, no variance smoothing and cluster stat with
@@ -80,7 +76,7 @@ classdef test_twoSample < generic_test_snpm
             
             testCase.testName = 'twosample_cov';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov.c = [1 5 2 21 0 3 6 14 8 5];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov.c = [1 5 2 21 0 3];
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov.cname = 'Age';
         end
         
@@ -90,16 +86,16 @@ classdef test_twoSample < generic_test_snpm
             
             testCase.testName = 'twosample_cov3';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov(1).c = [1 5 2 21 0 3 6 14 8 5];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov(1).c = [1 5 2 21 0 3];
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov(1).cname = 'Age';
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov(2).c = [1 3 5 7 3 5 11 7 8 4];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov(2).c = [1 3 5 7 3 5];
 %             u = [1 5 2 21 0 3 6 14 8 5];
 %             x=u(:).'/norm(u);
 %             yz=null(x).';
 %             xyz=[x;yz]*norm(u);
 %             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov(2).c = xyz(2,:);
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov(2).cname = 'Height';
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov(3).c = [-1 0.5 0.6 -0.1 2 1 1.5 0.5 1 -1];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov(3).c = [-1 0.5 0.6 -0.1 2 1];
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.cov(3).cname = 'Width';
         end
 
@@ -114,17 +110,8 @@ classdef test_twoSample < generic_test_snpm
         function test_twosample_approx(testCase)
             testCase.testName = 'twosample_approx';
             
-            rand('seed',200);
-            
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.scans1(end+1:end+2) = {...
-                 fullfile(testCase.testDataDir, 'su_control11', 'cn_sess1', 'con_0001.img,1'),...
-                 fullfile(testCase.testDataDir, 'su_control12', 'cn_sess1', 'con_0001.img,1')...
-                 };
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.scans2(end+1) = {...
-                 fullfile(testCase.testDataDir, 'su_control13', 'cn_sess1', 'con_0001.img,1')...
-                 };
-             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.nPerm = 100;
+            rand('seed',200);            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.nPerm = 15;
         end
         
         % Global normalisation, normalisation: Proportional scaling scaled 
