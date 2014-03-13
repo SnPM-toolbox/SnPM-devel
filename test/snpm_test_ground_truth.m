@@ -38,18 +38,17 @@ switch buttonName,
         
         cwd = pwd;
         
-        testOneSample = { 'onesample_slice', 'onesample_ancova', ...
-            'onesample_grandmean_50', 'onesample_grandmean_145', ...
-            'onesample_propscaling_to_user', 'onesample_propscaling', ...
-            'onesample_cluster'...
-            } ;
-         
-        %'onesample_cluster_predefined'
-%         'onesample_1', 'onesample_propscaling', 'onesample_approx', ...
+        testOneSample = {} % { 'onesample_slice', 'onesample_ancova', ...
+%             'onesample_grandmean_50', 'onesample_grandmean_145', ...
+%             'onesample_propscaling_to_user', 'onesample_propscaling', ...
+%             'onesample_cluster', 'onesample_cluster_predefined', ...
+%             'onesample_1', 'onesample_propscaling', 'onesample_approx', ...
 %             'onesample_var', 'onesample_cov3', 'onesample_cov'
+%             } ;
+         
         testTwoSample = {};%{'twosample_1'}; 
-        testOneSubTwoSample = {}; %{'onesub_twocondrepl_1_other_design', ...
-%             'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
+        testOneSubTwoSample = {'onesub_twocondrepl_1_other_design', ...
+             'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
         allTests = [testOneSample testTwoSample testOneSubTwoSample];
         
         for i = 1:numel(allTests)
@@ -247,7 +246,7 @@ function design_one_sub_two_sample_test(testDataDir, resDir, varSmoothing, nSubj
     end
 
     cwd = pwd;
-    cd(resDir)
+    cd(testDataDir)
     % There is no snpmcfg.mat start snpm_ui and create it
     % interactively (with instructions for user)
     disp('* Select design type: SingleSub: Two Sample T test; 2 conditions');
@@ -259,14 +258,11 @@ function design_one_sub_two_sample_test(testDataDir, resDir, varSmoothing, nSubj
     end
     disp('* Select scans in time order:')
     for i = 1:nSubjects
-        disp(sprintf(['\t' ...
-                    fullfile(testDataDir, 'PER_motor', ...
-                    ['s8np01160em' num2str(i, '%02.0f') 'R.img'])]));
+        disp(sprintf(['\t' fullfile(testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
     end
     disp(['* Enter conditions index (B/A) [' num2str(nSubjects) ']: ' repmat('AB', 1, nSubjects/2)]);
     common_choices(1, varSmoothing, '', '', '', '')
-    snpm_ui
-    cd(cwd);
+    snpm_ui_and_copy_config(cwd, resDir);
 end
 
 % Instructions for interactive two-sample tests
@@ -320,8 +316,7 @@ function design_two_sample_test(testDataDir, resDir, numCovariates, ...
     end
     common_choices(varSmoothing, propScaling, grandMeanScaling, ...
         userGrandMean, userPropScaling);
-    snpm_ui
-    cd(cwd);
+    snpm_ui_and_copy_config(cwd, resDir)
 end
 
 % Instructions for interactive one-sample tests
@@ -371,6 +366,10 @@ function design_one_sample_test(testDataDir, resDir, numCovariates, ...
     end
     common_choices(nSubjects, varSmoothing, propScaling, grandMeanScaling, ...
         userGrandMean, userPropScaling);
+    snpm_ui_and_copy_config(cwd, resDir)
+end
+
+function snpm_ui_and_copy_config(cwd, resDir)
     snpm_ui
     cfgFile = spm_select('FPList', pwd, '^SnPMcfg\.mat$');
     if isempty(cfgFile)
