@@ -23,10 +23,16 @@ switch buttonName,
         % We need 17 scans in one-sample test with approximated
         % distribution
         nScans = 17;
+        gr2nScans = 3;
         
         % Create 'nScans' dummy (small) volumes to be used for testing.
-        for i = 1:nScans
-            vol.fname    = fullfile(testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii']);
+        for i = (nScans+1):(nScans+gr2nScans)
+            grSuffix = '';
+            if i > nScans
+                grSuffix = 'gr2_';
+            end
+            
+            vol.fname    = fullfile(testDataDir, ['test_data_' grSuffix num2str(i, '%02.0f') '.nii']);
             vol.descrip  = ['Test data ' num2str(i, '%02.0f')];
             vol.mat      =  [   -2     0     0    80; ...
                 0     2     0  -114; ...
@@ -39,8 +45,10 @@ switch buttonName,
             % Noise data...
             data = normrnd(0,1, vol.dim);
             
-            % Add some big effect (for FWE detections)
-            data(2:4,2:4,2:5) = normrnd(10,1, [3 3 4]);
+            if i < nScans
+                % Add some big effect (for FWE detections)
+                data(2:4,2:4,2:5) = normrnd(10,1, [3 3 4]);
+            end
             
             vol = spm_write_vol(vol, data);
         end

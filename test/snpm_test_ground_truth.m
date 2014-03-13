@@ -46,9 +46,9 @@ switch buttonName,
 %             'onesample_var', 'onesample_cov3', 'onesample_cov'
 %             } ;
          
-        testTwoSample = {};%{'twosample_1'}; 
-        testOneSubTwoSample = {'onesub_twocondrepl_1_other_design', ...
-             'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
+        testTwoSample = {'twosample_1'}; 
+        testOneSubTwoSample = {}% {'onesub_twocondrepl_1_other_design', ...
+%              'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
         allTests = [testOneSample testTwoSample testOneSubTwoSample];
         
         for i = 1:numel(allTests)
@@ -205,7 +205,7 @@ switch buttonName,
                         'onesample_grandmean_145', 'onesample_grandmean_50',...
                         'onesample_ancova', 'onesample_slice',...
                         'onesub_twocondrepl_1', 'onesub_twocondrepl_var', ...
-                        'onesub_twocondrepl_1_other_design'}
+                        'onesub_twocondrepl_1_other_design', 'twosample_1'}
                     interactive_results(resDir, 'SnPM_filtered_10none', 'P', 'None', '0.1');
                     
                 otherwise
@@ -292,15 +292,20 @@ function design_two_sample_test(testDataDir, resDir, numCovariates, ...
     end
     
     cwd = pwd;
-    cd(resDir)
+    cd(testDataDir)
     % There is no snpmcfg.mat start snpm_ui and create it
     % interactively (with instructions for user)
     disp('* Select design type: 2 Groups: Two Sample T test; 1 scan/subject');
     disp('* Select all scans:');
-    for i = 1:nSubjects
-        disp(fullfile(testDataDir, ['su_control' num2str(i, '%02.0f')], ...
-            'cn_sess1', 'con_0001.img,1'))
+    for i = 1:3
+        disp(sprintf(['\t' ...
+                fullfile(testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
     end
+    for i = 18:20
+        disp(sprintf(['\t' ...
+                fullfile(testDataDir, ['test_data_gr2_' num2str(i, '%02.0f') '.nii'])]));
+    end
+    disp(['Enter subject index (A/B) [6]: AAABBB'])
     disp(['* # of confounding covariates: ' numCovariates])
     for i = 1:str2double(numCovariates)
         disp(['* [5] - Covariate ' num2str(i) ': ' valueCov{i}])
@@ -314,7 +319,7 @@ function design_two_sample_test(testDataDir, resDir, numCovariates, ...
     if ~isempty(nPerm)
         disp(['* # perms. to use? (Max ' num2str(2^nSubjects) '): ' nPerm])
     end
-    common_choices(varSmoothing, propScaling, grandMeanScaling, ...
+    common_choices(5, varSmoothing, propScaling, grandMeanScaling, ...
         userGrandMean, userPropScaling);
     snpm_ui_and_copy_config(cwd, resDir)
 end
