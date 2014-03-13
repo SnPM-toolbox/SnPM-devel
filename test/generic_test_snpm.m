@@ -186,6 +186,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         end
         
         function complete_batch_and_run(testCase)
+            testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), ...
+                ['GT_' strrep(testCase.SnPMrefVersion, '.', '')], testCase.testName);
             testCase.complete_batch();
             
             if ~exist(testCase.batchResDir, 'dir')

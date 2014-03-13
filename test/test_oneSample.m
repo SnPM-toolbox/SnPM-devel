@@ -162,7 +162,6 @@ classdef test_oneSample < generic_test_snpm
             % corresponding result directory computed manually using the
             % original spm2-like interface
             testCase.batchResDir = fullfile(testCase.parentDataDir, 'results', 'batch', testCase.testName);
-            testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), ['GT_' strrep(testCase.SnPMrefVersion, '.', '')], testCase.testName);
             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.dir = {testCase.batchResDir};
         end
         
