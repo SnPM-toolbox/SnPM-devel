@@ -21,8 +21,8 @@ if isempty(testDataDir)
     error('Test data directory not set, please update snpm_test_config');
 end
 
-disp('Current version of SnPM')
-disp(which('snpm'))
+disp(['Current version of SnPM: ' snpm('ver')])
+disp(['Path: ' which('snpm')])
 
 buttonName = questdlg(['Current version of SnPM: ' snpm('ver') '. Is that ok?'],...
     'Check SnPM version','yes','no','no');
@@ -31,15 +31,21 @@ switch buttonName,
     case 'no',
         error('Re-computation of ground truth stopped!');
     case 'yes',
-        disp('Start re-computation of ground truth')
+        disp(sprintf('\nStart re-computation of ground truth\n'))
         
         resultDir = fullfile(spm_str_manip(testDataDir, 'h'), 'results');
         gtDirName = ['GT_' strrep(snpm('ver'), '.', '')];
         
         cwd = pwd;
         
-        testOneSample = {'onesample_slice'}%'onesample_ancova', 'onesample_grandmean_50', 'onesample_grandmean_145','onesample_propscaling_to_user', 'onesample_propscaling','onesample_cluster' 'onesample_cluster_predefined'} %{'onesample_1', 'onesample_propscaling', 'onesample_approx', 'onesample_var', 'onesample_cov3', 'onesample_cov', , } % };
-        allTests = testOneSample;
+        testOneSample = {}; %{'onesample_slice', 'onesample_ancova', ...
+        % 'onesample_grandmean_50', 'onesample_grandmean_145', ...
+        % 'onesample_propscaling_to_user', 'onesample_propscaling', ...
+        % 'onesample_cluster' 'onesample_cluster_predefined', ...
+        % 'onesample_1', 'onesample_propscaling', 'onesample_approx', ...
+        % 'onesample_var', 'onesample_cov3', 'onesample_cov'} ;
+        testOneSubTwoSample = {'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
+        allTests = [testOneSample testOneSubTwoSample];
         
         for i = 1:numel(allTests)
             currTest = allTests{i};
@@ -54,6 +60,7 @@ switch buttonName,
             cfgFile = spm_select('FPList', resDir, '^SnPMcfg\.mat$');           
             
             switch(allTests{i})
+                % *** One-sample test ***
                 case {'onesample_1'}
                     if isempty(cfgFile) || redo
                         design_one_sample_test(testDataDir, resDir, '0', {}, '0')
@@ -134,11 +141,20 @@ switch buttonName,
                         case {'onesample_cluster_predefined'}
                             configSnPM.bST = 1;
                             configSnPM.pU_ST_Ut = 0.1;     
+                    end                    
+                   save(cfgFile, '-struct', 'configSnPM')
+                   
+                % *** One-subject two-sample test ***
+                    case {'onesub_twocondrepl_1'}
+                    if isempty(cfgFile) || redo
+                        design_one_sub_two_sample_test(testDataDir, resDir, '0')
                     end
                     
-                    
-                    save(cfgFile, '-struct', 'configSnPM')
-                    
+                    case {'onesub_twocondrepl_var'}
+                    if isempty(cfgFile) || redo
+                        design_one_sub_two_sample_test(testDataDir, resDir, '12')
+                    end
+                
                 otherwise
                     error('undefined test')
             end
@@ -172,7 +188,8 @@ switch buttonName,
                         'onesample_approx', 'onesample_propscaling', ...
                         'onesample_propscaling_to_user', ...
                         'onesample_grandmean_145', 'onesample_grandmean_50',...
-                        'onesample_ancova', 'onesample_slice'}
+                        'onesample_ancova', 'onesample_slice',...
+                        'onesub_twocondrepl_1', 'onesub_twocondrepl_var'}
                     interactive_results(resDir, 'SnPM_filtered_10none', 'P', 'None', '0.1');
                     
                 otherwise
@@ -206,6 +223,28 @@ interactive_results(resDir, 'SnPMt_filtered_clus_4_fwe_p50', 'T', 'FWE', '0.5', 
 interactive_results(resDir, 'SnPMt_filtered_clus_5_fwe_p50', 'T', 'FWE', '0.5', 'Clusterwise', '5', 'P-value');
 end
 
+% Instructions for interactive one-subject two-sample test
+function design_one_sub_two_sample_test(testDataDir, resDir, varSmoothing)
+    cwd = pwd;
+    cd(resDir)
+    % There is no snpmcfg.mat start snpm_ui and create it
+    % interactively (with instructions for user)
+    disp('* Select design type: SingleSub: Two Sample T test; 2 conditions');
+    disp('* # replications per condition: 6');
+    disp('* Size of exchangeability block: 4');
+    disp('* Select scans in time order:')
+    for i = 1:12
+        disp(sprintf(['\t' ...
+                    fullfile(testDataDir, 'PER_motor', ...
+                    ['s8np01160em' num2str(i, '%02.0f') 'R.img'])]));
+    end
+    disp('* Enter conditions index (B/A) [12]: ABABABABABAB');
+    common_choices(1, varSmoothing, '', '', '')
+    snpm_ui
+    cd(cwd);
+end
+
+% Instructions for interactive one-sample tests
 function design_one_sample_test(testDataDir, resDir, numCovariates, ...
                 valueCov, varSmoothing, nSubjects, nPerm, propScaling, ...
                 userPropScaling, grandMeanScaling, userGrandMean)
@@ -248,6 +287,12 @@ function design_one_sample_test(testDataDir, resDir, numCovariates, ...
     if ~isempty(nPerm)
         disp(['* # perms. to use? (Max ' num2str(2^nSubjects) '): ' nPerm])
     end
+    common_choices(varSmoothing, propScaling, grandMeanScaling, userGrandMean);
+    snpm_ui
+    cd(cwd);
+end
+
+function common_choices(nSubjects, varSmoothing, propScaling, grandMeanScaling, userGrandMean)
     disp(['* FWHM(mm) for Variance smooth: ' varSmoothing])
     if nSubjects > 5
         disp(['* 17 scans: Work volumetrically?: no'])
@@ -272,8 +317,6 @@ function design_one_sample_test(testDataDir, resDir, numCovariates, ...
     end
     disp('* Threshold masking: none')
     disp('* Analysis mask?: No')
-    snpm_ui
-    cd(cwd);
 end
 
 function interactive_cluster_mass_results(resDir)
