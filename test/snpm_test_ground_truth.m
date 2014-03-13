@@ -395,11 +395,13 @@ function common_choices(nSubjects, varSmoothing, propScaling, ...
             disp(['* Propsca global mean to: ' userPropScaling])
         end
     end
-    if isempty(grandMeanScaling)
-        disp('* grand mean scaling: <no grand Mean scaling>')
-    else
-        disp(['* grand mean scaling: ' grandMeanScaling])
-        disp(['scale overall grand mean to...: ' userGrandMean])
+    if isempty(propScaling)
+        if isempty(grandMeanScaling)
+            disp('* grand mean scaling: <no grand Mean scaling>')
+        else
+            disp(['* grand mean scaling: ' grandMeanScaling])
+            disp(['* scale overall grand mean to...: ' userGrandMean])
+        end
     end
     if ~isempty(propScaling) || ~isempty(grandMeanScaling)
         disp('* Select global calculation...: mean voxel value (within per image fullmean/8 mask)')
