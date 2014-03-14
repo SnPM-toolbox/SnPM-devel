@@ -46,13 +46,16 @@ switch buttonName,
         %             'onesample_var', 'onesample_cov3', 'onesample_cov'
         %             } ;
         
-        testTwoSample = {'twosample_ancova'} %{'twosample_var', ...
+        testTwoSample = {} %{'twosample_ancova'} %{'twosample_var', ...
         %                         'twosample_approx', 'twosample_propscaling', ...
         %                         'twosample_propscaling_to_user', ...
         %                         'twosample_grandmean_145', 'twosample_grandmean_50'  }%'twosample_cov', 'twosample_cov3' 'twosample_cluster_predef_stat'}; %'twosample_cluster_predefined', 'twosample_cluster', 'twosample_1'
         testOneSubTwoSample = {}% 'onesub_twocondrepl_1_other_design', ...
         %               'onesub_twocondrepl_1', 'onesub_twocondrepl_var'};
-        allTests = [testOneSample testTwoSample testOneSubTwoSample];
+        
+        testANOVAbetw = {'ANOVAbetween_approx'};%'ANOVAbetween_var' 'ANOVAbetween_1' 'ANOVAbetween_allzero'
+        allTests = [testOneSample testTwoSample testOneSubTwoSample ...
+            testANOVAbetw];
         
         for i = 1:numel(allTests)
             currTest = allTests{i};
@@ -248,6 +251,26 @@ switch buttonName,
                         design_one_sub_two_sample_test(testDataDir, resDir, '12')
                     end
                     
+                    % ANOVA between
+                case {'ANOVAbetween_1'}
+                    if isempty(cfgFile) || redo
+                        design_anova_between_test(testDataDir, resDir, '0')
+                    end
+                case {'ANOVAbetween_allzero'}
+                    if isempty(cfgFile) || redo
+                        design_anova_between_test(testDataDir, resDir, '0', '', 'all zero');
+                    end   
+                case {'ANOVAbetween_var'}
+                    if isempty(cfgFile) || redo
+                        design_anova_between_test(testDataDir, resDir, '8', '', 'all zero')
+                    end
+                case {'ANOVAbetween_approx'}
+                    if isempty(cfgFile) || redo
+                        rand('seed',200);
+                        design_anova_between_test(testDataDir, resDir, '0', '15', '')
+                    end
+                    
+                    
                 otherwise
                     error('undefined test')
             end
@@ -278,22 +301,8 @@ switch buttonName,
                         'twosample_cluster_predef_stat'}
                     additional_interactive_predefined_cluster_results(resDir)
                     
-                case {'onesample_cov', 'onesample_cov3', 'onesample_var', ...
-                        'onesample_approx', 'onesample_propscaling', ...
-                        'onesample_propscaling_to_user', ...
-                        'onesample_grandmean_145', 'onesample_grandmean_50',...
-                        'onesample_ancova', 'onesample_slice',...
-                        'onesub_twocondrepl_1', 'onesub_twocondrepl_var', ...
-                        'onesub_twocondrepl_1_other_design', ...
-                        'twosample_1', 'twosample_cov', 'twosample_cov3', 'twosample_var', ...
-                        'twosample_approx', 'twosample_propscaling', ...
-                        'twosample_propscaling_to_user', ...
-                        'twosample_grandmean_145', 'twosample_grandmean_50',...
-                        'twosample_ancova'}
-                    interactive_results(resDir, 'SnPM_filtered_10none', 'P', 'None', '0.1');
-                    
                 otherwise
-                    error('undefined test')
+                    interactive_results(resDir, 'SnPM_filtered_10none', 'P', 'None', '0.1');
             end
         end
         
@@ -321,6 +330,47 @@ interactive_results(resDir, 'SnPMt_filtered_clus_4_unc_p10', 'T', 'Uncorr', '0.1
 interactive_results(resDir, 'SnPMt_filtered_clus_4_unc_k6', 'T', 'Uncorr', '6', 'Clusterwise', '4', 'ClusterSize');
 interactive_results(resDir, 'SnPMt_filtered_clus_4_fwe_p50', 'T', 'FWE', '0.5', 'Clusterwise', '4', 'P-value');
 interactive_results(resDir, 'SnPMt_filtered_clus_5_fwe_p50', 'T', 'FWE', '0.5', 'Clusterwise', '5', 'P-value');
+end
+
+% Instructions for ANOVA between groups
+function design_anova_between_test(testDataDir, resDir, varSmoothing, ...
+    nPerms, nullhyp)
+if nargin < 4
+    nPerms = '';
+end
+if nargin < 5
+    nullhyp = '';
+end
+
+nSubjects = 6;
+
+cwd = pwd;
+cd(testDataDir)
+% There is no snpmcfg.mat start snpm_ui and create it
+% interactively (with instructions for user)
+disp('* Select design type: >2 Groups: Between Group ANOVA; 1 scan/subject');
+disp('* Select all scans:')
+for i = 1:nSubjects
+    disp(sprintf(['\t' fullfile(testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
+end
+disp('* Number of groups k=: 3')
+disp(['* Enter subject index: (A/B/...)[' num2str(nSubjects) ']: AABBCC']);
+if isempty(nullhyp)
+    disp('* Null Hypothesis: Groups are: all equal')
+else
+    disp(['* Null Hypothesis: Groups are: ' nullhyp])
+end
+if isempty(nPerms)
+    approx = 'No';
+else
+    approx = 'Yes';
+end
+disp(['* xx Perms. Use approx. test?: ' approx])
+if ~isempty(nPerms)
+    disp(['* # perms. to use? (Max ' num2str(2^nSubjects) '): ' nPerms])
+end
+common_choices(1, varSmoothing, '', '', '', '')
+snpm_ui_and_copy_config(cwd, resDir);
 end
 
 % Instructions for interactive one-subject two-sample test
