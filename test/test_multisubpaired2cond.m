@@ -13,31 +13,14 @@ classdef test_multisubpaired2cond < generic_test_snpm
         function create_basis_matlabbatch(testCase)
             testCase.compaWithSpm = false;
             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(1).scans = {
-                  fullfile(testCase.testDataDir, 'su_control01', 'cn_sess1', 'con_0001.img,1')
-                  fullfile(testCase.testDataDir, 'su_control01', 'cn_sess2', 'con_0001.img,1')
-                  };
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(1).scindex = [1 2];
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(2).scans = {
-                  fullfile(testCase.testDataDir, 'su_control02', 'cn_sess1', 'con_0001.img,1')
-                  fullfile(testCase.testDataDir, 'su_control02', 'cn_sess2', 'con_0001.img,1')
-                  };
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(2).scindex = [1 2];
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(3).scans = {
-                  fullfile(testCase.testDataDir, 'su_control03', 'cn_sess1', 'con_0001.img,1')
-                  fullfile(testCase.testDataDir, 'su_control03', 'cn_sess2', 'con_0001.img,1')
-                  };      
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(3).scindex = [1 2];
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(4).scans = {
-                  fullfile(testCase.testDataDir, 'su_control04', 'cn_sess1', 'con_0001.img,1')
-                  fullfile(testCase.testDataDir, 'su_control04', 'cn_sess2', 'con_0001.img,1')
-                  };      
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(4).scindex = [1 2];
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(5).scans = {
-                  fullfile(testCase.testDataDir, 'su_control05', 'cn_sess1', 'con_0001.img,1')
-                  fullfile(testCase.testDataDir, 'su_control05', 'cn_sess2', 'con_0001.img,1')
-                  };      
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(5).scindex = [1 2];
+            nSubjects = 5;
+            for i = 1:nSubjects
+                for j = 1:2
+                    testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(i).scans{j} = ...
+                      fullfile(testCase.testDataDir, ['test_data_', num2str((i-1)*2+j, '%02.0f'), '.nii,1']);
+                    testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(i).scindex = [1 2];
+                end
+            end
         end
     end
 
@@ -51,18 +34,15 @@ classdef test_multisubpaired2cond < generic_test_snpm
         function test_multisubpaired2cond_chgorder(testCase)
             testCase.testName = 'multisubpaired2cond_chgorder';
         
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(2).scans = testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(2).scans(2:-1:1);
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(2).scindex = testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(2).scindex(2:-1:1);
-
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(4).scans = testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(4).scans(2:-1:1);
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(4).scindex = testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(4).scindex(2:-1:1);
+            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(1).scindex = testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(2).scindex(2:-1:1);
+            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(2).scindex = testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(4).scindex(2:-1:1);
         end
 
         % With variance smoothing
         function test_multisubpaired2cond_var(testCase)
             testCase.testName = 'multisubpaired2cond_var';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.vFWHM = [6 6 6];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.vFWHM = [8 8 8];
         end
 
         % With approximate test
@@ -70,7 +50,7 @@ classdef test_multisubpaired2cond < generic_test_snpm
             testCase.testName = 'multisubpaired2cond_approx';
             rand('seed',200);
             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.nPerm = 24;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.nPerm = 14;
         end
 
     end
