@@ -152,7 +152,7 @@ nSubj   = iSubj([diff(iStud),1]~=0);                    %-#subject per study
 nSUBJ   = sum(nSubj);                                   %-#subjects in total
 tmp     = cumsum([0,nSubj]);
 iSUBJ   = iSubj+tmp(cumsum([1,diff(iStud)]));           %-Index to subjects
-nScan   = nSubj*nCond;
+nScan   = nSUBJ*nCond;
 
 %-Get confounding covariates
 %-----------------------------------------------------------------------
