@@ -18,17 +18,17 @@ classdef test_ANOVAbetween < generic_test_snpm
             testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAbtwnS.group(1).scans = {};
             testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAbtwnS.group(2).scans = {};
             testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAbtwnS.group(3).scans = {};
-            for gr1 = 1:3
+            for gr1 = 1:2
                 testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAbtwnS.group(1).scans{end+1,1} = ...
-                    fullfile(testCase.testDataDir, ['su_control' num2str(gr1, '%02d')], 'cn_sess1', 'con_0001.img,1');
+                    fullfile(testCase.testDataDir, ['test_data_' num2str(gr1, '%02d') '.nii,1']);
             end
-            for gr2 = 4:6
+            for gr2 = 3:4
                 testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAbtwnS.group(2).scans{end+1,1} = ...
-                    fullfile(testCase.testDataDir, ['su_control' num2str(gr2, '%02d')], 'cn_sess1', 'con_0001.img,1');
+                    fullfile(testCase.testDataDir, ['test_data_' num2str(gr2, '%02d') '.nii,1']);
             end
-            for gr3 = 7:9
+            for gr3 = 5:6
                 testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAbtwnS.group(3).scans{end+1,1} = ...
-                    fullfile(testCase.testDataDir, ['su_control' num2str(gr3, '%02d')], 'cn_sess1', 'con_0001.img,1');
+                    fullfile(testCase.testDataDir, ['test_data_' num2str(gr3, '%02d') '.nii,1']);
             end
             
             testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAbtwnS.nullHypAllZero = false;
@@ -60,10 +60,8 @@ classdef test_ANOVAbetween < generic_test_snpm
         % With approximate test
         function test_ANOVAbetween_approx(testCase)
             testCase.testName = 'ANOVAbetween_approx';
-            
-            testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAbtwnS.nPerm = 100;
-            
             rand('seed',200);
+            testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAbtwnS.nPerm = 15;
         end
     end
     
@@ -73,7 +71,6 @@ classdef test_ANOVAbetween < generic_test_snpm
             % corresponding result directory computed manually using the
             % original spm2-like interface
             testCase.batchResDir = fullfile(testCase.parentDataDir, 'results', 'batch', testCase.testName);
-            testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), 'GT', testCase.testName);
             testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAbtwnS.dir = {testCase.batchResDir};
         end
     end
