@@ -13,14 +13,12 @@ classdef test_multisubsimpleregression < generic_test_snpm
         function create_basis_matlabbatch(testCase)
             testCase.compaWithSpm = false;
             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.P = {
-                                                         fullfile(testCase.testDataDir, 'su_control01', 'cn_sess1', 'con_0001.img,1')
-                                                         fullfile(testCase.testDataDir, 'su_control02', 'cn_sess1', 'con_0001.img,1')
-                                                         fullfile(testCase.testDataDir, 'su_control03', 'cn_sess1', 'con_0001.img,1')
-                                                         fullfile(testCase.testDataDir, 'su_control04', 'cn_sess1', 'con_0001.img,1')
-                                                         fullfile(testCase.testDataDir, 'su_control05', 'cn_sess1', 'con_0001.img,1')
-                                                         };
-            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.CovInt = [1 3 5 0 2];
+            nSubjects = 4;
+            for i = 1:nSubjects
+                testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.P{i} = ...
+                     fullfile(testCase.testDataDir, ['test_data_', num2str(i, '%02.0f'), '.nii,1']);
+            end
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.CovInt = [1 3 5 0];
         end
     end
     
@@ -36,7 +34,7 @@ classdef test_multisubsimpleregression < generic_test_snpm
         function test_multisubsimpleregression_var(testCase)
             testCase.testName = 'multisubsimpleregression_var';
             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.vFWHM = [6 6 6];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.vFWHM = [8 8 8];
         end
 
         % With approximate test
@@ -44,19 +42,7 @@ classdef test_multisubsimpleregression < generic_test_snpm
             testCase.testName = 'multisubsimpleregression_approx';
             
             rand('seed',200);
-            
-            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.P(end+1:end+8) = {
-                 fullfile(testCase.testDataDir, 'su_control06', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control07', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control08', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control09', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control10', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control11', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control12', 'cn_sess1', 'con_0001.img,1')
-                 fullfile(testCase.testDataDir, 'su_control13', 'cn_sess1', 'con_0001.img,1')
-                 };
-            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.CovInt = [1 3 5 0 2 6 7 2 1 -1 2 3 1];
-            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.nPerm = 100;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.nPerm = 14;
         end
     end
     
