@@ -52,6 +52,15 @@ classdef test_onesub_twocondrepl < generic_test_snpm
             
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.vFWHM = [12 12 12];
         end
+        
+        % With approx (does not check equal as do not exist in SnPM8)
+        function test_onesub_twocondrepl_approx(testCase)
+            testCase.checks = false;
+            testCase.testName = 'onesub_twocondrepl_approx';
+            
+            rand('seed',200);
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.nPerm = 15;
+        end
     end
     
     methods (TestMethodTeardown)

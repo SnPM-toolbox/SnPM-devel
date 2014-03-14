@@ -23,11 +23,12 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         tolerance;
         mapName;
         SnPMrefVersion;
+        checks;
     end
     
     methods (TestMethodSetup)
         
-        function setGlobals(testCase)
+        function setGlobals(testCase)           
             global TEST;
             TEST = true;
 
@@ -49,6 +50,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             
             % By default perform comparison of beta maps with SPM results
             testCase.compaWithSpm = true;
+            
+            testCase.checks = true;
         end
         
         function update_basis_matlabbatch(testCase)
@@ -393,22 +396,26 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             if ~iscell(testCase.batch_map)
                 testCase.batch_map = {testCase.batch_map};
             end
-            
-            if numel(testCase.inter_map) ~= numel(testCase.batch_map)
-                error(['Number of ' testCase.mapName ' maps are not equal between batch (',...
-                        num2str(numel(testCase.batch_map)),...
-                        ') and interactive mode ',...
-                        num2str(numel(testCase.inter_map))   ]);
-            else
-                for i = 1:numel(testCase.inter_map)
-                    data1 = spm_read_vols(spm_vol(testCase.batch_map{i}));
-                    data2 = spm_read_vols(spm_vol(testCase.inter_map{i}));
-                    
-                    if zeroingNaNs
-                        data1(isnan(data1(:))) = 0;
+            if testCase.checks
+                if numel(testCase.inter_map) ~= numel(testCase.batch_map)
+                    error(['Number of ' testCase.mapName ' maps are not equal between batch (',...
+                            num2str(numel(testCase.batch_map)),...
+                            ') and interactive mode ',...
+                            num2str(numel(testCase.inter_map))   ]);
+                else
+                    for i = 1:numel(testCase.inter_map)
+                        data1 = spm_read_vols(spm_vol(testCase.batch_map{i}));
+                        data2 = spm_read_vols(spm_vol(testCase.inter_map{i}));
+
+                        if zeroingNaNs
+                            data1(isnan(data1(:))) = 0;
+                        end
+
+                            testCase.verifyEqual(data1, data2, 'AbsTol', testCase.tolerance, [testCase.batch_map{i}])
                     end
-                    testCase.verifyEqual(data1, data2, 'AbsTol', testCase.tolerance, [testCase.batch_map{i}])
                 end
+            else
+                disp('Do not check as asked');
             end
         end
     end
