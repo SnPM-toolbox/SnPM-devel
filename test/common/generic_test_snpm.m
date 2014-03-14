@@ -1,6 +1,11 @@
 % Generic function to perform non-regression tests in SnPM.
 % Check that results obtained using the batch version are identical to the
 % results computed manually (using the interactive GUI).
+% Run all tests using:
+% import matlab.unittest.TestSuite;
+% suite = TestSuite.fromFolder(fullfile(spm_str_manip(which('snpm'), 'h'), 'test'));
+% result = run(suite);
+
 %_______________________________________________________________________
 % Copyright (C) 2013 The University of Warwick
 % Id: generic_test_snpm.m  SnPM13 2013/10/12
