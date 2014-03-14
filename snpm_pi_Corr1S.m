@@ -81,7 +81,7 @@
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'CovInt Xblk';	% PlugIn variables to save in cfg file
 
-
+global TEST;
 
 %-Get filenames of scans
 %-----------------------------------------------------------------------
@@ -138,7 +138,6 @@ if bAproxTst
 	%-Approximate test :
 	% Build up random subset of all (within Xblk) permutations
 	%===============================================================
-    global TEST;
     if isempty(TEST) || ~TEST % When testing we need a fixed seed
         rand('seed',sum(100*clock))	%-Initialise random number generator
     end
@@ -209,7 +208,9 @@ if ~all(all(PiCond*spm_DesMtx(iXblk)== (Xblk+1)*Xblk/2 ))
 nPiCond = size(PiCond,1);
 PiCond = PiCond + meshgrid((iXblk-1)*Xblk,1:nPiCond);
 %-Randomise order of PiConds (except first) to allow interim analysis
-rand('seed',sum(100*clock))	%-Initialise random number generator
+if isempty(TEST) || ~TEST % When testing we need a fixed seed
+    rand('seed',sum(100*clock))	%-Initialise random number generator
+end
 PiCond=[PiCond(1,:);PiCond(randperm(nPiCond-1)+1,:)];
 %-Check first permutation is null permutation
 if ~all(PiCond(1,:)==[1:nScan])
