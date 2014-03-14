@@ -58,9 +58,11 @@ switch buttonName,
         
         testANOVAbetw = {}%{'ANOVAbetween_approx'};%'ANOVAbetween_var' 'ANOVAbetween_1' 'ANOVAbetween_allzero'
         testANOVAwithin = {}%{'multisub_withinsubanova_var', 'multisub_withinsubanova_approx'}%{'multisub_withinsubanova_1'}
-        testPaired2cond = {'multisubpaired2cond_chgorder'}%'multisubpaired2cond_approx','multisubpaired2cond_1', 'multisubpaired2cond_var'}
+        testPaired2cond = {}%'multisubpaired2cond_chgorder','multisubpaired2cond_approx','multisubpaired2cond_1', 'multisubpaired2cond_var'}
+        testMultiSubSimpleReg = {'multisubsimpleregression_var', 'multisubsimpleregression_approx'}%'multisubsimpleregression_1'
         allTests = [testOneSample testTwoSample testOneSubTwoSample ...
-            testANOVAbetw testANOVAwithin testPaired2cond];
+            testANOVAbetw testANOVAwithin testPaired2cond ...
+            testMultiSubSimpleReg];
         
         for i = 1:numel(allTests)
             currTest = allTests{i};
@@ -309,7 +311,22 @@ switch buttonName,
                         rand('seed',200);
                         design_paired2cond_test(testDataDir, resDir, '0', '14')
                     end
-                    
+                
+                    % Multi-subject simple regression
+                case {'multisubsimpleregression_1'}
+                    if isempty(cfgFile) || redo
+                        design_msub_regression_test(testDataDir, resDir, '0')
+                    end
+
+                case {'multisubsimpleregression_var'}
+                    if isempty(cfgFile) || redo
+                        design_msub_regression_test(testDataDir, resDir, '8', '')
+                    end
+                case {'multisubsimpleregression_approx'}
+                    if isempty(cfgFile) || redo
+                        rand('seed',200);
+                        design_msub_regression_test(testDataDir, resDir, '0', '14')
+                    end
                     
                 otherwise
                     error('undefined test')
@@ -370,6 +387,38 @@ interactive_results(resDir, 'SnPMt_filtered_clus_4_unc_p10', 'T', 'Uncorr', '0.1
 interactive_results(resDir, 'SnPMt_filtered_clus_4_unc_k6', 'T', 'Uncorr', '6', 'Clusterwise', '4', 'ClusterSize');
 interactive_results(resDir, 'SnPMt_filtered_clus_4_fwe_p50', 'T', 'FWE', '0.5', 'Clusterwise', '4', 'P-value');
 interactive_results(resDir, 'SnPMt_filtered_clus_5_fwe_p50', 'T', 'FWE', '0.5', 'Clusterwise', '5', 'P-value');
+end
+
+% Instructions for multi-sub simple regression
+function design_msub_regression_test(testDataDir, resDir, varSmoothing, ...
+    nPerms)
+if nargin < 4
+    nPerms = '';
+end
+
+nSubjects = 4;
+
+cwd = pwd;
+cd(testDataDir)
+% There is no snpmcfg.mat start snpm_ui and create it
+% interactively (with instructions for user)
+disp('* Select design type: MultiSub: Simple Regression; 1 covariate of interest');
+disp('* Select scans, 1 per subj.: ' );
+for s = 1:nSubjects
+    disp(sprintf(['\t' fullfile(testDataDir, ['test_data_' num2str(s, '%02.0f') '.nii'])]));
+end
+disp(['Enter covariate value[' num2str(nSubjects) ']: 1 3 5 0']) 
+if isempty(nPerms)
+    approx = 'No';
+else
+    approx = 'Yes';
+end
+disp(['* xx Perms. Use approx. test?: ' approx])
+if ~isempty(nPerms)
+    disp(['* # perms. to use? (Max ' num2str(2^nSubjects) '): ' nPerms])
+end
+common_choices(1, varSmoothing, '', '', '', '')
+snpm_ui_and_copy_config(cwd, resDir);
 end
 
 % Instructions for multi-sub paired 2 conditions
