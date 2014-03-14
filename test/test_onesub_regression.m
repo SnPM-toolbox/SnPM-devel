@@ -14,21 +14,12 @@ classdef test_onesub_regression < generic_test_snpm
             testCase.compaWithSpm = false;
             
             % Fill the design part in the batch
-            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.P = {
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em01R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em02R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em03R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em04R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em05R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em06R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em07R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em08R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em09R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em10R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em11R.img,1')
-                 fullfile(testCase.testDataDir, 'PET_motor', 's8np01160em12R.img,1')
-                 };
-            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.CovInt = [1 2 0 -1 5 4 3 3 1 -2 0 1.5];
+            nScans = 10;
+            for i = 1:nScans
+                testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.P{i,1} = ...
+                 fullfile(testCase.testDataDir, ['test_data_', num2str(i, '%02.0f'),'.nii,1']);
+            end
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.CovInt = [1 2 0 -1 5 4 3 3 1 -2];
             testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.xblock = 2;
         end
     end
@@ -53,7 +44,7 @@ classdef test_onesub_regression < generic_test_snpm
             
             rand('seed',200);
             
-            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.nPerm = 50;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.nPerm = 25;
         end
     end
     
