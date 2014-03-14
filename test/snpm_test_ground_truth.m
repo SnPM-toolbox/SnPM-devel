@@ -60,10 +60,12 @@ switch buttonName,
         testANOVAwithin = {}%{'multisub_withinsubanova_var', 'multisub_withinsubanova_approx'}%{'multisub_withinsubanova_1'}
         testPaired2cond = {}%'multisubpaired2cond_chgorder','multisubpaired2cond_approx','multisubpaired2cond_1', 'multisubpaired2cond_var'}
         testMultiSubSimpleReg = {}%'multisubsimpleregression_var', 'multisubsimpleregression_approx'}%'multisubsimpleregression_1'
-        testOneSubRegression = {'onesub_regression_approx'}%onesub_regression_1 'onesub_regression_var'
+        testOneSubRegression = {}%'onesub_regression_approx' onesub_regression_1 'onesub_regression_var'
+        testTwoSampTwoCond = {'twosample_twocond_cov3'}%'twosample_twocond_1','twosample_twocond_cov', 'twosample_twocond_cov3''twosample_twocond_chgorder','twosample_twocond_approx''twosample_twocond_1', 'twosample_twocond_var'
         allTests = [testOneSample testTwoSample testOneSubTwoSample ...
             testANOVAbetw testANOVAwithin testPaired2cond ...
-            testMultiSubSimpleReg testOneSubRegression];
+            testMultiSubSimpleReg testOneSubRegression ...
+            testTwoSampTwoCond];
         
         for i = 1:numel(allTests)
             currTest = allTests{i};
@@ -345,6 +347,43 @@ switch buttonName,
                         design_1sub_regression_test(testDataDir, resDir, '0', '25')
                     end
                     
+                % Two-sample two conditions
+                case {'twosample_twocond_1'}
+                    if isempty(cfgFile) || redo
+                        design_twosamptwocond_test(testDataDir, resDir, '0')
+                    end
+
+                case {'twosample_twocond_var'}
+                    if isempty(cfgFile) || redo
+                        design_twosamptwocond_test(testDataDir, resDir, '8.5', '')
+                    end
+                case {'twosample_twocond_approx'}
+                    if isempty(cfgFile) || redo
+                        rand('seed',200);
+                        design_twosamptwocond_test(testDataDir, resDir, '0', '15')
+                    end    
+                case {'twosample_twocond_chgorder'}
+                    if isempty(cfgFile) || redo
+                        design_twosamptwocond_test(testDataDir, resDir, '0', '', true)
+                    end  
+                case {'twosample_twocond_cov'}
+                    if isempty(cfgFile) || redo
+                        design_twosamptwocond_test(testDataDir, resDir, ...
+                            '0', '', false,...
+                            '1', ...
+                            {'1 5 2 21 0 5 4 8 7 1 1 5'})
+                    end
+                    
+                case {'twosample_twocond_cov3'}
+                    if isempty(cfgFile) || redo
+                        design_twosamptwocond_test(testDataDir, resDir, ...
+                            '0', '', false,...
+                            '3', ...
+                            {'1 1 2 3 1 5 4 6 3 1 1 2 ', ...
+                            '0 21 15 18 3 4 22 1 5 4 21 15',...
+                            '-1 -0.5 -1 1 0 2 0.1 1 -1 2 -0.5 -1 '})
+                    end
+                    
                 otherwise
                     error('undefined test')
             end
@@ -404,6 +443,58 @@ interactive_results(resDir, 'SnPMt_filtered_clus_4_unc_p10', 'T', 'Uncorr', '0.1
 interactive_results(resDir, 'SnPMt_filtered_clus_4_unc_k6', 'T', 'Uncorr', '6', 'Clusterwise', '4', 'ClusterSize');
 interactive_results(resDir, 'SnPMt_filtered_clus_4_fwe_p50', 'T', 'FWE', '0.5', 'Clusterwise', '4', 'P-value');
 interactive_results(resDir, 'SnPMt_filtered_clus_5_fwe_p50', 'T', 'FWE', '0.5', 'Clusterwise', '5', 'P-value');
+end
+
+% Instructions for 2-sample 2-conditions
+function design_twosamptwocond_test(testDataDir, resDir, varSmoothing, ...
+    nPerms, chgorder, numCovariates, valueCov)
+if nargin < 4
+    nPerms = '';
+end
+if nargin < 5
+    chgorder = false;
+end
+if nargin < 6
+    numCovariates = '0';
+end
+
+nSubjectsPerGroup = 3;
+nScansPerSub = 2;
+
+cwd = pwd;
+cd(testDataDir)
+% There is no snpmcfg.mat start snpm_ui and create it
+% interactively (with instructions for user)
+disp('* Select design type: 2 Groups: Test diff of response; 2 conditions, 1 scan/condition');
+for g = 1:2
+disp(['* # subjects in group ' num2str(g) ': ' num2str(nSubjectsPerGroup)]);
+    for s = 1:nSubjectsPerGroup
+        disp(['* Select scans, group ' num2str(g), ', subj' num2str(s) ':'])
+        for i = (nScansPerSub)*(s-1)+[1:nScansPerSub]
+            disp(sprintf(['\t' fullfile(testDataDir, ['test_data_' num2str((g-1)*nSubjectsPerGroup*2+i, '%02.0f') '.nii'])]));
+        end
+        if s>2 || ~chgorder
+            disp(['Enter conditions index (A/B) [' num2str(nScansPerSub) ']: ' repmat('AB', 1, nScansPerSub/2)])
+        else
+            disp(['Enter conditions index (A/B) [' num2str(nScansPerSub) ']: ' repmat('BA', 1, nScansPerSub/2)])
+        end
+    end
+end
+if isempty(nPerms)
+    approx = 'No';
+else
+    approx = 'Yes';
+end
+disp(['* # of confounding covariates: ' numCovariates])
+for i = 1:str2double(numCovariates)
+    disp(['* [12] - Covariate ' num2str(i) ': ' valueCov{i}])
+end
+disp(['* xx Perms. Use approx. test?: ' approx])
+if ~isempty(nPerms)
+    disp(['* # perms. to use? (Max xx): ' nPerms])
+end
+common_choices(1, varSmoothing, '', '', '', '')
+snpm_ui_and_copy_config(cwd, resDir);
 end
 
 % Instructions for multi-sub simple regression
