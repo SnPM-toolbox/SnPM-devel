@@ -138,7 +138,10 @@ if bAproxTst
 	%-Approximate test :
 	% Build up random subset of all (within Xblk) permutations
 	%===============================================================
-	rand('seed',sum(100*clock))	%-Initialise random number generator
+    global TEST;
+    if isempty(TEST) || ~TEST % When testing we need a fixed seed
+        rand('seed',sum(100*clock))	%-Initialise random number generator
+    end
 	PiCond      = zeros(nPiCond,nScan);
 	PiCond(1,:) = 1+rem([0:Xblk*nXblk-1],Xblk);
 	for i = 2:nPiCond

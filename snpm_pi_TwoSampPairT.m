@@ -109,7 +109,10 @@ nCond    = 2;			% Number of conditions
 nStud    = 2;			% Number of groups
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iStud iCond nSubj'; % PlugIn variables to save in cfg file
-rand('seed',sum(100*clock));	% Initialise random number generator
+global TEST;
+if isempty(TEST) || ~TEST % When testing we need a fixed seed
+    rand('seed',sum(100*clock));	% Initialise random number generator
+end
 iStudC   = [];			% +1/-1 version of iStud
 
 %-Get filenames and iStud, the subject group labels

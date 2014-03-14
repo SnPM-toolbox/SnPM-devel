@@ -116,7 +116,11 @@ if bAproxTst
 	%-Approximate test :
 	% Build up random subset of all (within nSubj) permutations
 	%===============================================================
-	rand('seed',sum(100*clock))	%-Initialise random number generator
+	global TEST;
+    if isempty(TEST) || ~TEST % When testing we need a fixed seed
+        rand('seed',sum(100*clock))	%-Initialise random number generator
+    end
+    
 	PiCond      = zeros(nPiCond,nSubj);
 	PiCond(1,:) = 1+rem([0:nSubj-1],nSubj);
 	for i = 2:nPiCond

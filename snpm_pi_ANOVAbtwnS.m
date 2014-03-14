@@ -101,7 +101,10 @@
 %%% nCond    = 2;			% Number of conditions (groups)
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iCond GrpCnt';	% PlugIn variables to save in cfg file
-% rand('seed',sum(100*clock));	% Initialise random number generator
+global TEST;
+if isempty(TEST) || ~TEST % When testing we need a fixed seed
+    rand('seed',sum(100*clock));	% Initialise random number generator
+end
 
 %-Get filenames and iCond, the condition labels
 %=======================================================================
