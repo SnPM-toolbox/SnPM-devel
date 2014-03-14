@@ -230,13 +230,18 @@ snpm_check_nperm(nPiStud,nPiStud_mx);
 
 if nSUBJ<=12 || ~bAproxTst                    % exact method
 
-    %-Generate all labellings of nSUBJ subjects as +/- 1
-    PiStud=[];
-    for i=0:nSUBJ-1
-	PiStud=[ones(2^i,1),PiStud;-ones(2^i,1),PiStud];
-    end
-    %-Trim to labellings with correct group numbers
-    PiStud=PiStud(sum(PiStud'==-1)==nFlip,:);
+%     %-Generate all labellings of nSUBJ subjects as +/- 1
+%     PiStud=[];
+%     for i=0:nSUBJ-1
+% 	PiStud=[ones(2^i,1),PiStud;-ones(2^i,1),PiStud];
+%     end
+%     %-Trim to labellings with correct group numbers
+%     PiStud=PiStud(sum(PiStud'==-1)==nFlip,:);
+    
+    PiStud = -ones(nPiStud_mx, nSUBJ);
+    altGroupSubIdx = nchoosek(1:nSUBJ, nFlip);
+    altGroupIdx = sub2ind(size(PiStud), repmat(1:nPiStud_mx, nFlip, 1)', altGroupSubIdx);
+    PiStud(altGroupIdx(:)) = 1;
 
     %-Only do half the work, if possible
     bhPerms=0;
