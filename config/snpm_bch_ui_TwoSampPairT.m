@@ -38,6 +38,7 @@ sub_files.values{1}.val{2}.num = [1 2];
 sub_files.values{1}.val{2}.name = 'Scan index';
 sub_files.values{1}.val{2}.help = {'Enter scan index: (1 2|2 1)'};
 sub_files.values{1}.val{2}.tag = 'scindex';
+sub_files.val{1} = sub_files.values{1};
 
 % ---------------------------------------------------------------------
 % scans1 Group 1 scans
