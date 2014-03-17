@@ -21,7 +21,7 @@ classdef test_twosample_twocond < generic_test_snpm
                     for i = 1:nScansPerSub
                         % Warning: error in spm12b if files are defined by rows
                         % instead of colmuns.
-                        testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.(['scans' num2str(g)]).fsubject(s).scans{i} = ...
+                        testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.(['scans' num2str(g)]).fsubject(s).scans{i,1} = ...
                             fullfile(testCase.testDataDir, ['test_data_' num2str(jj, '%02d') '.nii,1']);
                         testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.(['scans' num2str(g)]).fsubject(s).scindex = [1 2];
                         jj = jj + 1;
