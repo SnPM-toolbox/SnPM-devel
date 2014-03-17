@@ -178,6 +178,7 @@ b_all_zero = job.nullHypAllZero; %spm_input('Null Hypothesis: Groups are','+1','
 %(nScan)!/(GrpCnt[1]!*GrpCnt[2]!*...*GrpCnt[nCond]!)
 
 nPiCond_mx = round(exp(gammaln(nScan+1)-sum(gammaln(GrpCnt+1))));
+nPiCond = job.nPerm;
 if job.nPerm >= nPiCond_mx
     bAproxTst=0;
     if job.nPerm > nPiCond_mx
@@ -186,7 +187,6 @@ if job.nPerm >= nPiCond_mx
     end
 else
     bAproxTst=1;
-    nPiCond = job.nPerm;
 end
 snpm_check_nperm(nPiCond,nPiCond_mx);
 

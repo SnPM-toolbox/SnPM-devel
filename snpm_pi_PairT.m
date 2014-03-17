@@ -182,6 +182,7 @@ iSUBJ = iSubj;
 %-Work out how many perms, and ask about approximate tests
 %-----------------------------------------------------------------------
 nPiSubj_mx = 2^nSubj;
+nPiSubj = job.nPerm;
 if job.nPerm >= nPiSubj_mx
     bAproxTst=0;
     if job.nPerm > nPiSubj_mx
@@ -190,7 +191,6 @@ if job.nPerm >= nPiSubj_mx
     end
 else
     bAproxTst=1;
-    nPiSubj = job.nPerm;
 end
 if rem(nPiSubj,2)
     error(['Number of perms must be even']);

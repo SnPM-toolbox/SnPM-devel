@@ -176,6 +176,7 @@ G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nSubj;
 nPiCond_mx = 2^(nSubj-1);
 % Note: here nPiCond is half of its usual value. The reason is we are
 % calculating F stat.
+nPiCond = job.nPerm;
 if job.nPerm >= nPiCond_mx
     bAproxTst=0;
     if job.nPerm > nPiCond_mx
@@ -184,7 +185,6 @@ if job.nPerm >= nPiCond_mx
     end
 else
     bAproxTst=1;
-    nPiCond = job.nPerm;
 end
 
 %-Two methods for computing permutations, random and exact; exact

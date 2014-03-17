@@ -149,6 +149,7 @@ Gnames = Gcnames;
 %-Compute permutations for a single exchangability block
 %-----------------------------------------------------------------------
 nPiCond_mx = 2^nScan;
+nPiCond = job.nPerm;
 if job.nPerm >= nPiCond_mx
     bAproxTst=0;
     if job.nPerm > nPiCond_mx
@@ -157,7 +158,6 @@ if job.nPerm >= nPiCond_mx
     end
 else
     bAproxTst=1;
-    nPiCond = job.nPerm;
 end
 snpm_check_nperm(nPiCond,nPiCond_mx);
 

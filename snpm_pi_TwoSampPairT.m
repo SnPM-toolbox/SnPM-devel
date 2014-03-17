@@ -195,6 +195,7 @@ Gnames = Gcnames;
 %-----------------------------------------------------------------------
 %-NB: m-Choose-n = exp(gammaln(m+1)-gammaln(m-n+1)-gammaln(n+1))
 nPiStud_mx = round(exp(gammaln(nSUBJ+1)-gammaln(nSUBJ-nFlip+1)-gammaln(nFlip+1)));
+nPiStud = job.nPerm;
 if job.nPerm >= nPiStud_mx
     bAproxTst=0;
     if job.nPerm > nPiStud_mx
@@ -203,7 +204,6 @@ if job.nPerm >= nPiStud_mx
     end
 else
     bAproxTst=1;
-    nPiStud = job.nPerm;
 end                            
 %                             
 % if (bAproxTst)

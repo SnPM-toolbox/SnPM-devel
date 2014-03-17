@@ -123,6 +123,7 @@ iXblk    = meshgrid(1:nXblk,1:Xblk); iXblk = iXblk(:)';
 nPiCond_mx = round(exp(nXblk*gammaln(Xblk+1)));
 % bAproxTst = spm_input(sprintf('%d Perms. Use approx. test?',nPiCond),...
 % 							'+1','y/n')=='y';
+nPiCond = job.nPerm;
 if job.nPerm >= nPiCond_mx
     bAproxTst=0;
     if job.nPerm > nPiCond_mx
@@ -131,7 +132,6 @@ if job.nPerm >= nPiCond_mx
     end
 else
     bAproxTst=1;
-    nPiCond = job.nPerm;
 end
 
 %-Compute permutations of conditions
