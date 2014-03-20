@@ -49,7 +49,7 @@ switch buttonName,
         %             'onesample_var', 'onesample_cov3', 'onesample_cov'
         %             } ;
         
-        testTwoSample = {} %{'twosample_ancova'} %{'twosample_var', ...
+        testTwoSample = {'twosample_proportional_global_user'} %{'twosample_ancova'} %{'twosample_var', ...
         %                         'twosample_approx', 'twosample_propscaling', ...
         %                         'twosample_propscaling_to_user', ...
         %                         'twosample_grandmean_145', 'twosample_grandmean_50'  }%'twosample_cov', 'twosample_cov3' 'twosample_cluster_predef_stat'}; %'twosample_cluster_predefined', 'twosample_cluster', 'twosample_1'
@@ -61,7 +61,7 @@ switch buttonName,
         testPaired2cond = {}%'multisubpaired2cond_chgorder','multisubpaired2cond_approx','multisubpaired2cond_1', 'multisubpaired2cond_var'}
         testMultiSubSimpleReg = {}%'multisubsimpleregression_var', 'multisubsimpleregression_approx'}%'multisubsimpleregression_1'
         testOneSubRegression = {}%'onesub_regression_approx' onesub_regression_1 'onesub_regression_var'
-        testTwoSampTwoCond = {'twosample_twocond_cov3'}%'twosample_twocond_1','twosample_twocond_cov', 'twosample_twocond_cov3''twosample_twocond_chgorder','twosample_twocond_approx''twosample_twocond_1', 'twosample_twocond_var'
+        testTwoSampTwoCond = {}%'twosample_twocond_cov3'}%'twosample_twocond_1','twosample_twocond_cov', 'twosample_twocond_cov3''twosample_twocond_chgorder','twosample_twocond_approx''twosample_twocond_1', 'twosample_twocond_var'
         allTests = [testOneSample testTwoSample testOneSubTwoSample ...
             testANOVAbetw testANOVAwithin testPaired2cond ...
             testMultiSubSimpleReg testOneSubRegression ...
@@ -220,6 +220,19 @@ switch buttonName,
                         design_two_sample_test(testDataDir, resDir, ...
                             '0', {}, '0', 5, '', 'proportional scaling')
                     end
+                case {'twosample_proportional_global_user'}
+                    if isempty(cfgFile) || redo
+                        design_two_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 5, '', 'proportional scaling', '50', '', '50', '1 3 2 2 3 1');
+                    end
+%                             function test_twosample_proportional_user(testCase)
+%             
+%             testCase.testName = 'twosample_proportional_user';
+%             
+%             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.globalc.g_user.global_uval = [1 3 2 2 3 1];
+%             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.globalm.gmsca.gmsca_no = 1;
+%             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.globalm.glonorm = 2;
+%         end
                     
                 case {'twosample_propscaling_to_user'}
                     if isempty(cfgFile) || redo
@@ -711,21 +724,24 @@ end
 % Instructions for interactive two-sample tests
 function design_two_sample_test(testDataDir, resDir, numCovariates, ...
     valueCov, varSmoothing, nSubjects, nPerm, propScaling, ...
-    userPropScaling, grandMeanScaling, userGrandMean)
-if nargin < 11
-    userGrandMean = '';
-    if nargin < 10
-        grandMeanScaling = '';
-        if nargin < 9
-            userPropScaling = '50';
-            if nargin < 8
-                propScaling = '';
-                if nargin < 7
-                    nPerm = '';
-                    if nargin < 6
-                        nSubjects = 5;
-                        if nargin < 5
-                            varSmoothing = '0';
+    userPropScaling, grandMeanScaling, userGrandMean, userGlobal)
+if nargin < 12
+    userGlobal = '';
+    if nargin < 11
+        userGrandMean = '';
+        if nargin < 10
+            grandMeanScaling = '';
+            if nargin < 9
+                userPropScaling = '50';
+                if nargin < 8
+                    propScaling = '';
+                    if nargin < 7
+                        nPerm = '';
+                        if nargin < 6
+                            nSubjects = 5;
+                            if nargin < 5
+                                varSmoothing = '0';
+                            end
                         end
                     end
                 end
@@ -763,7 +779,7 @@ if ~isempty(nPerm)
     disp(['* # perms. to use? (Max ' num2str(2^nSubjects) '): ' nPerm])
 end
 common_choices(5, varSmoothing, propScaling, grandMeanScaling, ...
-    userGrandMean, userPropScaling);
+    userGrandMean, userPropScaling, userGlobal);
 snpm_ui_and_copy_config(cwd, resDir)
 end
 
@@ -828,7 +844,7 @@ cd(cwd);
 end
 
 function common_choices(nSubjects, varSmoothing, propScaling, ...
-    grandMeanScaling, userGrandMean, userPropScaling)
+    grandMeanScaling, userGrandMean, userPropScaling, userGlobal)
 disp(['* FWHM(mm) for Variance smooth: ' varSmoothing])
 if nSubjects > 5
     disp(['* 17 scans: Work volumetrically?: no'])
@@ -851,7 +867,12 @@ if isempty(propScaling) || strcmp(propScaling, 'AnCova')
     end
 end
 if ~isempty(propScaling) || ~isempty(grandMeanScaling)
-    disp('* Select global calculation...: mean voxel value (within per image fullmean/8 mask)')
+    if isempty(userGlobal)
+        disp('* Select global calculation...: mean voxel value (within per image fullmean/8 mask)')
+    else
+        disp('* Select global calculation...: user-specified')
+        disp(['* [x] globals:' userGlobal])
+    end
 end
 disp('* Threshold masking: none')
 disp('* Analysis mask?: No')
