@@ -140,6 +140,18 @@ classdef test_twoSample < generic_test_snpm
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.globalm.gmsca.gmsca_yes.gmscv = 145;
         end
         
+        % Global calculation -> "User". 
+        % Global normalisation -> "Proportional" 
+        % Overall grand mean scaling: No
+        function test_twosample_proportional_global_user(testCase)
+            
+            testCase.testName = 'twosample_proportional_global_user';
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.globalc.g_user.global_uval = [1 3 2 2 3 1];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.globalm.gmsca.gmsca_no = 1;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.globalm.glonorm = 2;
+        end
+        
         % Global normalisation: overall grand mean scaling to 50
         function test_twosample_grandmean_50(testCase)
             testCase.testName = 'twosample_grandmean_50';

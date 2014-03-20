@@ -395,7 +395,7 @@ elseif isfield(job.globalc,'g_omit')
     iGXcalc=3;
 elseif isfield(job.globalc,'g_user')
     iGXcalc=2;
-    GX = job.globalc.g_user{1}(:);
+    GX = job.globalc.g_user.global_uval;
     rg = GX;
     if length(GX) ~= nScan
         error(['User-specified globals length [%d] doesn''t match number of' ...
