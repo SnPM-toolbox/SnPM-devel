@@ -540,9 +540,9 @@ for i = 1:zdim
         SmMask    = zeros(xdim, ydim, zdim);
         TmpVol    = zeros(xdim, ydim, zdim);
         TmpVol(Q) = ones(size(Q));
-        spm_smooth(TmpVol,SmMask,vFWHM);
+        spm_smooth(TmpVol,SmMask,vFWHM./VOX);
         TmpVol(Q) = ResSS;
-        spm_smooth(TmpVol,SmResSS,vFWHM);
+        spm_smooth(TmpVol,SmResSS,vFWHM./VOX);
 
         ResSS     = SmResSS(Q)./SmMask(Q);
       else
@@ -849,7 +849,7 @@ for i = 1:zdim
         SmStart=toc;			%-Timestamp (>)
         if bVolm
           TmpVol(Q) = ResSS;
-          spm_smooth(TmpVol,SmResSS,vFWHM);
+          spm_smooth(TmpVol,SmResSS,vFWHM./VOX);
           ResSS     = SmResSS(Q)./SmMask(Q);
         else
           TmpPl(Q)  = ResSS;
