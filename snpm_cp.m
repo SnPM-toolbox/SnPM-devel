@@ -540,8 +540,10 @@ for i = 1:zdim
         SmMask    = zeros(xdim, ydim, zdim);
         TmpVol    = zeros(xdim, ydim, zdim);
         TmpVol(Q) = ones(size(Q));
+        % FWHM in voxels (and not in mm) as TmpVol is not a struct 
         spm_smooth(TmpVol,SmMask,vFWHM./VOX);
         TmpVol(Q) = ResSS;
+        % FWHM in voxels (and not in mm) as TmpVol is not a struct 
         spm_smooth(TmpVol,SmResSS,vFWHM./VOX);
 
         ResSS     = SmResSS(Q)./SmMask(Q);
@@ -849,6 +851,7 @@ for i = 1:zdim
         SmStart=toc;			%-Timestamp (>)
         if bVolm
           TmpVol(Q) = ResSS;
+          % FWHM in voxels (and not in mm) as TmpVol is not a struct 
           spm_smooth(TmpVol,SmResSS,vFWHM./VOX);
           ResSS     = SmResSS(Q)./SmMask(Q);
         else
