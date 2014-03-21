@@ -41,7 +41,9 @@ switch buttonName,
         
         cwd = pwd;
         
-        testOneSample = {} % {'onesample_var' 'onesample_slice', 'onesample_ancova', ...
+        testOneSample = {'onesample_mask'} 
+        % 'onesample_abs_thresh', 'onesample_1'
+        % {'onesample_prop_thresh', 'onesample_var' 'onesample_slice', 'onesample_ancova', ...
         %             'onesample_grandmean_50', 'onesample_grandmean_145', ...
         %             'onesample_propscaling_to_user', 'onesample_propscaling', ...
         %             'onesample_cluster', 'onesample_cluster_predefined', ...
@@ -84,6 +86,24 @@ switch buttonName,
                 case {'onesample_1'}
                     if isempty(cfgFile) || redo
                         design_one_sample_test(testDataDir, resDir, '0', {}, '0')
+                    end
+                    
+                case {'onesample_mask'}
+                    if isempty(cfgFile) || redo
+                        design_one_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 5, '', '', '', '', '', '', '', 'mask.nii')
+                    end
+                    
+                case {'onesample_prop_thresh'}
+                    if isempty(cfgFile) || redo
+                        design_one_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 5, '', '', '', '', '', '0.75')
+                    end
+                    
+                case {'onesample_abs_thresh'}
+                    if isempty(cfgFile) || redo
+                        design_one_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 5, '', '', '', '', '', '', '0.1')
                     end
                     
                 case {'onesample_cov'}
@@ -786,19 +806,29 @@ end
 % Instructions for interactive one-sample tests
 function design_one_sample_test(testDataDir, resDir, numCovariates, ...
     valueCov, varSmoothing, nSubjects, nPerm, propScaling, ...
-    userPropScaling, grandMeanScaling, userGrandMean)
-if nargin < 11
-    userGrandMean = '';
-    if nargin < 10
-        grandMeanScaling = '';
-        if nargin < 9
-            userPropScaling = '50';
-            if nargin < 8
-                propScaling = '';
-                if nargin < 7
-                    nPerm = '';
-                    if nargin < 6
-                        nSubjects = 5;
+    userPropScaling, grandMeanScaling, userGrandMean, ...
+    propThresh, absThresh, fileToMaskWith)
+if nargin < 14
+    fileToMaskWith = '';
+    if nargin < 13
+        absThresh = '';
+        if nargin < 12
+            propThresh = '';
+            if nargin < 11
+                userGrandMean = '';
+                if nargin < 10
+                    grandMeanScaling = '';
+                    if nargin < 9
+                        userPropScaling = '50';
+                        if nargin < 8
+                            propScaling = '';
+                            if nargin < 7
+                                nPerm = '';
+                                if nargin < 6
+                                    nSubjects = 5;
+                                end
+                            end
+                        end
                     end
                 end
             end
@@ -829,7 +859,8 @@ if ~isempty(nPerm)
     disp(['* # perms. to use? (Max ' num2str(2^nSubjects) '): ' nPerm])
 end
 common_choices(nSubjects, varSmoothing, propScaling, grandMeanScaling, ...
-    userGrandMean, userPropScaling);
+    userGrandMean, userPropScaling, '', propThresh, absThresh, ...
+    fullfile(testDataDir, fileToMaskWith));
 snpm_ui_and_copy_config(cwd, resDir)
 end
 
@@ -844,7 +875,8 @@ cd(cwd);
 end
 
 function common_choices(nSubjects, varSmoothing, propScaling, ...
-    grandMeanScaling, userGrandMean, userPropScaling, userGlobal)
+    grandMeanScaling, userGrandMean, userPropScaling, userGlobal, ...
+    propThresh, absThresh, fileToMaskWith)
 disp(['* FWHM(mm) for Variance smooth: ' varSmoothing])
 if nSubjects > 5
     disp(['* 17 scans: Work volumetrically?: no'])
@@ -874,8 +906,21 @@ if ~isempty(propScaling) || ~isempty(grandMeanScaling)
         disp(['* [x] globals:' userGlobal])
     end
 end
-disp('* Threshold masking: none')
-disp('* Analysis mask?: No')
+if ~isempty(propThresh) 
+    disp('* Threshold masking: proportional')
+    disp(['* Prop''nal threshold: ' propThresh])
+elseif ~isempty(absThresh) 
+    disp('* Threshold masking: absolute')
+    disp(['* Absolute threshold: ' absThresh])
+else
+    disp('* Threshold masking: none')
+end
+if isempty(fileToMaskWith)
+    disp('* Analysis mask?: No')
+else
+    disp('* Analysis mask?: Yes')    
+    disp(['* <select file: ' fileToMaskWith '>'])    
+end
 end
 
 function interactive_cluster_mass_results(resDir)
