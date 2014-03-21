@@ -162,8 +162,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                     spmBetaIndices(i) = corresIndex;
                 end
                 
-                testCase.inter_map = inter_beta(1:testCase.numBetas);
-                testCase.batch_map = spm_beta(spmBetaIndices);
+                testCase.inter_map = spm_beta(spmBetaIndices);
+                testCase.batch_map = batch_beta(1:testCase.numBetas);
                 testCase.tolerance = 10^-2;
                 testCase.mapName = 'beta, SPM';
                 testCase.compare_batch_with_inter();
