@@ -416,7 +416,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                             data1(isnan(data1(:))) = 0;
                         end
 
-                            testCase.verifyEqual(data1, data2, 'AbsTol', testCase.tolerance, [testCase.batch_map{i}])
+                        testCase.verifyEqual(data1, data2, 'AbsTol', testCase.tolerance, [testCase.batch_map{i}])
                     end
                 end
             else

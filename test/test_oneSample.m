@@ -89,7 +89,32 @@ classdef test_oneSample < generic_test_snpm
             
             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.vFWHM = [6 6 6];
         end
+        
+        % With absolute masking
+        function test_onesample_abs_thresh(testCase)
+            testCase.testName = 'onesample_abs_thresh';
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.masking.tm.tma.athresh = 0.1;
+        end
+        
+        % With proportional masking
+        function test_onesample_prop_thresh(testCase)
+            % FIXME: check why results are different using SPM (only one
+            % voxel is concerned)
+            testCase.compaWithSpm = false;
+            testCase.testName = 'onesample_prop_thresh';
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.masking.tm.tmr.rthresh = 0.75;
+        end
 
+        % With masking using an image
+        function test_onesample_mask(testCase)
+            testCase.testName = 'onesample_mask';
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.masking.em =...
+                {fullfile(testCase.testDataDir, 'mask.nii,1')};
+        end
+        
         % With approximate test
         function test_onesample_approx(testCase)
             testCase.testName = 'onesample_approx';
