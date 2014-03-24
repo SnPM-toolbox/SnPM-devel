@@ -41,8 +41,8 @@ switch buttonName,
         
         cwd = pwd;
         
-        testOneSample = {'onesample_mask'} 
-        % 'onesample_abs_thresh', 'onesample_1'
+        testOneSample = {'onesample_cluster_predefined_slow'} 
+        % 'onesample_mask' 'onesample_abs_thresh', 'onesample_1'
         % {'onesample_prop_thresh', 'onesample_var' 'onesample_slice', 'onesample_ancova', ...
         %             'onesample_grandmean_50', 'onesample_grandmean_145', ...
         %             'onesample_propscaling_to_user', 'onesample_propscaling', ...
@@ -86,6 +86,11 @@ switch buttonName,
                 case {'onesample_1'}
                     if isempty(cfgFile) || redo
                         design_one_sample_test(testDataDir, resDir, '0', {}, '0')
+                    end
+                case {'onesample_cluster_predefined_slow'}
+                    if isempty(cfgFile) || redo
+                        design_one_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 5, '', '', '', '', '', '', '', '', true)
                     end
                     
                 case {'onesample_mask'}
@@ -446,6 +451,8 @@ switch buttonName,
                 case {'onesample_cluster_predefined', 'twosample_cluster_predefined',...
                         'twosample_cluster_predef_stat'}
                     additional_interactive_predefined_cluster_results(resDir)
+                case {'onesample_cluster_predefined_slow'}
+                    additional_interactive_predefined_cluster_results(resDir, '3.8')
                     
                 otherwise
                     interactive_results(resDir, 'SnPM_filtered_10none', 'P', 'None', '0.1');
@@ -465,10 +472,13 @@ interactive_results(resDir, 'SnPMt_filtered_vox_fwe_p10', 'T', 'FWE', '0.1', clu
 interactive_results(resDir, 'SnPMt_filtered_vox_fdr_p70', 'P', 'FDR', '0.7');
 end
 
-function additional_interactive_predefined_cluster_results(resDir)
+function additional_interactive_predefined_cluster_results(resDir, clusterFormThresh)
+if ~exist('clusterFormThresh', 'var')
+    clusterFormThresh = ''
+end
 interactive_results(resDir, 'SnPMt_filtered_vox_unc_p10', 'P', 'None', '0.1');
-interactive_results(resDir, 'SnPMt_filtered_clus_p10_unc_p10', 'T', 'Uncorr', '0.1', 'Clusterwise', '', 'P-value');
-interactive_results(resDir, 'SnPMt_filtered_clus_p10_fwe_p50', 'T', 'FWE', '0.5', 'Clusterwise', '', 'P-value');
+interactive_results(resDir, 'SnPMt_filtered_clus_p10_unc_p10', 'T', 'Uncorr', '0.1', 'Clusterwise', clusterFormThresh, 'P-value');
+interactive_results(resDir, 'SnPMt_filtered_clus_p10_fwe_p50', 'T', 'FWE', '0.5', 'Clusterwise', clusterFormThresh, 'P-value');
 end
 
 function additional_interactive_cluster_results(resDir)
@@ -807,7 +817,11 @@ end
 function design_one_sample_test(testDataDir, resDir, numCovariates, ...
     valueCov, varSmoothing, nSubjects, nPerm, propScaling, ...
     userPropScaling, grandMeanScaling, userGrandMean, ...
-    propThresh, absThresh, fileToMaskWith)
+    propThresh, absThresh, fileToMaskWith, supraThreshStat)
+if ~exist('supraThreshStat', 'var')
+    supraThreshStat = false;
+end
+
 if nargin < 14
     fileToMaskWith = '';
     if nargin < 13
@@ -858,9 +872,13 @@ disp(['* ' num2str(2^nSubjects) ' Perms. Use approx. test?: ' approx])
 if ~isempty(nPerm)
     disp(['* # perms. to use? (Max ' num2str(2^nSubjects) '): ' nPerm])
 end
+if ~isempty(fileToMaskWith)
+    fileToMaskWith = fullfile(testDataDir, fileToMaskWith);
+end
 common_choices(nSubjects, varSmoothing, propScaling, grandMeanScaling, ...
     userGrandMean, userPropScaling, '', propThresh, absThresh, ...
-    fullfile(testDataDir, fileToMaskWith));
+    fileToMaskWith, supraThreshStat);
+
 snpm_ui_and_copy_config(cwd, resDir)
 end
 
@@ -876,12 +894,20 @@ end
 
 function common_choices(nSubjects, varSmoothing, propScaling, ...
     grandMeanScaling, userGrandMean, userPropScaling, userGlobal, ...
-    propThresh, absThresh, fileToMaskWith)
+    propThresh, absThresh, fileToMaskWith, supraThreshStat)
+if ~exist('supraThreshStat', 'var') 
+    supraThreshStat = false;
+end
 disp(['* FWHM(mm) for Variance smooth: ' varSmoothing])
 if nSubjects > 5
     disp(['* 17 scans: Work volumetrically?: no'])
 end
-disp('* Collect Supra-Threshold stats?: No')
+if ~supraThreshStat
+    disp('* Collect Supra-Threshold stats?: No')
+else
+    disp('* Collect Supra-Threshold stats?: Yes')
+    disp('* Define the thresh now?: No')
+end
 if isempty(propScaling)
     disp('* Select global normalisation: <no Global normalisation>')
 else
