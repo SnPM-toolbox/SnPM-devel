@@ -349,7 +349,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_clus_5_fwe_p50.nii';  
         end
         
-        function additional_predifined_cluster_results(testCase)
+        function additional_predefined_cluster_results(testCase)
             % Rename uncorrected p<0.1
             testCase.matlabbatch{end}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_vox_unc_p10.nii';
             

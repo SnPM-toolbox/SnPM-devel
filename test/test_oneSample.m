@@ -60,7 +60,7 @@ classdef test_oneSample < generic_test_snpm
             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.bVolm = 1;
             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.ST.ST_U = 0.1;
             
-            additional_predifined_cluster_results(testCase);
+            additional_predefined_cluster_results(testCase);
         end
         
         % With 1 covariate

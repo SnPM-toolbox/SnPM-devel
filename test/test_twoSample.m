@@ -49,7 +49,7 @@ classdef test_twoSample < generic_test_snpm
             
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.ST.ST_U = 0.1;
             
-            additional_predifined_cluster_results(testCase);
+            additional_predefined_cluster_results(testCase);
         end
         
         
@@ -60,7 +60,7 @@ classdef test_twoSample < generic_test_snpm
             
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.ST.ST_U = 2.03;
             
-            additional_predifined_cluster_results(testCase);
+            additional_predefined_cluster_results(testCase);
         end
 
 %         % With covariate with wrong number of values
