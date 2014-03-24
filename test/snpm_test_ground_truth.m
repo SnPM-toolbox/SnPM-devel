@@ -41,8 +41,8 @@ switch buttonName,
         
         cwd = pwd;
         
-        testOneSample = {'onesample_cluster_predefined_slow'} 
-        % 'onesample_mask' 'onesample_abs_thresh', 'onesample_1'
+        testOneSample = {'onesample_cluster_predefined_slow_var'} 
+        % 'onesample_cluster_predefined_slow' 'onesample_mask' 'onesample_abs_thresh', 'onesample_1'
         % {'onesample_prop_thresh', 'onesample_var' 'onesample_slice', 'onesample_ancova', ...
         %             'onesample_grandmean_50', 'onesample_grandmean_145', ...
         %             'onesample_propscaling_to_user', 'onesample_propscaling', ...
@@ -86,6 +86,11 @@ switch buttonName,
                 case {'onesample_1'}
                     if isempty(cfgFile) || redo
                         design_one_sample_test(testDataDir, resDir, '0', {}, '0')
+                    end
+                case {'onesample_cluster_predefined_slow_var'}
+                    if isempty(cfgFile) || redo
+                        design_one_sample_test(testDataDir, resDir, ...
+                            '0', {}, '6', 5, '', '', '', '', '', '', '', '', true)
                     end
                 case {'onesample_cluster_predefined_slow'}
                     if isempty(cfgFile) || redo
@@ -451,7 +456,7 @@ switch buttonName,
                 case {'onesample_cluster_predefined', 'twosample_cluster_predefined',...
                         'twosample_cluster_predef_stat'}
                     additional_interactive_predefined_cluster_results(resDir)
-                case {'onesample_cluster_predefined_slow'}
+                case {'onesample_cluster_slow', 'onesample_cluster_slow_var'}
                     additional_interactive_predefined_cluster_results(resDir, '3.8')
                     
                 otherwise
