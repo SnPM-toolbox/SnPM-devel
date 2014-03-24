@@ -532,7 +532,7 @@ if BATCH
                 if (CFth<1)
                     error(sprintf('ERROR: Cluster-forming threshold specified as a P-value (%g), but uncorrected P-values are unavailable for the pseudo t (smoothed variance t-test).  \nRe-run results with a cluster-forming threshold greater than 1.\n',ST_Ut))
                 end
-                if (CFth>=ST_Ut-tol)
+                if (CFth < ST_Ut)%(CFth>=ST_Ut-tol)
                     error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STprop in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
                 end
             else
