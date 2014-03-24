@@ -63,6 +63,20 @@ classdef test_oneSample < generic_test_snpm
             additional_predefined_cluster_results(testCase);
         end
         
+        % No covariate, no variance smoothing and cluster stat with
+        % pre-defined height threshold as a statistic value
+        function test_onesample_cluster_predefined_slow(testCase)
+            testCase.testName = 'onesample_cluster_predefined_slow';
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.bVolm = 1;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.ST.ST_later = -1;
+            
+            additional_predefined_cluster_results(testCase);
+            % Slow => need to specify cluster-forming threshold
+            testCase.matlabbatch{end-1}.spm.tools.snpm.inference.Thr.Clus.ClusSize.CFth = 3.8;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.CFth = 3.8;
+        end
+        
         % With 1 covariate
         function test_onesample_cov(testCase)
             testCase.testName = 'onesample_cov';
