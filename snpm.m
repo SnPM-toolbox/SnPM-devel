@@ -95,6 +95,15 @@ elseif strcmp(lower(Action),lower('Colour'))
 %-Distribution livery
 varargout = {[0.8 0.8 1.0], 'Diluted Blackcurrent Purple'};
 
+elseif strcmpi(Action,'CreateMenuWin')
+%=======================================================================
+% snpm('CreateMenuWin')
+% Initialise batch system
+spm_jobman('initcfg');
+% Open batch window
+spm_jobman('interactive');
+disp('SnPM13 tools are available in the SPM batch window under SPM -> Tools -> SnPM')
+
 else
 %=======================================================================
 error('Unknown action string')
