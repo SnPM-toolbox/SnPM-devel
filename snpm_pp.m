@@ -805,7 +805,17 @@ if bSpatEx
 	%---------------------------------------------------------------
         if pU_ST_Ut==-1 % No threshold was set in snpm_ui.
 	  fprintf('\tLoading & conditioning SupraThreshold statistics...');
-	  load(fullfile(CWD,'SnPM_ST'))
+      try
+        load(fullfile(CWD,'SnPM_ST'))
+      catch exception
+          if strcmp(exception.message, 'File may be corrupt.')
+              warning(['SnPM_ST file can not be loaded. Consider using' ...
+                  ' ''set cluster-forming threshold now (fast)'' option' ...
+                  ' in SnPM ''Specify''.']);
+          end
+          % Rethrow exception           
+          throw(exception)
+      end
 	  %-SnPM_ST stores columns of [x;y;z;abs(t);perm] with perm negative
 	  % where the exceedence was t < -ST_Ut_0
 	  %-Trim statistics according to threshold ST_Ut, if ST_Ut > ST_Ut_0
