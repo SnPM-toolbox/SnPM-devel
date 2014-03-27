@@ -960,7 +960,8 @@ for i = 1:zdim
               % integers with respect to a level of absolute tolerance (~10^-14)
               % and enforce Locs_vox to be integers.
               diffWithRounded = max(abs(Locs_vox(:)-round(Locs_vox(:))));
-              if diffWithRounded > eps*100
+              tolerance = 10^-10;
+              if diffWithRounded > tolerance
                  Locs_vox_alter = MAT\Locs_mm;
                  diffWithRounded_alter = max(abs(Locs_vox_alter(:)-round(Locs_vox(:))));
                  error(['''Locs_vox'' must be integers (difference is ' num2str(diffWithRounded) ...
