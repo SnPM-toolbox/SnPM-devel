@@ -959,8 +959,12 @@ for i = 1:zdim
               % error later in the code. Here check that the values are
               % integers with respect to a level of absolute tolerance (~10^-14)
               % and enforce Locs_vox to be integers.
-              if max(abs(Locs_vox(:)-round(Locs_vox(:)))) > eps*100
-                 error('''Locs_vox'' must be integers');
+              diffWithRounded = max(abs(Locs_vox(:)-round(Locs_vox(:))));
+              if diffWithRounded > eps*100
+                 Locs_vox_alter = MAT\Locs_mm;
+                 diffWithRounded_alter = max(abs(Locs_vox_alter(:)-round(Locs_vox(:))));
+                 error(['''Locs_vox'' must be integers (difference is ' num2str(diffWithRounded) ...
+                     ' or ' num2str(diffWithRounded_alter) ')']);
               else
                  Locs_vox = round(Locs_vox); 
               end
