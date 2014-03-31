@@ -486,7 +486,9 @@ else
 end
 
 %-Compute Grey matter threshold for each image
-if isempty(GX)
+% Fix different from SnPM13 as iGMsca set to 2 here means no global
+% normalisation 
+if isempty(GX) | iGMsca==2 
     TH    = repmat(THRESH,nScan,1);
 elseif (iTHRESH==3)
     % Absolute threshold
