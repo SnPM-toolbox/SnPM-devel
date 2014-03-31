@@ -41,7 +41,8 @@ switch buttonName,
         
         cwd = pwd;
         
-        testOneSample = {'onesample_cluster_predefined_slow_var'} 
+        testOneSample = {'onesample_ancova_with_neg'} 
+        % 'onesample_cluster_predefined_slow_var'
         % 'onesample_cluster_predefined_slow' 'onesample_mask' 'onesample_abs_thresh', 'onesample_1'
         % {'onesample_prop_thresh', 'onesample_var' 'onesample_slice', 'onesample_ancova', ...
         %             'onesample_grandmean_50', 'onesample_grandmean_145', ...
@@ -166,6 +167,12 @@ switch buttonName,
                     if isempty(cfgFile) || redo
                         design_one_sample_test(testDataDir, resDir, ...
                             '0', {}, '0', 5, '', 'AnCova', '')
+                    end
+                    
+                case {'onesample_ancova_with_neg'}
+                    if isempty(cfgFile) || redo
+                        design_one_sample_test(testDataDir, resDir, ...
+                            '0', {}, '0', 6, '', 'AnCova', '')
                     end
                     
                 case {'onesample_slice'}
@@ -862,7 +869,12 @@ cd(testDataDir)
 disp('* Select design type: MultiSub: One Sample T test on differences; 1 condition');
 disp('* Select all scans:');
 for i = 1:nSubjects
-    disp(sprintf(['\t' fullfile(testDataDir, ['test_data' num2str(i, '%02.0f') '.nii'])]))
+    if nSubjects == 6 && i==6
+        % Used in negative ANCOVA only         
+        disp(sprintf(['\t' fullfile(testDataDir, 'test_data_gr3_21.nii')]))
+    else
+        disp(sprintf(['\t' fullfile(testDataDir, ['test_data' num2str(i, '%02.0f') '.nii'])]))
+    end
 end
 disp(['* # of confounding covariates: ' numCovariates])
 for i = 1:str2double(numCovariates)
@@ -904,7 +916,7 @@ if ~exist('supraThreshStat', 'var')
     supraThreshStat = false;
 end
 disp(['* FWHM(mm) for Variance smooth: ' varSmoothing])
-if nSubjects > 5
+if nSubjects > 6
     disp(['* 17 scans: Work volumetrically?: no'])
 end
 if ~supraThreshStat
