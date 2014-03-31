@@ -193,6 +193,15 @@ classdef test_oneSample < generic_test_snpm
             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.globalm.glonorm = 3;
         end
         
+        % Global normalisation, normalisation: ANCOVA with neg
+        function test_onesample_ancova_with_neg(testCase)
+            testCase.testName = 'onesample_ancova_with_neg';
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P{end+1,1} = ...
+                     fullfile(testCase.testDataDir, 'test_data_gr3_21.nii');
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.globalm.glonorm = 3;
+        end
+        
+        
         % Work slice by slice
         function test_onesample_slice(testCase)
             testCase.compaWithSpm = false;
