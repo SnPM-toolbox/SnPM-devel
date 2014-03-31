@@ -495,7 +495,7 @@ else
 end
 
 %-Compute Grey matter threshold for each image
-if isempty(GX)
+if isempty(GX) | iGMsca==1
     TH    = repmat(THRESH,nScan,1);
 elseif (iTHRESH==3)
     % Absolute threshold
