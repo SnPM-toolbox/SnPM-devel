@@ -131,9 +131,7 @@ classdef test_oneSample < generic_test_snpm
         
         % With proportional masking
         function test_onesample_prop_thresh(testCase)
-            % FIXME: check why results are different using SPM (only one
-            % voxel is concerned)
-            testCase.compaWithSpm = false;
+            testCase.compaWithSpm = true;
             testCase.testName = 'onesample_prop_thresh';
             
             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.masking.tm.tmr.rthresh = 0.75;
