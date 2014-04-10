@@ -41,8 +41,8 @@ switch buttonName,
         
         cwd = pwd;
         
-        testOneSample = {'onesample_prop_thresh'} 
-        % 'onesample_ancova_with_neg', 'onesample_cluster_predefined_slow_var'
+        testOneSample = {} 
+        % 'onesample_prop_thresh' 'onesample_ancova_with_neg', 'onesample_cluster_predefined_slow_var'
         % 'onesample_cluster_predefined_slow' 'onesample_mask' 'onesample_abs_thresh', 'onesample_1'
         % {, 'onesample_var' 'onesample_slice', 'onesample_ancova', ...
         %             'onesample_grandmean_50', 'onesample_grandmean_145', ...
@@ -52,7 +52,7 @@ switch buttonName,
         %             'onesample_var', 'onesample_cov3', 'onesample_cov'
         %             } ;
         
-        testTwoSample = {}%'twosample_1'} %{'twosample_var' 'twosample_ancova'} %{, ...
+        testTwoSample = {'twosample_unbalanced'}%'twosample_1'} %{'twosample_var' 'twosample_ancova'} %{, ...
         %                         'twosample_approx', 'twosample_propscaling', ...
         %                         'twosample_propscaling_to_user', ...
         %                         'twosample_grandmean_145', 'twosample_grandmean_50'  }%'twosample_cov', 'twosample_cov3' 'twosample_cluster_predef_stat'}; %'twosample_cluster_predefined', 'twosample_cluster', 'twosample_1'
@@ -205,6 +205,10 @@ switch buttonName,
                 case {'twosample_1'}
                     if isempty(cfgFile) || redo
                         design_two_sample_test(testDataDir, resDir, '0', {}, '0')
+                    end
+                case {'twosample_unbalanced'}
+                    if isempty(cfgFile) || redo
+                        design_two_sample_test(testDataDir, resDir, '0', {}, '0', -1)
                     end
                     
                 case {'twosample_cluster', 'twosample_cluster_predefined', ...
@@ -802,11 +806,22 @@ for i = 1:3
     disp(sprintf(['\t' ...
         fullfile(testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
 end
-for i = 18:20
+if nSubjects ~= -1 
+    for i = 18:20
+        disp(sprintf(['\t' ...
+            fullfile(testDataDir, ['test_data_gr2_' num2str(i, '%02.0f') '.nii'])]));
+    end
+    disp(['Enter subject index (A/B) [6]: AAABBB'])
+else
     disp(sprintf(['\t' ...
-        fullfile(testDataDir, ['test_data_gr2_' num2str(i, '%02.0f') '.nii'])]));
+        fullfile(testDataDir, ['test_data_04.nii'])]));
+    for i = 18:19
+        disp(sprintf(['\t' ...
+            fullfile(testDataDir, ['test_data_gr2_' num2str(i, '%02.0f') '.nii'])]));
+    end
+    disp(['Enter subject index (A/B) [6]: AAAABB'])
 end
-disp(['Enter subject index (A/B) [6]: AAABBB'])
+
 disp(['* # of confounding covariates: ' numCovariates])
 for i = 1:str2double(numCovariates)
     disp(['* [5] - Covariate ' num2str(i) ': ' valueCov{i}])
@@ -821,7 +836,8 @@ if ~isempty(nPerm)
     disp(['* # perms. to use? (Max ' num2str(2^nSubjects) '): ' nPerm])
 end
 common_choices(5, varSmoothing, propScaling, grandMeanScaling, ...
-    userGrandMean, userPropScaling, userGlobal);
+    userGrandMean, userPropScaling, userGlobal, '', '', ...
+    '', false);
 snpm_ui_and_copy_config(cwd, resDir)
 end
 
