@@ -398,6 +398,10 @@ if (iTHRESH==1)
 elseif (iTHRESH==2)
   THRESH = spm_input('Prop''nal threshold ?','0','e',0.8);
   sThresh = sprintf('Proportional (%g)',THRESH);
+  
+  % As in SPM if relative threshold is set then global calculation must be
+  % computed
+  if iGXcalc~=2, iGXcalc=3; end
 elseif (iTHRESH==3)
   THRESH = spm_input('Absolute threshold ?','0','e');
   sThresh = sprintf('Absolute (%g)',THRESH);
@@ -488,7 +492,8 @@ end
 %-Compute Grey matter threshold for each image
 % Fix different from SnPM13 as iGMsca set to 2 here means no global
 % normalisation 
-if isempty(GX) | iGMsca==2 
+if isempty(GX) | (iTHRESH==1)
+    % No thresholding or no global computation    
     TH    = repmat(THRESH,nScan,1);
 elseif (iTHRESH==3)
     % Absolute threshold
