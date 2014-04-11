@@ -16,7 +16,7 @@ classdef test_multisubpaired2cond < generic_test_snpm
             nSubjects = 5;
             for i = 1:nSubjects
                 for j = 1:2
-                    % In SPM12, scand must be one by line (not one by
+                    % In SPM12, scans must be one by line (not one by
                     % colmun) otherwise error.
                     testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.fsubject(i).scans{j,1} = ...
                       fullfile(testCase.testDataDir, ['test_data_', num2str((i-1)*2+j, '%02.0f'), '.nii,1']);

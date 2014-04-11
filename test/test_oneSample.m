@@ -34,7 +34,8 @@ classdef test_oneSample < generic_test_snpm
         function test_onesample_no_ext_in_results(testCase)
             testCase.testName = 'onesample_no_ext_in_results';
             
-            testCase.matlabbatch{3}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPM_filtered_10none';
+            % Test FDR, FWE et uncorrected T thresh as well
+            additional_results(testCase);
         end
         
         % No covariate, no variance smoothing and cluster stat
@@ -131,9 +132,7 @@ classdef test_oneSample < generic_test_snpm
         
         % With proportional masking
         function test_onesample_prop_thresh(testCase)
-            % FIXME: check why results are different using SPM (only one
-            % voxel is concerned)
-            testCase.compaWithSpm = false;
+            testCase.compaWithSpm = true;
             testCase.testName = 'onesample_prop_thresh';
             
             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.masking.tm.tmr.rthresh = 0.75;

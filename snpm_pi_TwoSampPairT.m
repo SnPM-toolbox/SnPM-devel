@@ -239,8 +239,8 @@ if nSUBJ<=12 || ~bAproxTst                    % exact method
 %     PiStud=PiStud(sum(PiStud'==-1)==nFlip,:);
     
     PiStud = -ones(nPiStud_mx, nSUBJ);
-    altGroupSubIdx = nchoosek(1:nSUBJ, nFlip);
-    altGroupIdx = sub2ind(size(PiStud), repmat(1:nPiStud_mx, nFlip, 1)', altGroupSubIdx);
+    altGroupSubIdx = nchoosek(1:nSUBJ, nSUBJ-nFlip);
+    altGroupIdx = sub2ind(size(PiStud), repmat(1:nPiStud_mx, nSUBJ-nFlip, 1)', altGroupSubIdx);
     PiStud(altGroupIdx(:)) = 1;
 
     %-Only do half the work, if possible

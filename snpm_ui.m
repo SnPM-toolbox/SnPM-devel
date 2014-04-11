@@ -417,6 +417,12 @@ elseif isfield(job.masking.tm,'tmr')
     iTHRESH=2;
     THRESH=job.masking.tm.tmr.rthresh;
     sThresh=sprintf('Relative (%g)',THRESH);
+    
+    % As in SPM if relative thresholding then calculation of globals is
+    % implied
+    if iGXcalc~=2
+        iGXcalc = 3;
+    end
 elseif isfield(job.masking.tm,'tma')
     iTHRESH=3;
     THRESH=job.masking.tm.tma.athresh;
@@ -495,13 +501,14 @@ else
 end
 
 %-Compute Grey matter threshold for each image
-if isempty(GX) | iGMsca==1
+if (iTHRESH==1) || (iTHRESH==3)
+    % No threshold or Absolute threshold    
     TH    = repmat(THRESH,nScan,1);
-elseif (iTHRESH==3)
-    % Absolute threshold
-    TH    = THRESH * ones(size(GX));
-else
+elseif (iTHRESH==2)
+    % Relative threshold
     TH    = THRESH * GX;
+else 
+    error(['Wrong value for iTHRESH: ', num2str(iTHRESH)])
 end
 
 

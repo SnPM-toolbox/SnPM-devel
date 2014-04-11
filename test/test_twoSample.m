@@ -30,6 +30,16 @@ classdef test_twoSample < generic_test_snpm
             testCase.testName = 'twosample_1';
         end
         
+        % No covariate, no variance smoothing (1 vs. group)
+        function test_twosample_unbalanced(testCase)
+            testCase.testName = 'twosample_unbalanced';
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.scans1{end+1,1} = ...
+                     fullfile(testCase.testDataDir, ['test_data_04.nii']);
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.scans2(end,:) = [];
+        end
+        
         % No covariate, no variance smoothing and cluster stat
         function test_twosample_cluster(testCase)
             testCase.testName = 'twosample_cluster';

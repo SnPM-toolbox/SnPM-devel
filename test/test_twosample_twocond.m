@@ -38,6 +38,18 @@ classdef test_twosample_twocond < generic_test_snpm
             testCase.testName = 'twosample_twocond_1';
         end
         
+        function test_twosample_twocond_unbalanced(testCase)
+            % Unbalanced numbr of subjects per group
+            testCase.testName = 'twosample_twocond_unbalanced';
+            % Move one subject from group 2 to group 1            
+            subjectsGroup2 = testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.('scans2').fsubject;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.('scans1').fsubject(end+1) = subjectsGroup2(1);
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.('scans2').fsubject(end) = [];
+            for i = 1:(numel(subjectsGroup2)-1)
+                testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.('scans2').fsubject(i) = subjectsGroup2(i+1);
+            end
+        end
+        
         % Change the acquisition order of conditions for part of the
         % subjects
         function test_twosample_twocond_chgorder(testCase)
