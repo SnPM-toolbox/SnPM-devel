@@ -189,7 +189,7 @@ if nScan<=12 || ~bAproxTst                    % exact method
         % Note we may have missed iCond!  We catch this below.	
     end	
 
-else                                          % random method
+elseif nScan<=53      % random method, using integer indexing
     
     d       = nPiCond-1;
     tmp     = pow2(0:nScan-1)*iCond';  % Include correctly labeled iCond
@@ -208,6 +208,17 @@ else                                          % random method
 
     bhPerms=0;    
 
+else    % random method, for nSubj>=54, when exceeding
+        % double-precision's significand's 53 bit precision
+        % For now, don't check for duplicates
+
+    d       = nPiCond-1;
+
+    PiCond = [iCond;
+	      2*(rand(nPiCond-1,nScan)>0.5)-1];
+
+    bhPerms=0;    
+    
 end
 
 %-Find (maybe) iCond in PiCond, move iCond to 1st; negate if neccesary
