@@ -92,7 +92,11 @@ end
 
 %-Ask whether positive or negative effects be analysed
 %-----------------------------------------------------------------------
-bNeg = (sign(job.Tsign) == -1); % spm_input('Positive or negative effects?',1,'b','+ve|-ve',[0,1],1);
+if STAT == 'T'
+    bNeg = job.Tsign==-1;
+else
+    bNeg = 0;
+end
 
 %-Form full Tmax distribution
 %-----------------------------------------------------------------------
