@@ -30,6 +30,34 @@ classdef test_multisubsimpleregression < generic_test_snpm
             testCase.testName = 'multisubsimpleregression_1';
         end
 
+            % With 1 covariate
+        function test_multisubsimpleregression_cov(testCase)
+            % This was introduced in SnPM13 and can therefore not be tested
+            % for non-regression with SnPM8            
+            testCase.checks = false;
+            
+            testCase.testName = 'multisubsimpleregression_cov';
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.cov.c = [1 5 2 21];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.cov.cname = 'age';
+        end
+
+        % With 3 covariates
+        function test_multisubsimpleregression_cov3(testCase)
+            % This was introduced in SnPM13 and can therefore not be tested
+            % for non-regression with SnPM8            
+            testCase.checks = false;
+            
+            testCase.testName = 'multisubsimpleregression_cov3';
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.cov(1).c = [1 1 2 3];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.cov(1).cname = 'age';
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.cov(2).c = [0 21 15 18];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.cov(2).cname = 'height';
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.cov(3).c = [-1 -0.5 -1 1];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.cov(3).cname = 'width';
+        end
+        
         % With variance smoothing
         function test_multisubsimpleregression_var(testCase)
             testCase.testName = 'multisubsimpleregression_var';

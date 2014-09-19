@@ -106,6 +106,42 @@ end
 %**** bCCovInt = (spm_input('Centre this covariate ?','+0','y/n')=='y');
 bCCovInt = 1;	% Always centre covariate
 
+%-Get confounding covariates
+%-----------------------------------------------------------------------
+G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nSubj;
+if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
+    for i = 1:numel(job.cov)
+        d = job.cov(i).c;
+        if (size(d,1) == 1), 
+            d = d'; 
+        end
+        nGcs = size(Gc,2);
+        if size(d,1) ~= q
+            error(sprintf('Covariate [%d,1] does not match number of subjects [%d]',...
+                size(job.cov(i).c,1),nSubj))
+        else
+            %-Save raw covariates for printing later on
+            Gc = [Gc,d];
+            % Center
+            d  = d - ones(q,1)*mean(d); str=''; 
+            G = [G, d];
+            dnames = job.cov(i).cname;
+    %         dnames = [str,'ConfCov#',int2str(nGcs+1)];
+    %         for j = nGcs+1:nGcs+size(d,1)
+    %             dnames = str2mat(dnames,['ConfCov#',int2str(j)]); 
+    %         end
+            Gcnames = str2mat(Gcnames,dnames);
+        end 
+    end
+    %-Strip off blank line from str2mat concatenations
+    if size(Gc,2), 
+        Gcnames(1,:)=[]; 
+    end
+end
+%-Since no FxC interactions these are the same
+Gnames = Gcnames;
+
+
 %-Work out how many perms, and ask about approximate tests
 %-----------------------------------------------------------------------
 %-NB: n! == gamma(n+1)

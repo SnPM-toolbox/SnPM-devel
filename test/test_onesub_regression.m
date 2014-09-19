@@ -31,6 +31,34 @@ classdef test_onesub_regression < generic_test_snpm
             testCase.testName = 'onesub_regression_1';
         end
 
+        % With 1 covariate
+        function test_onesub_regression_cov(testCase)
+            % This was introduced in SnPM13 and can therefore not be tested
+            % for non-regression with SnPM8            
+            testCase.checks = false;
+            
+            testCase.testName = 'onesub_regression_cov';
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.cov.c = [1 5 2 21 0 4 5 7 8 3];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.cov.cname = 'age';
+        end
+
+        % With 3 covariates
+        function test_onesub_regression_cov3(testCase)
+            % This was introduced in SnPM13 and can therefore not be tested
+            % for non-regression with SnPM8            
+            testCase.checks = false;
+            
+            testCase.testName = 'onesub_regression_cov3';
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.cov(1).c = [1 1 2 3 1 2 4 3 1 2];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.cov(1).cname = 'age';
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.cov(2).c = [0 21 15 18 3 0 14 5 5 2];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.cov(2).cname = 'height';
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.cov(3).c = [-1 -0.5 -1 1 0 1 1.5 0.5 -0.5 1];
+            testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.cov(3).cname = 'width';
+        end
+        
         % With variance smoothing
         function test_onesub_regression_var(testCase)
             testCase.testName = 'onesub_regression_var';

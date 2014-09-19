@@ -26,6 +26,42 @@ CovInt.val        = {};
 CovInt.num        = [1 Inf];
 CovInt.help       = {'This is the variable to correlate with the imaging data.'}; 
 
+% ---------------------------------------------------------------------
+% c Vector
+% ---------------------------------------------------------------------
+c         = cfg_entry;
+c.tag     = 'c';
+c.name    = 'Vector';
+c.help    = {'Vector of covariate values'};
+c.strtype = 'e';
+c.num     = [Inf 1];
+% ---------------------------------------------------------------------
+% cname Name
+% ---------------------------------------------------------------------
+cname         = cfg_entry;
+cname.tag     = 'cname';
+cname.name    = 'Name';
+cname.help    = {'Name of covariate'};
+cname.strtype = 's';
+cname.num     = [1 Inf];
+
+% ---------------------------------------------------------------------
+% mcov Covariate
+% ---------------------------------------------------------------------
+cov         = cfg_branch;
+cov.tag     = 'cov';
+cov.name    = 'Covariate';
+cov.val     = {c cname };
+cov.help    = {'Add a new covariate to your experimental design'};
+% ---------------------------------------------------------------------
+% generic Covariates
+% ---------------------------------------------------------------------
+generic         = cfg_repeat;
+generic.tag     = 'generic';
+generic.name    = 'Covariates of no interest';
+generic.help    = {'Covariates of no interest'};
+generic.values  = {cov };
+generic.num     = [0 Inf];
 
 %% Executable Branch
-snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{CovInt});
+snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{CovInt generic});
