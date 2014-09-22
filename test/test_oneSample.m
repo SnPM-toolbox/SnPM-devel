@@ -64,6 +64,29 @@ classdef test_oneSample < generic_test_snpm
             additional_predefined_cluster_results(testCase);
         end
         
+        % No covariate, with variance smoothing and cluster stat with
+        % pre-defined height threshold
+        function test_onesample_var_cluster_predefined(testCase)
+            % Conversion to statistic using Normal distribution was 
+            % introduced in SnPM13 and can therefore not be tested
+            % for non-regression with SnPM8            
+            testCase.checks = false;
+            
+            testCase.warningId = 'snpm_cp:pseudoTFormingThresholdP';
+            
+            % Cannot compare with SPM as we have variance smoothing            
+            testCase.compaWithSpm = false;
+            
+            testCase.testName = 'onesample_var_cluster_predefined';
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.vFWHM = [6 6 6];
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.bVolm = 1;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.ST.ST_U = 0.1;
+            
+            additional_predefined_cluster_results(testCase);
+        end
+        
         % No covariate, no variance smoothing and cluster stat with
         % pre-defined height threshold as a statistic value
         function test_onesample_cluster_slow(testCase)
@@ -94,6 +117,31 @@ classdef test_oneSample < generic_test_snpm
             testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.CFth = 3.8;
         end
         
+        % No covariate, variance smoothing and cluster stat with
+        % pre-defined height threshold as a statistic value
+        function test_onesample_cluster_slow_var_threshP(testCase)
+            % Conversion to statistic using Normal distribution was 
+            % introduced in SnPM13 and can therefore not be tested
+            % for non-regression with SnPM8            
+            testCase.checks = false;
+            
+            testCase.warningId = 'snpm_pp:pseudoTFormingThresholdP';
+            
+            % Cannot compare with SPM as we have variance smoothing            
+            testCase.compaWithSpm = false;
+            
+            testCase.testName = 'onesample_cluster_slow_var_threshP';
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.vFWHM = [6 6 6];
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.bVolm = 1;
+            testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.ST.ST_later = -1;
+            
+            additional_predefined_cluster_results(testCase);
+            % Slow => need to specify cluster-forming threshold
+            testCase.matlabbatch{end-1}.spm.tools.snpm.inference.Thr.Clus.ClusSize.CFth = 0.01;
+            testCase.matlabbatch{end}.spm.tools.snpm.inference.Thr.Clus.ClusSize.CFth = 0.01;
+        end
         
         
         % With 1 covariate

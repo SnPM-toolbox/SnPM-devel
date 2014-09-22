@@ -29,6 +29,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         mapName;
         SnPMrefVersion;
         checks;
+        warningId;
     end
     
     methods (TestMethodSetup)
@@ -57,6 +58,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.compaWithSpm = true;
             
             testCase.checks = true;
+            testCase.warningId = '';
         end
         
         function update_basis_matlabbatch(testCase)
@@ -229,7 +231,13 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                     end
                 end
             end
-            spm_jobman('run', testCase.matlabbatch);
+            
+            
+            if isempty(testCase.warningId)
+                spm_jobman('run', testCase.matlabbatch);
+            else
+                verifyWarning(testCase, @()(spm_jobman('run', testCase.matlabbatch)),testCase.warningId)
+            end
             
             if testCase.compaWithSpm
                 designName = fieldnames(testCase.matlabbatch{1}.spm.tools.snpm.des);

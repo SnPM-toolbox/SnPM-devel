@@ -713,7 +713,16 @@ if bST
     end
   else            % A threshold has been set.    
     if bVarSm
-      ST_Ut=pU_ST_Ut;
+        if (pU_ST_Ut < 1)
+            ST_Ut = spm_invNcdf(1-pU_ST_Ut);
+            warning('snpm_cp:pseudoTFormingThresholdP',...
+                ['Pseudo-T cluster-forming threshold defined by '...
+                'P-value using Gaussian approximation P=' num2str(pU_ST_Ut)...
+                ' -> Z=' num2str(ST_Ut) '; actual Pseudo-T threshold '...
+                'unknown but may be higher than ' num2str(ST_Ut) '.']);
+        else
+            ST_Ut=pU_ST_Ut;
+        end
     else
       if (pU_ST_Ut>1)
         ST_Ut=pU_ST_Ut;
