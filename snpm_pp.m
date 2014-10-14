@@ -872,6 +872,22 @@ if bSpatEx
                 Locs_mm = SnPM_ST(1:3,tQ);
                 Locs_mm (4,:) = 1;
                 Locs_vox = IMAT * Locs_mm;
+                
+                % Sometimes Locs_vox are not exactly integers and this raises an
+                % error later in the code. Here check that the values are
+                % integers with respect to a level of absolute tolerance (~10^-14)
+                % and enforce Locs_vox to be integers.
+                % (As in snpm_cp)                
+                diffWithRounded = max(abs(Locs_vox(:)-round(Locs_vox(:))));
+                tolerance = 10^-10;
+                if diffWithRounded > tolerance
+                 Locs_vox_alter = MAT\Locs_mm;
+                 diffWithRounded_alter = max(abs(Locs_vox_alter(:)-round(Locs_vox(:))));
+                 error(['''Locs_vox'' must be integers (difference is ' num2str(diffWithRounded) ...
+                     ' or ' num2str(diffWithRounded_alter) ')']);
+                else
+                 Locs_vox = round(Locs_vox); 
+                end
 
                 STCS = snpm_STcalc('update',STCS, SnPM_ST(4,tQ),...
                    Locs_vox(1:3,:),isPos,i,ST_Ut,df);
