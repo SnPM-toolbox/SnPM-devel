@@ -115,13 +115,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             batch_filtmap = cellstr(spm_select('FPList', testCase.batchResDir, '^SnPMt?_filtered_.*\.nii'));
             
             if testCase.compaWithSpm
-                if strcmp(spm('ver'), 'SPM8')
-                    spm_beta = cellstr(spm_select('FPList', testCase.spmDir, '^beta_00\d\d\.hdr'));
-                elseif strcmp(spm('ver'), 'SPM12b')
-                    spm_beta = cellstr(spm_select('FPList', testCase.spmDir, '^beta_00\d\d\.nii'));
-                else
-                    error(['Version ' spm('ver') ' of SPM, not supported.' ]);
-                end
+                spm_beta = cellstr(spm_select('FPList', testCase.spmDir, '^beta_00\d\d\.[hdr|nii]'));
             end
 
             % Maps obtained with the interactive execution
