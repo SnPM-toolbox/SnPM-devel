@@ -38,6 +38,7 @@ switch buttonName,
         
         resultDir = fullfile(spm_str_manip(testDataDir, 'h'), 'results');
         gtDirName = ['GT_' strrep(snpm('ver'), '.', '') '_' version('-release')];
+        disp(sprintf(['\nfolder: ' gtDirName '\n']))
         
         cwd = pwd;
         
