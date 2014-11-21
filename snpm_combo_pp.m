@@ -662,13 +662,14 @@ imagesc((spm_DesMtx('Sca', [H,C,B,G],HCBGnames) + 1)*32)
 xlabel 'Design Matrix'
 set(hDesMtx,'XTick',[],'XTickLabel','')
 hConAxes = axes('Position',[0.65 0.8 0.2 0.1]);
-h = bar(CONT(1,:)); if str2num(MLver)>=7, h=get(h,'children'), end
+
+h = bar(CONT(1,:), 'FaceColor',[1 1 1]*.8, 'BarWidth', 1);  
 hold on
-set(h,'FaceColor',[1 1 1]*.8)
-tX = get(h,'Xdata'); tY = get(h,'Ydata');
-set(gca,'Xlim',[min(tX(:)) max(tX(:))]) 
+tX = get(h,'XData'); tY = get(h,'YData');
+bar_width = get(h, 'BarWidth');
+set(gca,'Xlim',[min(tX(:))-bar_width/2 max(tX(:))+bar_width/2]) 
 title 'contrast'; axis off; hold off
- 
+
 
 
 
