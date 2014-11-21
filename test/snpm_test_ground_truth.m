@@ -555,6 +555,9 @@ end
 if nargin < 6
     numCovariates = '0';
 end
+if nargin < 8
+    balanced = true;
+end
 
 nSubjectsPerGroup = 3;
 nScansPerSub = 2;
