@@ -479,6 +479,10 @@ elseif iGXcalc==3
   %-Compute global values
   rg     = zeros(nScan,1);
   for i  = 1:nScan, rg(i)=spm_global(V(i)); end
+  if any(~isfinite(rg))
+    disp(rg)
+    error('Global computation returned NaN! Cannot continue')
+  end
   GX     = rg;
 elseif iGXcalc==1
   rg     = [];
