@@ -1619,7 +1619,7 @@ elseif ~isempty(C)
     xlabel(sprintf('Max Cluster Size Observed = %g  Cluster Threshold = %g',C(1),cC))
   end
   Ylim = get(gca,'ylim'); Xlim = get(gca,'xlim');
-  set(gca,'Xticklabel',num2str(str2num(get(gca,'Xticklabel')).^3))
+  set(gca,'Xticklabel',num2str(str2double(cellstr(get(gca,'Xticklabel'))).^3))
   line(rC(1)*[1 1],Ylim.*[1 0.95],'LineStyle','--','color',[1 0 0]);
   text(rC(1)+diff(Xlim)*0.01,Ylim(2)*0.95,'Observed','FontSize',10)
   line(cC.^(1/3)*[1 1],Ylim.*[1 0.85],'LineStyle','-');
