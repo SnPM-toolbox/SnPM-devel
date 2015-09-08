@@ -221,10 +221,11 @@ end
 %=======================================================================
 %-All possible labelings correspond to the binary representation of
 % numbers {1...2^nSubj}.
-tmp = (0:(2^nSubj-1))';
 if (bAproxTst)
   tmp = randperm(2^nSubj)-1;
   tmp = tmp(1:nPiSubj)';
+else
+  tmp = (0:(2^nSubj-1))';
 end
 %-Generate labelings of subjects as +/-1
 PiSubj=[];
