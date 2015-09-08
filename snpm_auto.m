@@ -1,16 +1,25 @@
-function job = snpm_auto(SPM,varargin)
-% FUNCTION job = snpm_auto(SPM,[dir,nPerm,vFWHM,bVol])
-%
+function matlabbatch = snpm_auto(SPM,varargin)
 % Converts existing parametric SPM analysis' SPM.mat into a job structure
+% FORMAT job = snpm_auto(SPM,[dir,nPerm,vFWHM,bVol])
+%_______________________________________________________________________
+% Arguments
+%     SPM    - SPM structure or filepath to SPM.mat, to be base of new SnPM run
+%     dir    - Directory where new SnPM to be run
+%     nPerm  - Number of permutations to use
+%     vFWHM  - Variance FWHM smoothing (a 3 vector; defaults to [0 0 0])
+%     bVol   - Use 3D (1) or 2D (0) processing
+%
 
-if nargin<2; dir=varargin{1};   else dir=''; end
-if nargin<3; nPerm=varargin{2}; else nPerm=[]; end
-if nargin<4; vFWHM=varargin{3}; else vFWHM=[]; end
-if nargin<5; bVol=varargin{4};  else bVol=[]; end
+if nargin>=2; dir=varargin{1};   else dir=''; end
+if nargin>=3; nPerm=varargin{2}; else nPerm=[]; end
+if nargin>=4; vFWHM=varargin{3}; else vFWHM=[]; end
+if nargin>=5; bVol=varargin{4};  else bVol=[]; end
 
 snpm_defaults
 
-load(SPM)
+if ~isstruct(SPM)
+  load(SPM)
+end
 % Set up 'default' job structure, with as much from SPM.mat as possible
 job = JobDefault(SPM,dir,nPerm,vFWHM,bVol);
   
@@ -30,20 +39,20 @@ if size(SPM.xX.X,2)==1 && all(SPM.xX.X==SPM.xX.X(1)) % Yes!
 % Is it a simple correlation
 % elseif ????  % 
 
+end
+
+matlabbatch{1}.spm.tools.snpm.des.OneSampT = job;
 
 return
 
-
-
 function job = JobDefault(SPM,dir,nPerm,vFWHM,bVol)
 global SnPMdefs
-
 
 cov = struct('c',[],...
 	     'cname','');
 masking = struct('tm',struct('tm_none',1),...
 		 'im',1,...
-		 'em',{''});
+		 'em',{{''}});
 globalm = struct('gmsca',struct('gmsca_no',1),...
 		 'glonorm',1);
 job.DesignName = '';
@@ -64,21 +73,18 @@ job.globalm = globalm;
 if isempty(dir)
   job.dir = {fullfile(SPM.swd,'SnPM')};
 else
-  job.dir = dir;
+  job.dir = {dir};
 end
 if ~isempty(nPerm)
   job.nPerm = nPerm;
 end
-if ~isempthy(vFWHM);
+if ~isempty(vFWHM);
   job.vFWHM = vFWHM;
 end
-if ~isempthy(bVol)
+if ~isempty(bVol)
   job.bVol = bVol;
 end
 
 job.P = SPM.xY.P;
 
-% set up threshold/masking/global 
-
-
-%%%% STILL TO DO BY TOM
+return
