@@ -181,7 +181,11 @@ iSUBJ = iSubj;
 %=======================================================================
 %-Work out how many perms, and ask about approximate tests
 %-----------------------------------------------------------------------
-nPiSubj_mx = 2^nSubj;
+if nSubj <= 52
+  nPiSubj_mx = 2^nSubj;
+else
+  nPiSubj_mx = Inf;
+end
 nPiSubj = job.nPerm;
 if job.nPerm >= nPiSubj_mx
     bAproxTst=0;
@@ -221,29 +225,36 @@ end
 %=======================================================================
 %-All possible labelings correspond to the binary representation of
 % numbers {1...2^nSubj}.
-if (bAproxTst)
-  tmp = randperm(2^nSubj)-1;
-  tmp = tmp(1:nPiSubj)';
+if nSubj<=52
+  if (bAproxTst)
+    tmp = randperm(2^nSubj)-1;
+    tmp = tmp(1:nPiSubj)';
+  else
+    tmp = (0:(2^nSubj-1))';
+  end
+  %-Generate labelings of subjects as +/-1
+  PiSubj=[];
+  for i=(nSubj-1):-1:0
+    PiSubj = [PiSubj,2*(tmp>=2^i)-1];
+    tmp = tmp - (tmp>=2^i)*2^i;
+  end
+  % Look for correct labeling
+  d = find(all((PiSubj==meshgrid(iSubjC,1:size(PiSubj,1)))'));
+  if (length(d)~=1 & ~bAproxTst)
+    error('Internal error: Correct labeling is not in the perms');
+  elseif (length(d)~=1)
+    % Correct labeling randomly removed, insert at top
+    PiSubj(1,:) = iSubjC;
+  else
+    % Swap correct labeling to top
+    PiSubj(d,:) = PiSubj(1,:);
+    PiSubj(1,:) = iSubjC(1:nSubj);
+  end
 else
-  tmp = (0:(2^nSubj-1))';
-end
-%-Generate labelings of subjects as +/-1
-PiSubj=[];
-for i=(nSubj-1):-1:0
-  PiSubj = [PiSubj,2*(tmp>=2^i)-1];
-  tmp = tmp - (tmp>=2^i)*2^i;
-end
-% Look for correct labeling
-d = find(all((PiSubj==meshgrid(iSubjC,1:size(PiSubj,1)))'));
-if (length(d)~=1 & ~bAproxTst)
-  error('Internal error: Correct labeling is not in the perms');
-elseif (length(d)~=1)
-  % Correct labeling randomly removed, insert at top
-  PiSubj(1,:) = iSubjC;
-else
-  % Swap correct labeling to top
-  PiSubj(d,:) = PiSubj(1,:);
-  PiSubj(1,:) = iSubjC(1:nSubj);
+  % Here we are always approximate 
+  PiSubj = [...
+      iSubjC
+      2*randi(2,nPiSubj-1,nSubj)-3];
 end
 
 %-If not approximate then we can just calc half
