@@ -4,6 +4,13 @@ This file describes the bugs that have been reported, along with the appropriate
 Updated versions of appropriate SnPM functions are available from in the snpm13_updates: 
 http://warwick.ac.uk/snpm/distribution/snpm13_updates
 
+--- SnPM13.1.03 ---
+* snpm
+SnPM version 13.1.03
+
+* snpm_pi_PairT
+Now allows more than 52 subjects, as previously that would generate a "Maximum variable size allowed by the program" error message.
+
 --- SnPM13.1.02 ---
 * snpm
 SnPM version 13.1.02
