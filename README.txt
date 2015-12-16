@@ -4,6 +4,23 @@ This file describes the bugs that have been reported, along with the appropriate
 Updated versions of appropriate SnPM functions are available from in the snpm13_updates: 
 http://warwick.ac.uk/snpm/distribution/snpm13_updates
 
+--- SnPM13.1.03 ---
+* snpm
+SnPM version 13.1.03
+
+* snpm_pi_PairT
+Now allows more than 52 subjects, as previously that would generate a "Maximum variable size allowed by the program" error message.
+
+--- SnPM13.1.02 ---
+* snpm
+SnPM version 13.1.02
+
+* snpm_pp, snpm_combo_pp
+Update contrast display for compatibility with Matlab R2014b.
+
+* generic_test_snpm
+Updates affecting tests only.
+
 --- SnPM13.1.01 ---
 * snpm
 SnPM version 13.1.01
