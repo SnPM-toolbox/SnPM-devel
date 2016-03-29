@@ -753,6 +753,7 @@ end
 %=======================================================================
 % - C O M P U T E   F O R   P E R M U T A T I O N S
 %=======================================================================
+
 %-Cycle over planes (or just once for volumetric mode)
 
 %-If working plane by plane, preallocate Q & XYZ for speed/mem. efficiency
@@ -773,6 +774,20 @@ tic %-Start the clock: Timing code is commented with "clock" symbol: (>)
 %-Loop over planes (breaks out after first loop if bVolm)
 %-----------------------------------------------------------------------
 nP = [];
+
+if(strcmp('snpm_pi_TwoSampT',sDesFile)) %&& nPerm > 10000)
+    nGroup1 = size(find(iCond == 1),2);
+    [N,V] = size(X);
+    RapidPT_path = '~/PermTest/RapidPT/';
+    addpath(RapidPT_path);
+    write = 0;
+    
+    [outputs, timings] = TwoSampleRapidPT(X, nPerm, nGroup1, write, RapidPT_path);
+    MaxT = outputs.MaxT;
+    save('MaxT.mat','MaxT');    
+    save('SnPMt.mat','SnPMt')
+    save('RapidPT_timings.mat','timings');
+else
 for i = 1:zdim
     
   PlStart=toc;SmTime=0; %-Timestamp (>) 
@@ -831,9 +846,14 @@ for i = 1:zdim
       STCS = snpm_STcalc('init',nPerm); 
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	
-	
-    %-Loop over permutations
+   
+    disp('Starting Permutation Testing...');
+%     if(nPerm >= 1000)
+%        [MaxT] = snpm_RapidPT(X,nPerm,sDesign);
+%     end
+    snpmPermTime = tic;
+
+    % Loop over permutations
     %-----------------------------------------------------------------
     for perm = StartPerm:nPerm
       PmStart = toc;			%-Timestamp (>)
@@ -889,7 +909,7 @@ for i = 1:zdim
       %-Save Max T statistic
       %-----------------------------------------------------------
       MaxT(perm,:) = max([ max(T(1,:)), -min(T(1,:));      ...
-		    MaxT(perm,1), MaxT(perm,2) ]);
+                           MaxT(perm,1), MaxT(perm,2) ]);
 	    
       %-Update nonparametric P-value
       %-----------------------------------------------------------
@@ -1011,7 +1031,13 @@ for i = 1:zdim
       end % (if bVolm)
 
     end 	% (for perm = StartPerm:nPerm) - Perm loop
+
+    snpmPermTime = toc(snpmPermTime);
     
+    output_filename = strcat('~/PermTest/outputs/TwoSample_ADRC_25_25_50/outputs_',num2str(size(X,1)),'_',num2str(nPerm),'.mat');
+    timing_filename = strcat('~/PermTest/timings/TwoSample_ADRC_25_25_50/timings_',num2str(size(X,1)),'_',num2str(nPerm),'.mat');
+    %save(timing_filename, 'snpmPermTime');
+
     %- save STCS
     if bST & pU_ST_Ut>=0
       if bhPerms %Double the STCS variables.
@@ -1039,6 +1065,7 @@ for i = 1:zdim
   
 end		% (for i = 1:zdim) - loop over planes
 
+
 fprintf('\n\nPermutations are done. Writing out images.\n')
 
 if bhPerms
@@ -1057,6 +1084,10 @@ lP_pos=-log10(nP_pos);
 lP_pos_image(spm_xyz2e(XYZ_total, Vt))=lP_pos;
 lP_pos_vol=reshape(lP_pos_image,DIM(1),DIM(2),DIM(3));
 spm_write_vol(VlP_pos, lP_pos_vol);
+
+% save MaxT for accuracy comparisson
+%save(output_filename, 'MaxT');
+
 
 if STAT == 'T'
   if bhPerms
@@ -1174,10 +1205,8 @@ fprintf(['\nCorrect Perm has max t %g & rank %d out of %d ', ...
 	'completed permutations\n'],MaxT(1,1),Rank,perm*(bhPerms+1));
 fprintf('\n\tRun snpm_pp for full results\n\n');
 
+end % End else
 
 
-function Vs = sf_close_vol(Vs)
-% Don't need to close images in SPM5
-return
 
 

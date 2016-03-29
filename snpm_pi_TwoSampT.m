@@ -212,17 +212,23 @@ else                                          % random method
     
     % Allocate final result
     PiCond = zeros(nPiCond,nScan);
+    nGroup1 = length(find(iCond==1));
+    nGroup2 = length(find(iCond==-1));
+    
+    [indexMatrix, labelsMatrix1, labelsMatrix2] = snpm_TwoSampleTGetLabelsMatrices(nPiCond-1, nScan, nGroup1 );
 
     % Fill first row  
     PiCond(1,:) = iCond;
+    PiCond(2:nPiCond,:) = labelsMatrix1 - labelsMatrix2;
     % Fill subsequent rows, checking that we're not repeating  
-    for i=2:nPiCond
-      tmp=PiCond(i-1,randperm(nScan));
-      while any(all(PiCond(1:(i-1),:)'==meshgrid(tmp,1:(i-1))'))
-	tmp=PiCond(i-1,randperm(nScan));
-      end
-      PiCond(i,:)=tmp;
-    end      
+%     for i=2:nPiCond
+%       disp(i)
+%       tmp=PiCond(i-1,randperm(nScan));
+%       while any(all(PiCond(1:(i-1),:)'==meshgrid(tmp,1:(i-1))'))
+% 	tmp=PiCond(i-1,randperm(nScan));
+%       end
+%       PiCond(i,:)=tmp;
+%     end      
 
     bhPerms=0;    
 end
