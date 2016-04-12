@@ -780,13 +780,35 @@ if(strcmp('snpm_pi_TwoSampT',sDesFile)) %&& nPerm > 10000)
     [N,V] = size(X);
     RapidPT_path = '~/PermTest/RapidPT/';
     addpath(RapidPT_path);
+    addpath(strcat(RapidPT_path,'postprocess'));
+
     write = 0;
-    
+    if(exist('outputs','dir') ~= 7)
+        mkdir('outputs');
+    end
+    runInfo = strcat('_',num2str(nGroup1),'_',num2str(N-nGroup1),'_',num2str(nPerm),'.mat');
+    params.V = V;
+    params.N = N; 
+    params.nPerm = nPerm;
+    params.xdim = xdim; 
+    params.ydim = ydim; 
+    params.zdim = zdim; 
+    params.origin = ORIGIN; 
+    params.nGroup1 = nGroup1; 
+    params.nGroup2 = N - nGroup1; 
+    alpha = 0.05;
+    save(strcat('outputs/params',runInfo),'params');
+    save(strcat('outputs/XYZ',runInfo),'XYZ'); 
+    save(strcat('outputs/SnPMt',runInfo),'SnPMt'); 
     [outputs, timings] = TwoSampleRapidPT(X, nPerm, nGroup1, write, RapidPT_path);
     MaxT = outputs.MaxT;
-    save('MaxT.mat','MaxT');    
-    save('SnPMt.mat','SnPMt')
-    save('RapidPT_timings.mat','timings');
+    save(strcat('outputs/MaxT',runInfo),'MaxT'); 
+    save('SnPMt.mat','SnPMt'); % Real t-statistic for each voxel.
+    save(strcat('outputs/timings_',runInfo),'timings');
+    
+    brain = load_nii(Vt.fname);
+    rapidpt_postprocess(MaxT, SnPMt, XYZ, brain, alpha, params)
+    
 else
 for i = 1:zdim
     
