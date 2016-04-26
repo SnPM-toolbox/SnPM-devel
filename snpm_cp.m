@@ -775,7 +775,7 @@ tic %-Start the clock: Timing code is commented with "clock" symbol: (>)
 %-----------------------------------------------------------------------
 nP = [];
 
-if(strcmp('snpm_pi_TwoSampT',sDesFile)) %&& nPerm > 10000)
+if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm < 10000)
     nGroup1 = size(find(iCond == 1),2);
     [N,V] = size(X);
     RapidPT_path = '~/PermTest/RapidPT/';
@@ -796,15 +796,17 @@ if(strcmp('snpm_pi_TwoSampT',sDesFile)) %&& nPerm > 10000)
     params.origin = ORIGIN; 
     params.nGroup1 = nGroup1; 
     params.nGroup2 = N - nGroup1; 
-    alpha = 0.05;
+    alpha = [0.5 0.25 0.1 0.05 0.01 0.001];
+    avgImage = mean(X);
     save(strcat('outputs/params',runInfo),'params');
     save(strcat('outputs/XYZ',runInfo),'XYZ'); 
     save(strcat('outputs/SnPMt',runInfo),'SnPMt'); 
+    save(strcat('outputs/avgImage',runInfo),'avgImage'); 
     [outputs, timings] = TwoSampleRapidPT(X, nPerm, nGroup1, write, RapidPT_path);
     MaxT = outputs.MaxT;
     save(strcat('outputs/MaxT',runInfo),'MaxT'); 
     save('SnPMt.mat','SnPMt'); % Real t-statistic for each voxel.
-    save(strcat('outputs/timings_',runInfo),'timings');
+    save(strcat('outputs/timings',runInfo),'timings');
     
     brain = load_nii(Vt.fname);
     rapidpt_postprocess(MaxT, SnPMt, XYZ, brain, alpha, params)

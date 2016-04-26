@@ -5,24 +5,30 @@ function [ ] = rapidpt_postprocess(MaxT, SnPMt, XYZ, brain, alpha, params)
     xSize = params.xdim;
     ySize = params.ydim;
     zSize = params.zdim;
+    numAlphas = size(alpha,2);
+    tThresh = zeros(1,numAlphas);
+    for i=1:numAlphas
+        currAlpha = alpha(1,i);
+        tThresh(1,i) = getTThreshold(MaxT, currAlpha);
+        sigVoxelsIndices = find(SnPMt >= tThresh(1,i));
+        numSigVoxels = size(sigVoxelsIndices,2);
 
-    [ tThresh ] = getTThreshold(MaxT, alpha);
-    sigVoxelsIndices = find(SnPMt >= tThresh);
-    numSigVoxels = size(sigVoxelsIndices,2);
+        coords = floor(repmat(params.origin,1,numSigVoxels) - XYZ(:,sigVoxelsIndices));
 
-    coords = floor(repmat(params.origin,1,numSigVoxels) - XYZ(:,sigVoxelsIndices));
+        newBrain = zeros(xSize,ySize,zSize);
+        for j=1:numSigVoxels
+            newBrain(coords(1,j),coords(2,j),coords(3,j)) = 1;
+        end
 
-    newBrain = zeros(xSize,ySize,zSize);
-    for i=1:numSigVoxels
-        newBrain(coords(1,i),coords(2,i),coords(3,i)) = 1;
-    end
-
-    brain_bin = brain; 
-    brain_bin.img = double(newBrain);
-    imgStr = 'activeBrain';
+        brain_bin = brain; 
+        brain_bin.img = double(newBrain);
+        imgStr = 'activeBrain';
     
-    save_nii(brain_bin,strcat('outputs/',imgStr,'_',num2str(alpha),'.nii'));
-    save(strcat('outputs/coords_',imgStr,'_',num2str(alpha),'.mat'),'coords');
+        save_nii(brain_bin,strcat('outputs/',imgStr,'_',num2str(currAlpha),'.nii'));
+        save(strcat('outputs/coords_',imgStr,'_',num2str(currAlpha),'.mat'),'coords');
+    end
+    
+
 
 
 end
