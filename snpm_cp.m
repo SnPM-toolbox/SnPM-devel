@@ -426,6 +426,8 @@ if STAT=='T'
   lP_FDR_neg_image=repmat(NaN,1, VolDim);	
 end
 
+snpmPermTime = tic;
+
 %=======================================================================
 % - C O R R E C T   P E R M U T A T I O N
 %=======================================================================
@@ -434,6 +436,7 @@ end
 % allows determination of pseudo-t threshold when saving supratheshold
 % statistics.
 disp('Working on correct permutation...');
+
 
 SnPMt=[]; %Initialzie SnPMt,which will store the t's from correct permutation.
 
@@ -774,10 +777,14 @@ tic %-Start the clock: Timing code is commented with "clock" symbol: (>)
 %-Loop over planes (breaks out after first loop if bVolm)
 %-----------------------------------------------------------------------
 nP = [];
+nGroup1 = size(find(iCond == 1),2);
+params.N = size(X,1);
+params.V = size(X,2);
+nGroup2 = N - nGroup1;
+runOutDir = strcat(num2str(params.N),'_',num2str(nGroup1),'_',num2str(nGroup2));
+runInfo = strcat(runOutDir,'_',num2str(nPerm),'.mat');
 
-if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm < 10000)
-    nGroup1 = size(find(iCond == 1),2);
-    [N,V] = size(X);
+if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm < 1000)
     RapidPT_path = '~/PermTest/RapidPT/';
     addpath(RapidPT_path);
     addpath(strcat(RapidPT_path,'postprocess'));
@@ -786,9 +793,6 @@ if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm < 10000)
     if(exist('outputs','dir') ~= 7)
         mkdir('outputs');
     end
-    runInfo = strcat('_',num2str(nGroup1),'_',num2str(N-nGroup1),'_',num2str(nPerm),'.mat');
-    params.V = V;
-    params.N = N; 
     params.nPerm = nPerm;
     params.xdim = xdim; 
     params.ydim = ydim; 
@@ -875,7 +879,6 @@ for i = 1:zdim
 %     if(nPerm >= 1000)
 %        [MaxT] = snpm_RapidPT(X,nPerm,sDesign);
 %     end
-    snpmPermTime = tic;
 
     % Loop over permutations
     %-----------------------------------------------------------------
@@ -1058,9 +1061,9 @@ for i = 1:zdim
 
     snpmPermTime = toc(snpmPermTime);
     
-    output_filename = strcat('~/PermTest/outputs/TwoSample_ADRC_25_25_50/outputs_',num2str(size(X,1)),'_',num2str(nPerm),'.mat');
-    timing_filename = strcat('~/PermTest/timings/TwoSample_ADRC_25_25_50/timings_',num2str(size(X,1)),'_',num2str(nPerm),'.mat');
-    %save(timing_filename, 'snpmPermTime');
+    outputs_filename = strcat('~/PermTest/outputs_parallel/',runOutDir,'/snpm/outputs_',runInfo);
+    timings_filename = strcat('~/PermTest/timings_parallel/',runOutDir,'/snpm/timings_',runInfo);
+    save(timings_filename, 'snpmPermTime');
 
     %- save STCS
     if bST & pU_ST_Ut>=0
@@ -1110,7 +1113,20 @@ lP_pos_vol=reshape(lP_pos_image,DIM(1),DIM(2),DIM(3));
 spm_write_vol(VlP_pos, lP_pos_vol);
 
 % save MaxT for accuracy comparisson
-%save(output_filename, 'MaxT');
+
+  params.nPerm = nPerm;
+  params.xdim = xdim; 
+  params.ydim = ydim; 
+  params.zdim = zdim; 
+  params.origin = ORIGIN; 
+  params.nGroup1 = nGroup1; 
+  params.nGroup2 = N - nGroup1; 
+  snpmOutputs.params = params;
+  snpmOutputs.MaxT = MaxT;
+  snpmOutputs.avgImage = mean(X);
+  snpmOutputs.XYZ = XYZ;
+  snpmOutputs.SnPMt = SnPMt;
+  save(outputs_filename, 'snpmOutputs');
 
 
 if STAT == 'T'

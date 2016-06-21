@@ -215,7 +215,7 @@ else                                          % random method
     nGroup1 = length(find(iCond==1));
     nGroup2 = length(find(iCond==-1));
     
-    [indexMatrix, labelsMatrix1, labelsMatrix2] = snpm_TwoSampleTGetLabelsMatrices(nPiCond-1, nScan, nGroup1 );
+    [indexMatrix, labelsMatrix1, labelsMatrix2] = snpm_TwoSampleTGetLabelsMatrices(nPiCond-1, nScan, nGroup1);
 
     % Fill first row  
     PiCond(1,:) = iCond;
