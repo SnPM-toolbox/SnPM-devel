@@ -784,7 +784,7 @@ nGroup2 = params.N - nGroup1;
 runOutDir = strcat(num2str(params.N),'_',num2str(nGroup1),'_',num2str(nGroup2));
 runInfo = strcat(runOutDir,'_',num2str(nPerm),'.mat');
 
-if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm < 1000)
+if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm == 2)
     RapidPT_path = '~/PermTest/RapidPT/';
     addpath(RapidPT_path);
     addpath(strcat(RapidPT_path,'postprocess'));
@@ -799,7 +799,7 @@ if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm < 1000)
     params.zdim = zdim; 
     params.origin = ORIGIN; 
     params.nGroup1 = nGroup1; 
-    params.nGroup2 = N - nGroup1; 
+    params.nGroup2 = params.N - nGroup1; 
     alpha = [0.5 0.25 0.1 0.05 0.01 0.001];
     avgImage = mean(X);
     save(strcat('outputs/params',runInfo),'params');
