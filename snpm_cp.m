@@ -780,7 +780,7 @@ nP = [];
 nGroup1 = size(find(iCond == 1),2);
 params.N = size(X,1);
 params.V = size(X,2);
-nGroup2 = N - nGroup1;
+nGroup2 = params.N - nGroup1;
 runOutDir = strcat(num2str(params.N),'_',num2str(nGroup1),'_',num2str(nGroup2));
 runInfo = strcat(runOutDir,'_',num2str(nPerm),'.mat');
 
@@ -1061,8 +1061,8 @@ for i = 1:zdim
 
     snpmPermTime = toc(snpmPermTime);
     
-    outputs_filename = strcat('~/PermTest/outputs_parallel/',runOutDir,'/snpm/outputs_',runInfo);
-    timings_filename = strcat('~/PermTest/timings_parallel/',runOutDir,'/snpm/timings_',runInfo);
+    outputs_filename = strcat('/u/v/a/vamsi/private/PermTest/outputs_parallel/',runOutDir,'/snpm/outputs_',runInfo);
+    timings_filename = strcat('/u/v/a/vamsi/private/PermTest/timings_parallel/',runOutDir,'/snpm/timings_',runInfo);
     save(timings_filename, 'snpmPermTime');
 
     %- save STCS
@@ -1120,7 +1120,7 @@ spm_write_vol(VlP_pos, lP_pos_vol);
   params.zdim = zdim; 
   params.origin = ORIGIN; 
   params.nGroup1 = nGroup1; 
-  params.nGroup2 = N - nGroup1; 
+  params.nGroup2 = params.N - nGroup1; 
   snpmOutputs.params = params;
   snpmOutputs.MaxT = MaxT;
   snpmOutputs.avgImage = mean(X);
