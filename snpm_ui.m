@@ -590,7 +590,7 @@ eval(['save SnPMcfg ',s_SnPMcfg_save])
 
 
 
-if ~defaults.cmdline
+if ~spm_get_defaults('cmdline')
 
     %=======================================================================
     %-Display parameters

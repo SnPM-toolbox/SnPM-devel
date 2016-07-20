@@ -1141,8 +1141,9 @@ if bSpatEx
 	end
 end
 
-
-
+% Display only if *not* in command line mode
+if ~spm_get_defaults('cmdline')
+    
 %=======================================================================
 %-D I S P L A Y :   Max report
 %=======================================================================
@@ -1436,6 +1437,8 @@ if length(strmatch('MIPtable',Report))>0
   end
   
   set(Finter,'Pointer','Arrow')
+
+end
 
 end
 
