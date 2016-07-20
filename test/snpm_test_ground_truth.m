@@ -102,6 +102,7 @@ switch buttonName,
         
         for i = 1:numel(allTests)
             currTest = allTests{i};
+            disp(['*** COMPUTING ' currTest ' ***'])
             
             % ---- one-sample tests ----
             resDir = fullfile(resultDir, gtDirName, allTests{i});
