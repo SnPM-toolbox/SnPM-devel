@@ -247,12 +247,14 @@ end
 if ~bVolm & pU_ST_Ut>=0
   error('Must work volumetrically to computer STCS on-the-fly');
 end
-% Re-map files to avoid Endian headaches
+% Re-map files to avoid Endian headaches; note if NaN's available
+NaNrep=0;
 for i = 1:length(V)
     curr_pinfo = V(i).pinfo;% Added to keep scaling
     V(i) = spm_vol([V(i).fname ',' num2str(V(i).n)]);
     original_pinfo = V(i).pinfo;
     V(i).pinfo = curr_pinfo;
+    NaNrep = NaNrep | spm_type(V(i).dt(1),'nanrep');
 end
 
 %-Delete files from previous analyses, if they exist
@@ -497,8 +499,12 @@ for i = 1:zdim
   %-Eliminate background voxels (based on threshold TH), and
   % eliminate voxels where there are no differences across scans.
   %---------------------------------------------------------------------
-  Q = find(all(X>TH) & any(diff(X)) & Wt);
-    
+  if ImMASK & NaNrep==0
+    Q = find(all(X>TH) & any(diff(X)) & Wt & all(X~=0));
+  else
+    Q = find(all(X>TH) & any(diff(X)) & Wt);
+  end
+
   if length(Q)
    
     X     = X(:,Q);

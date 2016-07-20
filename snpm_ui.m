@@ -122,7 +122,7 @@ function snpm_ui(varargin)
 % sDesign       Description of PlugIn design
 % V             Memory mapping handles
 % MASK          Filename of explicit mask image
-% ImMASKING     Implicit masking; 0=none; 1=zeros are equivalent to NaN
+% ImMASK        Implicit masking; 0=none; 1=zeros are equivalent to NaN
 % 
 % df            degrees of freedom due to error
 % sDesSave      String of PlugIn variables to save to cfg file
@@ -431,7 +431,7 @@ end
 
 %-Implicit Masking - Batch only!
 %-----------------------------------------------------------------------
-ImMASKING=job.masking.im;
+ImMASK=job.masking.im;
 
 %-Get analysis mask
 %-----------------------------------------------------------------------
@@ -479,6 +479,10 @@ elseif iGXcalc==3
   %-Compute global values
   rg     = zeros(nScan,1);
   for i  = 1:nScan, rg(i)=spm_global(V(i)); end
+  if any(~isfinite(rg))
+    disp(rg)
+    error('Global computation returned NaN! Cannot continue')
+  end
   GX     = rg;
 elseif iGXcalc==1
   rg     = [];
@@ -577,7 +581,7 @@ CONT  = [CONT, zeros(size(CONT,1),size([B G],2))];
 %-----------------------------------------------------------------------
 s_SnPMcfg_save = ['s_SnPMcfg_save H C B G HCBGnames P PiCond ',...
 	'sPiCond bhPerms sHCform iGloNorm sGloNorm GM rg GX GMscale CONT ',...
-	'THRESH MASK TH bVarSm vFWHM sVarSm bVolm bST sDesFile sDesign ',...
+	'THRESH MASK ImMASK TH bVarSm vFWHM sVarSm bVolm bST sDesFile sDesign ',...
         'V pU_ST_Ut df1 ', ...
 	'sDesSave ',sDesSave];
 eval(['save SnPMcfg ',s_SnPMcfg_save])
