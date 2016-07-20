@@ -43,6 +43,9 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             % Run the tests in command line mode (no display)
             global defaults;
             defaults.cmdline = true;
+            
+            % Disable warning on very small number of permutations
+            warning('off','SnPM:VeryFewPermsCoarseExactPValues')
 
             snpm_test_config;
             cd(spm_str_manip(which('snpm_test_config'), 'h'))
@@ -195,6 +198,9 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             % Reinitialize SnPM & SPM defaults
             snpm_defaults;
             spm_defaults;
+            
+            % Reanable all warnings
+            warning('on','all');
         end
         
         function complete_batch_and_run(testCase)
