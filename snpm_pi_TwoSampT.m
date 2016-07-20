@@ -121,6 +121,9 @@ if SnPMdefs.shuffle_seed
         rand('seed',sum(100*clock));
     end
 end
+nPermMC = 2000; % When using more than this many permutations, use
+                % conventional MC permutation test, i.e. don't try
+                % to excluded repeated permutations.
 
 %-Get filenames and iCond, the condition labels
 %=======================================================================
@@ -224,8 +227,10 @@ else                                          % random method
     % Fill subsequent rows, checking that we're not repeating  
     for i=2:nPiCond
       tmp=PiCond(i-1,randperm(nScan));
-      while any(all(PiCond(1:(i-1),:)'==meshgrid(tmp,1:(i-1))'))
-	tmp=PiCond(i-1,randperm(nScan));
+      if nPerm<=nPermMC
+	while any(all(PiCond(1:(i-1),:)'==meshgrid(tmp,1:(i-1))'))
+	  tmp=PiCond(i-1,randperm(nScan));
+	end
       end
       PiCond(i,:)=tmp;
     end      
