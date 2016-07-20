@@ -259,9 +259,12 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                 if ~exist(testCase.spmDir, 'dir')
                     mkdir(testCase.spmDir);
                 else
-                    % Remove SPM.mat to avoid interactive window asking if
-                    % model can be overwritten
-                    delete(fullfile(testCase.spmDir, 'SPM.mat'));
+                    spmmatfile = fullfile(testCase.spmDir, 'SPM.mat');
+                    if exist(spmmatfile, 'file')
+                        % Remove SPM.mat to avoid interactive window asking if
+                        % model can be overwritten
+                        delete(spmmatfile);
+                    end
                 end
                 % If grand mean scaling then we should calculate mean (otherwise error?)
                 if (  isfield(testCase.spmBatch{1}.spm.stats.factorial_design, 'globalm') &&...
