@@ -39,6 +39,10 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             % shuffled seed
             global SnPMdefs
             SnPMdefs.shuffle_seed = false;
+            
+            % Run the tests in command line mode (no display)
+            global defaults;
+            defaults.cmdline = true;
 
             snpm_test_config;
             cd(spm_str_manip(which('snpm_test_config'), 'h'))
@@ -188,8 +192,9 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             end
             testCase.compare_batch_with_inter(zeroingNaNs); 
             
-            % Reinitialize SnPM defaults
+            % Reinitialize SnPM & SPM defaults
             snpm_defaults;
+            spm_defaults;
         end
         
         function complete_batch_and_run(testCase)
