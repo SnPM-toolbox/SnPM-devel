@@ -58,7 +58,13 @@ classdef test_onesub_twocondrepl < generic_test_snpm
             testCase.checks = false;
             testCase.testName = 'onesub_twocondrepl_approx';
             
-            rand('seed',200);
+            try
+                % Syntax for newest Matlab versions
+                rng(200);
+            catch
+                % Old syntax
+                rand('seed',200);
+            end
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.nPerm = 15;
         end
     end

@@ -48,7 +48,13 @@ classdef test_multisub_withinsubanova < generic_test_snpm
         function test_multisub_withinsubanova_approx(testCase)
             testCase.testName = 'multisub_withinsubanova_approx';
             
-            rand('seed',200);            
+            try
+                % Syntax for newest Matlab versions
+                rng(200);
+            catch
+                % Old syntax
+                rand('seed',200);
+            end
             testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.nPerm = 13;
         end
     end

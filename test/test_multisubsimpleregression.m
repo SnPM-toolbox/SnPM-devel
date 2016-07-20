@@ -69,7 +69,13 @@ classdef test_multisubsimpleregression < generic_test_snpm
         function test_multisubsimpleregression_approx(testCase)
             testCase.testName = 'multisubsimpleregression_approx';
             
-            rand('seed',200);
+            try
+                % Syntax for newest Matlab versions
+                rng(200);
+            catch
+                % Old syntax
+                rand('seed',200);
+            end
             testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.nPerm = 14;
         end
     end

@@ -198,7 +198,13 @@ classdef test_oneSample < generic_test_snpm
         function test_onesample_approx(testCase)
             testCase.testName = 'onesample_approx';
             
-            rand('seed',200);
+            try
+                % Syntax for newest Matlab versions
+                rng(200);
+            catch
+                % Old syntax
+                rand('seed',200);
+            end
             testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.nPerm = 15;
         end
         

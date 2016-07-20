@@ -28,9 +28,14 @@ classdef skeleton_class %< generic_test_snpm
 
         % With approximate test
         function test_testclassname_approx(testCase)
-            testCase.testName = 'testclassname_approx';
-            
-            rand('seed',200);
+            testCase.testName = 'testclassname_approx';          
+            try
+                % Syntax for newest Matlab versions
+                rng(200);
+            catch
+                % Old syntax
+                rand('seed',200);
+            end
         end
     end
     

@@ -89,7 +89,13 @@ classdef test_twosample_twocond < generic_test_snpm
         % With approximate test
         function test_twosample_twocond_approx(testCase)
             testCase.testName = 'twosample_twocond_approx';
-            rand('seed',200);
+            try
+                % Syntax for newest Matlab versions
+                rng(200);
+            catch
+                % Old syntax
+                rand('seed',200);
+            end
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampPairT.nPerm = 15;
         end
     end

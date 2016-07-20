@@ -50,7 +50,13 @@ classdef test_multisubpaired2cond < generic_test_snpm
         % With approximate test
         function test_multisubpaired2cond_approx(testCase)
             testCase.testName = 'multisubpaired2cond_approx';
-            rand('seed',200);
+            try
+                % Syntax for newest Matlab versions
+                rng(200);
+            catch
+                % Old syntax
+                rand('seed',200);
+            end
             
             testCase.matlabbatch{1}.spm.tools.snpm.des.PairT.nPerm = 14;
         end
