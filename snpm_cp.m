@@ -279,10 +279,8 @@ spm_unlink SnPM.mat SnPM_ST.mat SnPMt.mat SnPMucp.mat XYZ.mat SnPM_pp.mat ...
 
 %-Suprathreshold parameters
 %-----------------------------------------------------------------------
-global SnPMdefs
-if isempty(SnPMdefs), snpm_defaults; end
-STalpha = SnPMdefs.STalpha; 
-STprop  = SnPMdefs.STprop;
+STalpha = snpm_get_defaults('STalpha'); 
+STprop  = snpm_get_defaults('STprop');
 
 s_SnPM_save = [s_SnPM_save ' STalpha STprop'];  % Save for PP
 

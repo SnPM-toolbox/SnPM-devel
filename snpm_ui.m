@@ -282,7 +282,7 @@ bVarSm=0;	% Flag for variance smoothing
 vFWHM=[0,0,0];	% FWHM for variance smoothing
 sVarSm='';	% String describing Variance Smoothing
 bVolm=0;	% Flag for volumetric computation
-nMax4DefVol=SnPMdefs.nMax4DefVol;
+nMax4DefVol=snpm_get_defaults('nMax4DefVol');
                 % Default to volumetric if less than nMax4DefVol scans
 sPiCond='';	% String describing permutations in PiCond
 bhPerms=0;	% Flag for half permutations. Rest are then their inverses

@@ -102,9 +102,8 @@
 %%% nCond    = 2;			% Number of conditions (groups)
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iCond GrpCnt';	% PlugIn variables to save in cfg file
-global SnPMdefs;
 
-if SnPMdefs.shuffle_seed
+if snpm_get_defaults('shuffle_seed')
     % Shuffle seed of random number generator
     try
         rng('shuffle');

@@ -85,8 +85,7 @@ sDesSave = 'iCond iRepl Xblk';	% PlugIn variables to save in cfg file
 %-Get number of replications per condition - 2 x nRepl design
 nRepl    = job.Tss_repc;%spm_input('# replications per condition','+1');
 
-global SnPMdefs
-if SnPMdefs.shuffle_seed
+if snpm_get_defaults('shuffle_seed')
     % Shuffle seed of random number generator
     try
         rng('shuffle');
