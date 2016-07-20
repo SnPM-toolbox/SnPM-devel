@@ -15,7 +15,7 @@ classdef test_onesub_twocondrepl < generic_test_snpm
             
             % Fill the design part in the batch
             for i = 1:12
-                testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.P{i} = ...
+                testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.P{i,1} = ...
                      fullfile(testCase.testDataDir, ['test_data_', num2str(i, '%02.0f') '.nii,1']);
             end
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampTss.condidx = [1 2 1 2 1 2 1 2 1 2 1 2];
