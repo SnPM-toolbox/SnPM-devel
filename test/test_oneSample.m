@@ -252,7 +252,11 @@ classdef test_oneSample < generic_test_snpm
             
             testCase.testName = 'onesample_slice';
             
-            rand('seed',200);
+            try
+                rng(200);
+            catch
+                rand('seed',200);
+            end
             for i = 6:17
                 testCase.matlabbatch{1}.spm.tools.snpm.des.OneSampT.P{end+1} = ...
                     fullfile(testCase.testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii']);
