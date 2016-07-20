@@ -78,13 +78,23 @@
 
 %-Initialisation
 %-----------------------------------------------------------------------
-global TEST;
 nCond    = 2;			% Number of conditions
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iCond iRepl Xblk';	% PlugIn variables to save in cfg file
 
 %-Get number of replications per condition - 2 x nRepl design
 nRepl    = job.Tss_repc;%spm_input('# replications per condition','+1');
+
+global SnPMdefs
+if SnPMdefs.shuffle_seed
+    % Shuffle seed of random number generator
+    try
+        rng('shuffle');
+    catch
+        % Old syntax        
+        rand('seed',sum(100*clock));
+    end
+end
 
 %-Work out exchangability blocks - Assumme Xblks of equal size
 %-----------------------------------------------------------------------
@@ -177,10 +187,6 @@ if ~all(iCond==PiCond(perm,:)), error('iCond~=PiCond(perm,:)'), end
 if (perm~=1)
 	PiCond(perm,:)=[];
 	PiCond=[iCond;PiCond];
-end
-if isempty(TEST) || ~TEST
-    %-Randomise order of PiConds (except first) to allow interim analysis
-    rand('seed',sum(100*clock))	%-Initialise random number generator
 end
 PiCond=[PiCond(1,:);PiCond(randperm(size(PiCond,1)-1)+1,:)];
 

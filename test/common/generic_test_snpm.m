@@ -35,8 +35,10 @@ classdef generic_test_snpm < matlab.unittest.TestCase
     methods (TestMethodSetup)
         
         function setGlobals(testCase)           
-            global TEST;
-            TEST = true;
+            % Random number generator should not be initialised with a
+            % shuffled seed
+            global SnPMdefs
+            SnPMdefs.shuffle_seed = false;
 
             snpm_test_config;
             cd(spm_str_manip(which('snpm_test_config'), 'h'))
@@ -186,7 +188,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             end
             testCase.compare_batch_with_inter(zeroingNaNs); 
             
-            clear global TEST;
+            % Reinitialize SnPM defaults
+            snpm_defaults;
         end
         
         function complete_batch_and_run(testCase)

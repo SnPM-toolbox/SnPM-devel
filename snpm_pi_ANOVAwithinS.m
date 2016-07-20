@@ -108,11 +108,18 @@
 
 %-Initialisation
 %-----------------------------------------------------------------------
-global TEST;
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iRepl sHCform_Mtx';		        % PlugIn variables to save in cfg file
-if isempty(TEST) || ~TEST
-    rand('seed',sum(100*clock));	% Initialise random number generator
+
+global SnPMdefs
+if SnPMdefs.shuffle_seed
+    % Shuffle seed of random number generator
+    try
+        rng('shuffle');
+    catch
+        % Old syntax        
+        rand('seed',sum(100*clock));
+    end
 end
 
 %-Get number of subjects
