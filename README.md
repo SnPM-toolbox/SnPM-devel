@@ -15,10 +15,15 @@ global SnPMrefVersion;
 SnPMrefVersion = 'SnPM8';
 ```
 
-##### Run the tests
+##### Run the test suite
 Then, the tests can be started (from the test data folder) with:
 ```
 import matlab.unittest.TestSuite;
 suite = TestSuite.fromFolder(fullfile(spm_str_manip(which('snpm'), 'h'), 'test'));
 result = run(suite);
+```
+
+##### Run a single test
+```
+run(test_oneSample, 'test_onesample_1')
 ```
