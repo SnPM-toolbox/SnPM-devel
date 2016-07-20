@@ -734,7 +734,11 @@ if bST
       if (pU_ST_Ut>1)
         ST_Ut=pU_ST_Ut;
       else
-        ST_Ut=spm_invTcdf(1-pU_ST_Ut, df);
+        if STAT == 'T'
+                ST_Ut = spm_invTcdf(1-pU_ST_Ut, df);
+        else
+                ST_Ut = spm_invFcdf(1-pU_ST_Ut, df1, df);
+        end
       end   
     end 
   end  
