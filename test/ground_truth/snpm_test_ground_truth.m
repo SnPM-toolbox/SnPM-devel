@@ -12,7 +12,7 @@ function snpm_test_ground_truth()
   disp('Recomputing ground thruth for SnPM testing...')
   
   if isempty(testDataDir)
-    error('Test data directory not set, please update snpm_test_config');
+    error('SnPM:NotTestDataDir', 'Test data directory not set, please update snpm_test_config');
   end
   
   disp('Current version of SnPM')
@@ -23,7 +23,7 @@ function snpm_test_ground_truth()
 
   switch buttonName,
     case 'no',
-      error('Re-computation of ground truth stopped!');
+      error('SnPM:GroundTruthHalted', 'Re-computation of ground truth stopped!');
     case 'yes',
       disp('Start re-computation of ground truth')
       

@@ -124,12 +124,12 @@ end
 
 %-Get number of subjects
 nSubj    = size(job.fsubject,2);%spm_input('# subjects','+1');
-if (nSubj==1), error('Use single subject plug for single subjects'); end    
+if (nSubj==1), error('SnPM:SingleSubj', 'Use single subject plug for single subjects'); end    
 
 %-Get number of scans per subject - nSubj x nRepl design
 nRepl    =  unique(arrayfun(@(x) numel(x.scans), job.fsubject));%spm_input('# scans per subject','+1');
 if numel(nRepl) > 1
-    error('All subjects must have the same number of replications')
+    error('SnPM:DifferentReplications', 'All subjects must have the same number of replications')
 end
 
 
@@ -274,7 +274,7 @@ elseif length(perm)==0 & (nSubj<=12) & bAproxTst
     PiCond(1,:) = iCond;
     perm = 1;
 else    
-    error(['Bad PiCond (' num2str(perm) ')'])
+    error('SnPM:InvalidPiCond', ['Bad PiCond (' num2str(perm) ')'])
 end    
 
 

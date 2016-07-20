@@ -124,7 +124,7 @@ if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
         end
         nGcs = size(Gc,2);
         if size(d,1) ~= q
-            error(sprintf('Covariate [%d,1] does not match number of subjects [%d]',...
+            error(sprintf('SnPM:InvalidCovariate', 'Covariate [%d,1] does not match number of subjects [%d]',...
                 size(job.cov(i).c,1),nScan))
         else
             %-Save raw covariates for printing later on
@@ -250,7 +250,7 @@ elseif length(perm)==0 & (nScan<=12) & bAproxTst
     PiCond(1,:) = iCond;
     perm = 1;
 else    
-    error(['Bad PiCond (' num2str(perm) ')'])
+    error('SnPM:PiCond', ['Bad PiCond (' num2str(perm) ')'])
 end    
 
 

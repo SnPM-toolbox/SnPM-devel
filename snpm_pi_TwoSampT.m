@@ -240,7 +240,7 @@ end
 
 %-Check PiConds sum to nGrp1-nGrp2
 if ~all(all(PiCond*ones(nScan,1)==nScan-2*nFlip))
-	error('Invalid PiCond computed!'), end
+	error('SnPM:InvalidPiCond', 'Invalid PiCond computed!'), end
 
 %-Find (maybe) iCond in PiCond, move iCond to 1st; negate if neccesary
 %-----------------------------------------------------------------------
@@ -266,7 +266,7 @@ elseif length(perm)==0 & (nScan<=12) & bAproxTst
     PiCond(1,:) = iCond;
     perm = 1;
 else    
-    error(['Bad PiCond (' num2str(perm) ')'])
+    error('SnPM:InvalidPiCond', ['Bad PiCond (' num2str(perm) ')'])
 end    
 
 

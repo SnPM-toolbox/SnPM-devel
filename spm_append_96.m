@@ -47,7 +47,7 @@ end
 %----------------------------------------------------------------------------
 [m n] = size(X);
 HDR   = fread(fid,5,'int32');
-if m ~= HDR(2);  error('  Incompatible sizes');  end
+if m ~= HDR(2);  error('SnPM:InvalidSizes', '  Incompatible sizes');  end
 fclose(fid);
 
 % append and update nunmber of columns
@@ -57,7 +57,7 @@ fwrite(fid,X(:),'double');
 Len   = ftell(fid);
 if Len>2^(10*3)*0.99  % 99% of 1GB
   if ~strcmp(LAST_MAT_SIZE_WARNING,MAT)
-    warning(['Very large file!  (' MAT ')\n' SizeWarn])
+    warning('SnPM:VeryLargeFile', ['Very large file!  (' MAT ')\n' SizeWarn])
     LAST_MAT_SIZE_WARNING = MAT;
   end
 end

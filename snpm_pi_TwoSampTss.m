@@ -139,7 +139,7 @@ for i=2:nXblk
 end
 %-Check PiConds sum to zero within Xblks
 if ~all(all(PiCond*spm_DesMtx(iXblk)==0))
-	error('Invalid PiCond computed!'), end
+	error('SnPM:InvalidPiCond', 'Invalid PiCond computed!'), end
 
 %-Take half of PiCond. This is always possible.
 %-----------------------------------------------------------------------
@@ -166,10 +166,10 @@ perm=[]; while(isempty(perm))
 	perm = find(all((meshgrid(iCond,1:size(PiCond,1))==PiCond)'));
 	if (bhPerms), perm=[perm,...
 	    -find(all((meshgrid(iCond,1:size(PiCond,1))==-PiCond)'))]; end
-	if length(perm)>1, error('Multiple iCond in PiCond'), end
-	if isempty(perm), error('Invalid iCond for this design'), end
+	if length(perm)>1, error('SnPM:InvalidPiCond', 'Multiple iCond in PiCond'), end
+	if isempty(perm), error('SnPM:InvalidiCond', 'Invalid iCond for this design'), end
     else
-	error(['Enter indicies for ',int2str(nCond*nRepl),' scans'])
+	error('SnPM:InvalidIndices', ['Enter indicies for ',int2str(nCond*nRepl),' scans'])
     end
 end
 
@@ -182,7 +182,7 @@ iRepl=cumsum(iCond==-1).*(iCond==-1) + cumsum(iCond==1).*(iCond==1);
 %-----------------------------------------------------------------------
 if (perm<0), PiCond=-PiCond; perm=-perm; end
 %-Lame last ditch check just to make sure I know what's going on! ****
-if ~all(iCond==PiCond(perm,:)), error('iCond~=PiCond(perm,:)'), end
+if ~all(iCond==PiCond(perm,:)), error('SnPM:InvalidiCond', 'iCond~=PiCond(perm,:)'), end
 %-Actual labelling must be at top of PiCond
 if (perm~=1)
 	PiCond(perm,:)=[];

@@ -47,7 +47,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.SnPMrefVersion = SnPMrefVersion;
 
             if isempty(testDataDir)
-              error('Test data directory not set, please update snpm_test_config');
+              error('SnPM:NotTestDataDir', 'Test data directory not set, please update snpm_test_config');
             end
             
             testCase.parentDataDir = spm_str_manip(testDataDir, 'h');
@@ -408,7 +408,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             end
             if testCase.checks
                 if numel(testCase.inter_map) ~= numel(testCase.batch_map)
-                    error(['Number of ' testCase.mapName ' maps are not equal between batch (',...
+                    error('SnPM:UnequalTestCases', ['Number of ' testCase.mapName ' maps are not equal between batch (',...
                             num2str(numel(testCase.batch_map)),...
                             ') and interactive mode ',...
                             num2str(numel(testCase.inter_map))   ]);

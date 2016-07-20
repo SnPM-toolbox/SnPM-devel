@@ -122,7 +122,7 @@ if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
         end
         nGcs = size(Gc,2);
         if size(d,1) ~= q
-            error(sprintf('Covariate [%d,1] does not match number of scans [%d]',...
+            error('SnPM:InvalidCovariate', sprintf('Covariate [%d,1] does not match number of scans [%d]',...
                 size(job.cov(i).c,1),nScan))
         else
             %-Save raw covariates for printing later on
@@ -246,7 +246,7 @@ end
 %-----------------------------------------------------------------------
 %-Check PiConds sum within Xblks to sum of first nXblk natural numbers
 if ~all(all(PiCond*spm_DesMtx(iXblk)== (Xblk+1)*Xblk/2 ))
-	error('Invalid PiCond computed!'), end
+	error('SnPM:InvalidPiCond', 'Invalid PiCond computed!'), end
 %-Convert to full permutations from permutations within blocks
 nPiCond = size(PiCond,1);
 PiCond = PiCond + meshgrid((iXblk-1)*Xblk,1:nPiCond);
@@ -254,7 +254,7 @@ PiCond = PiCond + meshgrid((iXblk-1)*Xblk,1:nPiCond);
 PiCond=[PiCond(1,:);PiCond(randperm(nPiCond-1)+1,:)];
 %-Check first permutation is null permutation
 if ~all(PiCond(1,:)==[1:nScan])
-	error('PiCond(1,:)~=[1:nScan]'); end
+	error('SnPM:InvalidPiCond', 'PiCond(1,:)~=[1:nScan]'); end
 
 
 %-Form non-null design matrix partitions (Globals handled later)

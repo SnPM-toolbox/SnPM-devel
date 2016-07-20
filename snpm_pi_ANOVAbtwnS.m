@@ -136,7 +136,7 @@ nScan = size(P,1);
 %     end
 % end
 
-if nCond>255, error('Can''t support more than 255 groups'); end
+if nCond>255, error('SnPM:TooManyGroups', 'Can''t support more than 255 groups'); end
 
 tmp0='A/B/...';
 
@@ -266,7 +266,7 @@ tmp = 1:nCond;
 row_total = tmp*GrpCnt';
 
 if ~all(all(double(PiCond)*ones(nScan,1)==row_total))
-	error('Invalid PiCond computed!'), end
+	error('SnPM:InvalidPiCond', 'Invalid PiCond computed!'), end
 
 %-Find (maybe) iCond in PiCond, move iCond to 1st; 
 %-----------------------------------------------------------------------
@@ -294,7 +294,7 @@ elseif length(perm)==0 & (nScan<=10) & bAproxTst
     PiCond(1,:) = iCond;
     perm = 1;
 else    
-    error(['Bad PiCond (' num2str(perm) ')'])
+    error('SnPM:InvalidPiCond', ['Bad PiCond (' num2str(perm) ')'])
 end    
 
 

@@ -322,7 +322,8 @@ end
 %-Decide upon volumetric operation
 bVolm = job.bVolm;
 if ~bVolm & (vFWHM(3)~=0)
-warning(sprintf(['Working volumetrically because of smoothing in z (%g).\n'... 
+warning('SnPM:MayRunOutOfMemory', ...
+    sprintf(['Working volumetrically because of smoothing in z (%g).\n'... 
          'May run out of memory.'],vFWHM(3)));
 bVolm=1;
 end
@@ -334,7 +335,8 @@ bST = ~isfield(job.ST,'ST_none');
 % Add: get primary threshold for STC analysis if requested
 if bST
   if ~bVolm
-    warning(sprintf('Note:  Cannot define threshold now, because not working volumetrically\n'));
+    warning('SnPM:CannotDefineThreshVolumetrically', ...
+        sprintf('Note:  Cannot define threshold now, because not working volumetrically\n'));
     pU_ST_Ut=-1; % Define the threshold later
   else
     pU_ST_Ut = ~isfield(job.ST,'ST_later');
@@ -398,7 +400,7 @@ elseif isfield(job.globalc,'g_user')
     GX = job.globalc.g_user.global_uval;
     rg = GX;
     if length(GX) ~= nScan
-        error(['User-specified globals length [%d] doesn''t match number of' ...
+        error('SnPM:InvalidGlobals', ['User-specified globals length [%d] doesn''t match number of' ...
             ' scans [%d]'],length(GX),nScan);
     end
 elseif isfield(job.globalc,'g_mean')
@@ -457,10 +459,10 @@ V = spm_vol(P);
 %-Check compatability of images (Bombs for single image)
 %-----------------------------------------------------------------------
 if any(any(diff(cat(1,V(:).dim),1,1),1)&[1,1,1]) 
-	error('images do not all have the same dimensions')
+	error('SnPM:ImageDirections', 'images do not all have the same dimensions')
 end
 if any(any(any(diff(cat(3,V(:).mat),1,3),3)))
-	error('images do not all have same orientation & voxel size')
+	error('SnPM:ImageOrientationsResolutions','images do not all have same orientation & voxel size')
 end
 
 %-Get ORIGIN, etc
@@ -481,7 +483,7 @@ elseif iGXcalc==3
   for i  = 1:nScan, rg(i)=spm_global(V(i)); end
   if any(~isfinite(rg))
     disp(rg)
-    error('Global computation returned NaN! Cannot continue')
+    error('SnPM:NaNGlobal', 'Global computation returned NaN! Cannot continue')
   end
   GX     = rg;
 elseif iGXcalc==1
@@ -512,7 +514,7 @@ elseif (iTHRESH==2)
     % Relative threshold
     TH    = THRESH * GX;
 else 
-    error(['Wrong value for iTHRESH: ', num2str(iTHRESH)])
+    error('SnPM:InvalidiTHRESH', ['Wrong value for iTHRESH: ', num2str(iTHRESH)])
 end
 
 
@@ -554,7 +556,7 @@ elseif iGloNorm == 5				%-AnCova by study
         else Gnames = str2mat(Gnames,GLnames); end
 else
 %-----------------------------------------------------------------------
-    error(sprintf('%cError: invalid iGloNorm option\n',7))
+    error('SnPM:InvalidiGloNorm', sprintf('%cError: invalid iGloNorm option\n',7))
 end % (if)
 
 

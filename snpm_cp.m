@@ -214,16 +214,17 @@ CfgFile = fullfile(CWD,'SnPMcfg.mat');
 %-----------------------------------------------------------------------
 load(CfgFile);
 if isempty([H C])
-  error('No model specified; [H C] empty'); 
+  error('SnPM:NoModel', 'No model specified; [H C] empty'); 
 end
 if ~isempty(H) & ~isempty(C)
-    error('Cannot have both heirachical and covariate effects'); 
+    error('SnPM:HierarchicalAndCov', 'Cannot have both heirachical and covariate effects'); 
 end
 if size(CONT,2) ~= size([H C B G],2)
-    error('Contrast problem; wrong number of columns'); 
+    error('SnPM:InvalidContrast','Contrast problem; wrong number of columns'); 
 end
 if size(CONT,1) > 1
-  warning('F contrast!  F statistic images are being created.'); 
+  warning('SnPM:FContrast', ...
+          'F contrast!  F statistic images are being created.'); 
   STAT = 'F';
   if (CONT(1,:) == -CONT(2,:))
     CONT = CONT(1,:);
@@ -236,16 +237,16 @@ if rank(CONT)<size(CONT,1)
   CONT = full(u*sqrt(s))';
 end
 if ~bVolm & bVarSm & vFWHM(3)
-  error('Cannot z-smooth variance in non-volumetric mode'); 
+  error('SnPM:ZSmoothVolume', 'Cannot z-smooth variance in non-volumetric mode'); 
 end
 if exist('bVarAlph')~=1
   bVarAlph=0; 
 end
 if bVarAlph & ~(~bVarSm & bVolm)
-  error('No pseudo t or nonvolumetric w/ variable alpha');
+  error('SnPM:AlphaVolumePseudo', 'No pseudo t or nonvolumetric w/ variable alpha');
 end
 if ~bVolm & pU_ST_Ut>=0
-  error('Must work volumetrically to computer STCS on-the-fly');
+  error('SnPM:STCSNotVolume', 'Must work volumetrically to computer STCS on-the-fly');
 end
 % Re-map files to avoid Endian headaches; note if NaN's available
 NaNrep=0;
@@ -695,7 +696,7 @@ for i = 1:zdim
 end
 
 % Make an error if actually 'no voxels in brain'. 
-if perm==0, error('No voxels in brain'); end
+if perm==0, error('SnPM:NoVoxelsInBrain', 'No voxels in brain'); end
 
 save SnPMt SnPMt
 
@@ -979,7 +980,7 @@ for i = 1:zdim
               if diffWithRounded > tolerance
                  Locs_vox_alter = MAT\Locs_mm;
                  diffWithRounded_alter = max(abs(Locs_vox_alter(:)-round(Locs_vox(:))));
-                 error(['''Locs_vox'' must be integers (difference is ' num2str(diffWithRounded) ...
+                 error('SnPM:NonIntegerLocs', ['''Locs_vox'' must be integers (difference is ' num2str(diffWithRounded) ...
                      ' or ' num2str(diffWithRounded_alter) ')']);
               else
                  Locs_vox = round(Locs_vox); 

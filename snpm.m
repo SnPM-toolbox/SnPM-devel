@@ -106,7 +106,7 @@ disp('SnPM13 tools are available in the SPM batch window under SPM -> Tools -> S
 
 else
 %=======================================================================
-error('Unknown action string')
+error('SnPM:UnknownAction', 'Unknown action string')
 
 %=======================================================================
 end

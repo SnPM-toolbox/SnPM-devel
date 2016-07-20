@@ -283,7 +283,7 @@ end
 
 %-Check each perm in PiStuds sums to nStud1-nStud2
 if ~all(all(PiStud*ones(nSUBJ,1)==nSubj*[1 -1]'))
-	error('Invalid PiStud computed!'), end
+	error('SnPM:InvalidPiStud', 'Invalid PiStud computed!'), end
 
 %-Find (maybe) iStudC in PiStud, move iStudC to 1st; negate if neccesary
 %-----------------------------------------------------------------------
@@ -309,7 +309,7 @@ elseif length(perm)==0 & (nSUBJ<=12) & bAproxTst % MODIFIED FROM ORIGINAL CHANGE
     PiStud(1,:) = iStudC;
     perm = 1;
 else
-    error(['Bad PiStud (' num2str(perm) ')'])
+    error('SnPM:InvalidPiStud', ['Bad PiStud (' num2str(perm) ')'])
 end    
 
 %-Turn PiStud into PiCond
