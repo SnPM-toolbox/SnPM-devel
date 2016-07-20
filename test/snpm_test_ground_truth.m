@@ -165,7 +165,11 @@ switch buttonName,
                     
                 case {'onesample_approx'}
                     if isempty(cfgFile) || redo
-                        rand('seed',200);
+                        try
+                            rng(200);
+                        catch
+                            rand('seed',200);
+                        end
                         design_one_sample_test(testDataDir, resDir, '0', {}, '0', 5, '15')
                     end
                     
@@ -206,7 +210,11 @@ switch buttonName,
                     end
                     
                 case {'onesample_slice'}
-                    rand('seed',200);
+                    try
+                        rng(200);
+                    catch
+                        rand('seed',200);
+                    end
                     if isempty(cfgFile) || redo
                         design_one_sample_test(testDataDir, resDir, ...
                             '0', {}, '0', 17, '15')
@@ -282,7 +290,11 @@ switch buttonName,
                     
                 case {'twosample_approx'}
                     if isempty(cfgFile) || redo
-                        rand('seed',200);
+                        try
+                            rng(200);
+                        catch
+                            rand('seed',200);
+                        end
                         design_two_sample_test(testDataDir, resDir, '0', {}, '0', 5, '15')
                     end
                     
@@ -360,7 +372,11 @@ switch buttonName,
                     end
                 case {'ANOVAbetween_approx'}
                     if isempty(cfgFile) || redo
-                        rand('seed',200);
+                        try
+                            rng(200);
+                        catch
+                            rand('seed',200);
+                        end
                         design_anova_between_test(testDataDir, resDir, '0', '15', '')
                     end
                     
@@ -375,7 +391,11 @@ switch buttonName,
                     end
                 case {'multisub_withinsubanova_approx'}
                     if isempty(cfgFile) || redo
-                        rand('seed',200);
+                        try
+                            rng(200);
+                        catch
+                            rand('seed',200);
+                        end
                         design_anova_within_test(testDataDir, resDir, '0', '13')
                     end
                     
@@ -395,7 +415,11 @@ switch buttonName,
                     end
                 case {'multisubpaired2cond_approx'}
                     if isempty(cfgFile) || redo
-                        rand('seed',200);
+                        try
+                            rng(200);
+                        catch
+                            rand('seed',200);
+                        end
                         design_paired2cond_test(testDataDir, resDir, '0', '14')
                     end
                 
@@ -411,7 +435,11 @@ switch buttonName,
                     end
                 case {'multisubsimpleregression_approx'}
                     if isempty(cfgFile) || redo
-                        rand('seed',200);
+                        try
+                            rng(200);
+                        catch
+                            rand('seed',200);
+                        end
                         design_msub_regression_test(testDataDir, resDir, '0', '14')
                     end
                     
@@ -427,7 +455,11 @@ switch buttonName,
                     end
                 case {'onesub_regression_approx'}
                     if isempty(cfgFile) || redo
-                        rand('seed',200);
+                        try
+                            rng(200);
+                        catch
+                            rand('seed',200);
+                        end
                         design_1sub_regression_test(testDataDir, resDir, '0', '25')
                     end
                     
@@ -443,7 +475,11 @@ switch buttonName,
                     end
                 case {'twosample_twocond_approx'}
                     if isempty(cfgFile) || redo
-                        rand('seed',200);
+                        try
+                            rng(200);
+                        catch
+                            rand('seed',200);
+                        end
                         design_twosamptwocond_test(testDataDir, resDir, '0', '15')
                     end    
                 case {'twosample_twocond_chgorder'}
