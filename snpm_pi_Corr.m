@@ -176,7 +176,9 @@ if ~all(all(sum(PiCond,2)== (nSubj+1)*nSubj/2 ))
 %-Convert to full permutations from permutations within blocks
 nPiCond = size(PiCond,1);
 %-Randomise order of PiConds (except first) to allow interim analysis
-rand('seed',sum(100*clock))	%-Initialise random number generator
+if isempty(TEST) || ~TEST % When testing we need a fixed seed
+    rand('seed',sum(100*clock))	%-Initialise random number generator
+end
 PiCond=[PiCond(1,:);PiCond(randperm(nPiCond-1)+1,:)];
 %-Check first permutation is null permutation
 if ~all(PiCond(1,:)==[1:nSubj])
