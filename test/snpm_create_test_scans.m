@@ -23,10 +23,10 @@ switch buttonName,
         % We need 17 scans in one-sample test with approximated
         % distribution
         nScans = 17;
-        gr2nScans = 3;
+        gr2nScans = 7;
         
         % Create 'nScans' dummy (small) volumes to be used for testing.
-        for i = (nScans+1):(nScans+gr2nScans)
+        for i = 1:(nScans-1+gr2nScans)
             grSuffix = '';
             if i > nScans
                 grSuffix = 'gr2_';
