@@ -35,8 +35,17 @@ classdef generic_test_snpm < matlab.unittest.TestCase
     methods (TestMethodSetup)
         
         function setGlobals(testCase)           
-            global TEST;
-            TEST = true;
+            % Random number generator should not be initialised with a
+            % shuffled seed
+            global SnPMdefs
+            SnPMdefs.shuffle_seed = false;
+            
+            % Run the tests in command line mode (no display)
+            global defaults;
+            defaults.cmdline = true;
+            
+            % Disable warning on very small number of permutations
+            warning('off','SnPM:VeryFewPermsCoarseExactPValues')
 
             snpm_test_config;
             cd(spm_str_manip(which('snpm_test_config'), 'h'))
@@ -45,7 +54,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.SnPMrefVersion = SnPMrefVersion;
 
             if isempty(testDataDir)
-              error('Test data directory not set, please update snpm_test_config');
+              error('SnPM:NotTestDataDir', 'Test data directory not set, please update snpm_test_config');
             end
             
             testCase.parentDataDir = spm_str_manip(testDataDir, 'h');
@@ -186,7 +195,12 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             end
             testCase.compare_batch_with_inter(zeroingNaNs); 
             
-            clear global TEST;
+            % Reinitialize SnPM & SPM defaults
+            snpm_defaults;
+            spm_defaults;
+            
+            % Reanable all warnings
+            warning('on','all');
         end
         
         function complete_batch_and_run(testCase)
@@ -245,9 +259,12 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                 if ~exist(testCase.spmDir, 'dir')
                     mkdir(testCase.spmDir);
                 else
-                    % Remove SPM.mat to avoid interactive window asking if
-                    % model can be overwritten
-                    delete(fullfile(testCase.spmDir, 'SPM.mat'));
+                    spmmatfile = fullfile(testCase.spmDir, 'SPM.mat');
+                    if exist(spmmatfile, 'file')
+                        % Remove SPM.mat to avoid interactive window asking if
+                        % model can be overwritten
+                        delete(spmmatfile);
+                    end
                 end
                 % If grand mean scaling then we should calculate mean (otherwise error?)
                 if (  isfield(testCase.spmBatch{1}.spm.stats.factorial_design, 'globalm') &&...
@@ -405,7 +422,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             end
             if testCase.checks
                 if numel(testCase.inter_map) ~= numel(testCase.batch_map)
-                    error(['Number of ' testCase.mapName ' maps are not equal between batch (',...
+                    error('SnPM:UnequalTestCases', ['Number of ' testCase.mapName ' maps are not equal between batch (',...
                             num2str(numel(testCase.batch_map)),...
                             ') and interactive mode ',...
                             num2str(numel(testCase.inter_map))   ]);

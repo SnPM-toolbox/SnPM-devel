@@ -10,7 +10,7 @@ function snpm_init
 rev = '$Rev: 1716 $'; %#ok
 
 if exist('snpm_defaults')~=2
-  error('Cannot initialize - SnPM toolbox not found in path')
+  error('SnPM:MissingSnPM', 'Cannot initialize - SnPM toolbox not found in path')
 end
 if isempty(whos('global','SnPMdefs'))
   snpm_defaults

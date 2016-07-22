@@ -122,7 +122,7 @@ function snpm_ui(varargin)
 % sDesign       Description of PlugIn design
 % V             Memory mapping handles
 % MASK          Filename of explicit mask image
-% ImMASKING     Implicit masking; 0=none; 1=zeros are equivalent to NaN
+% ImMASK        Implicit masking; 0=none; 1=zeros are equivalent to NaN
 % 
 % df            degrees of freedom due to error
 % sDesSave      String of PlugIn variables to save to cfg file
@@ -282,7 +282,7 @@ bVarSm=0;	% Flag for variance smoothing
 vFWHM=[0,0,0];	% FWHM for variance smoothing
 sVarSm='';	% String describing Variance Smoothing
 bVolm=0;	% Flag for volumetric computation
-nMax4DefVol=SnPMdefs.nMax4DefVol;
+nMax4DefVol=snpm_get_defaults('nMax4DefVol');
                 % Default to volumetric if less than nMax4DefVol scans
 sPiCond='';	% String describing permutations in PiCond
 bhPerms=0;	% Flag for half permutations. Rest are then their inverses
@@ -322,7 +322,8 @@ end
 %-Decide upon volumetric operation
 bVolm = job.bVolm;
 if ~bVolm & (vFWHM(3)~=0)
-warning(sprintf(['Working volumetrically because of smoothing in z (%g).\n'... 
+warning('SnPM:MayRunOutOfMemory', ...
+    sprintf(['Working volumetrically because of smoothing in z (%g).\n'... 
          'May run out of memory.'],vFWHM(3)));
 bVolm=1;
 end
@@ -334,7 +335,8 @@ bST = ~isfield(job.ST,'ST_none');
 % Add: get primary threshold for STC analysis if requested
 if bST
   if ~bVolm
-    warning(sprintf('Note:  Cannot define threshold now, because not working volumetrically\n'));
+    warning('SnPM:CannotDefineThreshVolumetrically', ...
+        sprintf('Note:  Cannot define threshold now, because not working volumetrically\n'));
     pU_ST_Ut=-1; % Define the threshold later
   else
     pU_ST_Ut = ~isfield(job.ST,'ST_later');
@@ -398,7 +400,7 @@ elseif isfield(job.globalc,'g_user')
     GX = job.globalc.g_user.global_uval;
     rg = GX;
     if length(GX) ~= nScan
-        error(['User-specified globals length [%d] doesn''t match number of' ...
+        error('SnPM:InvalidGlobals', ['User-specified globals length [%d] doesn''t match number of' ...
             ' scans [%d]'],length(GX),nScan);
     end
 elseif isfield(job.globalc,'g_mean')
@@ -431,7 +433,7 @@ end
 
 %-Implicit Masking - Batch only!
 %-----------------------------------------------------------------------
-ImMASKING=job.masking.im;
+ImMASK=job.masking.im;
 
 %-Get analysis mask
 %-----------------------------------------------------------------------
@@ -457,10 +459,10 @@ V = spm_vol(P);
 %-Check compatability of images (Bombs for single image)
 %-----------------------------------------------------------------------
 if any(any(diff(cat(1,V(:).dim),1,1),1)&[1,1,1]) 
-	error('images do not all have the same dimensions')
+	error('SnPM:ImageDirections', 'images do not all have the same dimensions')
 end
 if any(any(any(diff(cat(3,V(:).mat),1,3),3)))
-	error('images do not all have same orientation & voxel size')
+	error('SnPM:ImageOrientationsResolutions','images do not all have same orientation & voxel size')
 end
 
 %-Get ORIGIN, etc
@@ -479,6 +481,10 @@ elseif iGXcalc==3
   %-Compute global values
   rg     = zeros(nScan,1);
   for i  = 1:nScan, rg(i)=spm_global(V(i)); end
+  if any(~isfinite(rg))
+    disp(rg)
+    error('SnPM:NaNGlobal', 'Global computation returned NaN! Cannot continue')
+  end
   GX     = rg;
 elseif iGXcalc==1
   rg     = [];
@@ -508,7 +514,7 @@ elseif (iTHRESH==2)
     % Relative threshold
     TH    = THRESH * GX;
 else 
-    error(['Wrong value for iTHRESH: ', num2str(iTHRESH)])
+    error('SnPM:InvalidiTHRESH', ['Wrong value for iTHRESH: ', num2str(iTHRESH)])
 end
 
 
@@ -550,7 +556,7 @@ elseif iGloNorm == 5				%-AnCova by study
         else Gnames = str2mat(Gnames,GLnames); end
 else
 %-----------------------------------------------------------------------
-    error(sprintf('%cError: invalid iGloNorm option\n',7))
+    error('SnPM:InvalidiGloNorm', sprintf('%cError: invalid iGloNorm option\n',7))
 end % (if)
 
 
@@ -577,148 +583,150 @@ CONT  = [CONT, zeros(size(CONT,1),size([B G],2))];
 %-----------------------------------------------------------------------
 s_SnPMcfg_save = ['s_SnPMcfg_save H C B G HCBGnames P PiCond ',...
 	'sPiCond bhPerms sHCform iGloNorm sGloNorm GM rg GX GMscale CONT ',...
-	'THRESH MASK TH bVarSm vFWHM sVarSm bVolm bST sDesFile sDesign ',...
+	'THRESH MASK ImMASK TH bVarSm vFWHM sVarSm bVolm bST sDesFile sDesign ',...
         'V pU_ST_Ut df1 ', ...
 	'sDesSave ',sDesSave];
 eval(['save SnPMcfg ',s_SnPMcfg_save])
 
 
 
+if ~spm_get_defaults('cmdline')
 
-%=======================================================================
-%-Display parameters
-%=======================================================================
+    %=======================================================================
+    %-Display parameters
+    %=======================================================================
 
-if BATCH
-  % OK, only _now_ activate the graphics... so if we crash here, there's
-  % nothing lost
-  Finter = spm_figure('FindWin','Interactive');
-  Fgraph = spm_figure('FindWin','Graphics');
-  if isempty(Fgraph), Fgraph=spm_figure('Create','Graphics'); end
-  spm_clf(Finter), spm_clf(Fgraph)
-end
+    if BATCH
+      % OK, only _now_ activate the graphics... so if we crash here, there's
+      % nothing lost
+      Finter = spm_figure('FindWin','Interactive');
+      Fgraph = spm_figure('FindWin','Graphics');
+      if isempty(Fgraph), Fgraph=spm_figure('Create','Graphics'); end
+      spm_clf(Finter), spm_clf(Fgraph)
+    end
 
 
-%-Muck about a bit to set flags for various indicators - handy for later
-bMStud=~isempty(iStud);
-bMSubj=~isempty(iSubj);
-bMCond=~isempty(iCond);
-bMRepl=~isempty(iRepl);
-bMXblk=~isempty(iXblk);
+    %-Muck about a bit to set flags for various indicators - handy for later
+    bMStud=~isempty(iStud);
+    bMSubj=~isempty(iSubj);
+    bMCond=~isempty(iCond);
+    bMRepl=~isempty(iRepl);
+    bMXblk=~isempty(iXblk);
 
-%-Compute common path components - all paths will begin with file separator
-%-----------------------------------------------------------------------
-d     = max(find(P(1,1:find(~all(P == ones(nScan,1)*P(1,:)), 1 )-1)==filesep)) - 1;
-CPath = P(1,1:d);
-Q     = P(:,d+1:size(P,2));
+    %-Compute common path components - all paths will begin with file separator
+    %-----------------------------------------------------------------------
+    d     = max(find(P(1,1:find(~all(P == ones(nScan,1)*P(1,:)), 1 )-1)==filesep)) - 1;
+    CPath = P(1,1:d);
+    Q     = P(:,d+1:size(P,2));
 
-%-Display data parameters
-%=======================================================================
-figure(Fgraph); spm_clf; axis off
-text(0.30,1.02,'Statistical analysis','Fontsize',16,'Fontweight','Bold');
-text(-0.10,0.85,'Scan Index','Rotation',90)
-if bMStud, text(-0.05,0.85,'Study',      'Rotation',90); end
-if bMSubj, text(+0.00,0.85,'Subject',    'Rotation',90); end
-if bMCond, text(+0.05,0.85,'Condition',  'Rotation',90); end
-if bMRepl, text(+0.10,0.85,'Replication','Rotation',90); end
-if bMXblk, text(+0.15,0.85,'Exchange Blk','Rotation',90); end
-x0    = 0.20; y0 = 0.83;
-dx    = 0.15; dy = 0.02;
-x     = x0;
-for i = 1:size(Cc,2)
-    text(x + 0.02,0.85,Ccnames(i,:),'Rotation',90);
+    %-Display data parameters
+    %=======================================================================
+    figure(Fgraph); spm_clf; axis off
+    text(0.30,1.02,'Statistical analysis','Fontsize',16,'Fontweight','Bold');
+    text(-0.10,0.85,'Scan Index','Rotation',90)
+    if bMStud, text(-0.05,0.85,'Study',      'Rotation',90); end
+    if bMSubj, text(+0.00,0.85,'Subject',    'Rotation',90); end
+    if bMCond, text(+0.05,0.85,'Condition',  'Rotation',90); end
+    if bMRepl, text(+0.10,0.85,'Replication','Rotation',90); end
+    if bMXblk, text(+0.15,0.85,'Exchange Blk','Rotation',90); end
+    x0    = 0.20; y0 = 0.83;
+    dx    = 0.15; dy = 0.02;
+    x     = x0;
+    for i = 1:size(Cc,2)
+        text(x + 0.02,0.85,Ccnames(i,:),'Rotation',90);
+        x = x + dx; end
+    for i = 1:size(Gc,2)
+        text(x + 0.02,0.85,Gcnames(i,:),'Rotation',90);
     x = x + dx; end
-for i = 1:size(Gc,2)
-    text(x + 0.02,0.85,Gcnames(i,:),'Rotation',90);
-x = x + dx; end
-text(x,0.92,'Base directory:','FontSize',10,'Fontweight','Bold');
-text(x,0.90,CPath,'FontSize',10,'interpreter','none');
-text(x,0.87,'Filename Tails');
-y     = y0;
+    text(x,0.92,'Base directory:','FontSize',10,'Fontweight','Bold');
+    text(x,0.90,CPath,'FontSize',10,'interpreter','none');
+    text(x,0.87,'Filename Tails');
+    y     = y0;
 
-for i = 1:nScan
-	text(-0.12,y,sprintf('%02d :',i));
-   if bMStud, text(-0.06,y,sprintf('%2d',iStud(i))); end
-   if bMSubj, text(-0.01,y,sprintf('%2d',iSubj(i))); end
-   if bMCond, text(+0.04,y,sprintf('%2d',iCond(i))); end
-   if bMRepl, text(+0.09,y,sprintf('%2d',iRepl(i))); end
-   if bMXblk, text(+0.14,y,sprintf('%2d',iXblk(i))); end
-   x     = x0;
-   for j = 1:size(Cc,2)
-	text(x,y,sprintf('%-8.6g',Cc(i,j)),'FontSize',10)
-	x = x + dx; end
-   for j = 1:size(Gc,2)
-	text(x,y,sprintf('%-8.6g',Gc(i,j)),'FontSize',10)
-	x = x + dx; end
-   text(x,y,Q(i,:),'FontSize',10,'interpreter','none');
-   y     = y - dy;
-   if y < 0;
-	spm_print
-	spm_clf; axis off
-	y = y0;
-	text(0.16,1.02,['Statistical analysis (continued)'],...
-	    'Fontsize',16,'Fontweight','Bold');
-   end
+    for i = 1:nScan
+        text(-0.12,y,sprintf('%02d :',i));
+       if bMStud, text(-0.06,y,sprintf('%2d',iStud(i))); end
+       if bMSubj, text(-0.01,y,sprintf('%2d',iSubj(i))); end
+       if bMCond, text(+0.04,y,sprintf('%2d',iCond(i))); end
+       if bMRepl, text(+0.09,y,sprintf('%2d',iRepl(i))); end
+       if bMXblk, text(+0.14,y,sprintf('%2d',iXblk(i))); end
+       x     = x0;
+       for j = 1:size(Cc,2)
+        text(x,y,sprintf('%-8.6g',Cc(i,j)),'FontSize',10)
+        x = x + dx; end
+       for j = 1:size(Gc,2)
+        text(x,y,sprintf('%-8.6g',Gc(i,j)),'FontSize',10)
+        x = x + dx; end
+       text(x,y,Q(i,:),'FontSize',10,'interpreter','none');
+       y     = y - dy;
+       if y < 0;
+        spm_print
+        spm_clf; axis off
+        y = y0;
+        text(0.16,1.02,['Statistical analysis (continued)'],...
+            'Fontsize',16,'Fontweight','Bold');
+       end
+    end
+
+    %-Print miscellaneous data parameters
+    %-----------------------------------------------------------------------
+    y      = y - dy;
+    dy     = dy*1.2;
+    if (GM~=0)
+        text(0,y,sprintf(['Images scaled to a grand mean of %g'],GM))
+        y = y - dy;
+    end
+    text(0,y,sprintf(...
+        'Analysis threshold is %3.0f%% of the whole brain mean',THRESH*100))
+    spm_print
+
+
+    %-Display design parameters
+    %=======================================================================
+    figure(Fgraph); spm_clf(Fgraph); axis off
+    text(0.30,1.02,'Design Matrix','Fontsize',16,'Fontweight','Bold');
+
+    %-Label the effects
+    %-----------------------------------------------------------------------
+    hDesMtx = axes('Position',[0.2 0.3 0.6 0.5]);
+    image((nHCBG + 1)*32);
+    ylabel('Observations')
+    set(hDesMtx,'XTick',[],'XTickLabel','')
+    hEfLabs = axes('Position',[0.2 0.82 0.6 0.1],'Visible','off');
+    y     = 0.1;
+    dx    = 1/size(nHCBG,2);
+    for i = 1:size(nHCBG,2)
+        text((i - 0.5)*dx,y,deblank(HCBGnames(i,:)),...
+        'Fontsize',8,'Rotation',90)
+    end
+
+
+    %-Display non-parametric analysis summary
+    %-----------------------------------------------------------------------
+    hPramAxes=axes('Position',[0.05 0.08 0.8 0.20],'Visible','off');
+    text(0,1.00,sDesign,'Fontsize',10);
+    text(0,0.90,['SnPM design flie: ',sDesFile],'Fontsize',10);
+    text(0,0.80,sPiCond,'Fontsize',10);
+    text(0,0.70,['Global normalisation: ',deblank(sGloNorm)],'Fontsize',10);
+    text(0,0.60,['Threshold masking: ',deblank(sThresh)],'Fontsize',10);
+
+    %-Display parameter summary
+    %-----------------------------------------------------------------------
+    text(0,.5,'Parameters:','Fontsize',10,'Fontweight','Bold');
+    text(0,.4,sprintf(['%d Condition + %d Covariate ',...
+        '+ %d Block + %d Confound'],...
+        size(H,2),size(C,2),size(B,2),size(G,2)),...
+        'Fontsize',10);
+    text(0,.3,sprintf(['= %d parameters, having %d degrees of freedom, ',...
+        'giving %d residual df (%d scans).'],...
+        size([H C B G],2),rank([H C B G]),nScan-rank([H C B G]),nScan),...
+        'Fontsize',10);
+    if (bVarSm) text(0,0.2,sVarSm,'Fontsize',10);
+    end
+
+    spm_print
+
+    %-Clear interactive window
+    %-----------------------------------------------------------------------
+    spm_clf(Finter)
 end
-
-%-Print miscellaneous data parameters
-%-----------------------------------------------------------------------
-y      = y - dy;
-dy     = dy*1.2;
-if (GM~=0)
-    text(0,y,sprintf(['Images scaled to a grand mean of %g'],GM))
-    y = y - dy;
-end
-text(0,y,sprintf(...
-    'Analysis threshold is %3.0f%% of the whole brain mean',THRESH*100))
-spm_print
-
-
-%-Display design parameters
-%=======================================================================
-figure(Fgraph); spm_clf(Fgraph); axis off
-text(0.30,1.02,'Design Matrix','Fontsize',16,'Fontweight','Bold');
-
-%-Label the effects
-%-----------------------------------------------------------------------
-hDesMtx = axes('Position',[0.2 0.3 0.6 0.5]);
-image((nHCBG + 1)*32);
-ylabel('Observations')
-set(hDesMtx,'XTick',[],'XTickLabel','')
-hEfLabs = axes('Position',[0.2 0.82 0.6 0.1],'Visible','off');
-y     = 0.1;
-dx    = 1/size(nHCBG,2);
-for i = 1:size(nHCBG,2)
-    text((i - 0.5)*dx,y,deblank(HCBGnames(i,:)),...
-    'Fontsize',8,'Rotation',90)
-end
-
-
-%-Display non-parametric analysis summary
-%-----------------------------------------------------------------------
-hPramAxes=axes('Position',[0.05 0.08 0.8 0.20],'Visible','off');
-text(0,1.00,sDesign,'Fontsize',10);
-text(0,0.90,['SnPM design flie: ',sDesFile],'Fontsize',10);
-text(0,0.80,sPiCond,'Fontsize',10);
-text(0,0.70,['Global normalisation: ',deblank(sGloNorm)],'Fontsize',10);
-text(0,0.60,['Threshold masking: ',deblank(sThresh)],'Fontsize',10);
-
-%-Display parameter summary
-%-----------------------------------------------------------------------
-text(0,.5,'Parameters:','Fontsize',10,'Fontweight','Bold');
-text(0,.4,sprintf(['%d Condition + %d Covariate ',...
-	'+ %d Block + %d Confound'],...
-	size(H,2),size(C,2),size(B,2),size(G,2)),...
-	'Fontsize',10);
-text(0,.3,sprintf(['= %d parameters, having %d degrees of freedom, ',...
-	'giving %d residual df (%d scans).'],...
-	size([H C B G],2),rank([H C B G]),nScan-rank([H C B G]),nScan),...
-	'Fontsize',10);
-if (bVarSm) text(0,0.2,sVarSm,'Fontsize',10);
-end
-
-spm_print
-
-%-Clear interactive window
-%-----------------------------------------------------------------------
-spm_clf(Finter)

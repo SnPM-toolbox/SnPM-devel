@@ -49,7 +49,7 @@ function varargout=snpm(Action)
 
 %-Parameters
 %-----------------------------------------------------------------------
-SnPMver    = 'SnPM13.1.03';
+SnPMver    = 'SnPM13.1.04';
 
 %-Format arguments
 %-----------------------------------------------------------------------
@@ -106,7 +106,7 @@ disp('SnPM13 tools are available in the SPM batch window under SPM -> Tools -> S
 
 else
 %=======================================================================
-error('Unknown action string')
+error('SnPM:UnknownAction', 'Unknown action string')
 
 %=======================================================================
 end

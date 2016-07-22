@@ -101,7 +101,7 @@ sDesSave = 'iCond iRepl PiSubj';
 
 %-Get number of subjects
 nSubj    = spm_input('# subjects','+1');
-if (nSubj==1), error('Use single subject plug for single subjects'); end    
+if (nSubj==1), error('SnPM:SingleSubject','Use single subject plug for single subjects'); end    
 
 %-Get number of replications per condition - 2 x nRepl design
 nRepl    = spm_input('# replications per condition','+1');
@@ -130,23 +130,23 @@ for subj=1:nSubj
 	%-Check validity of tmpCond
 	if length(tmpCond)==nScan
 	    if length(find(diff(sort(tmpCond)))) ~= nCond-1
-		error('Exactly ',[int2str(nCond), ...
+		error('SnPM:InvalidnCond', 'Exactly ',[int2str(nCond), ...
 			' conditions must be supplied']);
 	    elseif sum(tmpCond)~=0
-		error(['Exactly ',int2str(nRepl),' As and ', ...
+		error('SnPM:InvalidnRepl',['Exactly ',int2str(nRepl),' As and ', ...
 			    int2str(nRepl),' Bs must be supplied']);
 	    elseif isempty(iCond)
 		sCond=setstr(tmp([1,diff(sort(tmp))]~=0));
 		Cond = tmpCond;		
 	    elseif any(iCond(1:nScan)~=tmpCond) & ...
 			any(iCond(1:nScan)~=(-tmpCond))
-		error(['Conditions index must be same as ', ...
+		error('SnPM:InvalidiCond',['Conditions index must be same as ', ...
 			    'first subject, or flipped']);
 	    else		
 		Cond = tmpCond;		
 	    end
 	else
-	    error(['Enter indicies for ',int2str(nCond*nRepl),' scans'])
+	    error('SnPM:InvalidnIndices',['Enter indicies for ',int2str(nCond*nRepl),' scans'])
 	end
     end
     iCond = [iCond, Cond];
@@ -171,7 +171,8 @@ if nFlip==nSubj/2
     % Balanced design... everything is cool
 else
     % not balanced
-    warning('Design not balanced; results may be confounded with time');
+    warning('SnPM:Unbalanced', ...
+            'Design not balanced; results may be confounded with time');
 end
 
 %-Compute permutations of subjects
@@ -186,7 +187,7 @@ if (spm_input(sprintf('%d Perms. Use approx. test?',nPiSubj),'+1','y/n')=='y')
 	tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiSubj),'+0');
 	tmp = floor(max([0,tmp]));
 	if rem(tmp,2)
-	    error(['Number of perms must be even']);
+	    error('SnPM:OddPermutations',['Number of perms must be even']);
 	    tmp=0;	    
 	end	    
     end
@@ -216,7 +217,7 @@ PiSubj(sum((PiSubj==-1)')~=nFlip,:) = [];
 % Move correct labeling to top
 d = find(all((PiSubj==meshgrid(iSubjC(2:nSubj),1:size(PiSubj,1)))'));
 if (length(d)~=1)
-    error('Internal error: Correct labeling is not in the perms'); end
+    error('SnPM:CorrectLabelMissing', 'Internal error: Correct labeling is not in the perms'); end
 PiSubj(d,:) = PiSubj(1,:);
 PiSubj(1,:) = iSubjC(2:nSubj);
 % Pick a random sample of PiSubj if bAprxTst

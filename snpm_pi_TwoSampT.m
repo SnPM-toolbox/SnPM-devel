@@ -111,10 +111,19 @@
 nCond    = 2;			% Number of conditions (groups)
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iCond GrpCnt';	% PlugIn variables to save in cfg file
-global TEST;
-if isempty(TEST) || ~TEST % When testing the code we need a fixed seed
-    rand('seed',sum(100*clock));	% Initialise random number generator
+
+if snpm_get_defaults('shuffle_seed')
+    % Shuffle seed of random number generator
+    try
+        rng('shuffle');
+    catch
+        % Old syntax        
+        rand('seed',sum(100*clock));
+    end
 end
+nPermMC = 2000; % When using more than this many permutations, use
+                % conventional MC permutation test, i.e. don't try
+                % to excluded repeated permutations.
 
 %-Get filenames and iCond, the condition labels
 %=======================================================================
@@ -218,8 +227,10 @@ else                                          % random method
     % Fill subsequent rows, checking that we're not repeating  
     for i=2:nPiCond
       tmp=PiCond(i-1,randperm(nScan));
-      while any(all(PiCond(1:(i-1),:)'==meshgrid(tmp,1:(i-1))'))
-	tmp=PiCond(i-1,randperm(nScan));
+      if nPerm<=nPermMC
+	while any(all(PiCond(1:(i-1),:)'==meshgrid(tmp,1:(i-1))'))
+	  tmp=PiCond(i-1,randperm(nScan));
+	end
       end
       PiCond(i,:)=tmp;
     end      
@@ -229,7 +240,7 @@ end
 
 %-Check PiConds sum to nGrp1-nGrp2
 if ~all(all(PiCond*ones(nScan,1)==nScan-2*nFlip))
-	error('Invalid PiCond computed!'), end
+	error('SnPM:InvalidPiCond', 'Invalid PiCond computed!'), end
 
 %-Find (maybe) iCond in PiCond, move iCond to 1st; negate if neccesary
 %-----------------------------------------------------------------------
@@ -255,7 +266,7 @@ elseif length(perm)==0 & (nScan<=12) & bAproxTst
     PiCond(1,:) = iCond;
     perm = 1;
 else    
-    error(['Bad PiCond (' num2str(perm) ')'])
+    error('SnPM:InvalidPiCond', ['Bad PiCond (' num2str(perm) ')'])
 end    
 
 

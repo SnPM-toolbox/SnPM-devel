@@ -283,7 +283,9 @@ im.help    = {
               ''
               'For image data-types without a representation of NaN, zero is the mask value, and the user can choose whether zero voxels should be masked out or not.'
               ''
-              'By default, an implicit mask is used. '
+              'By default, an implicit mask is used.'
+              ''
+              'It is ill-advised to mix input images, but if data are a mix of integer (no NaN''s) and float/double datatypes, implicit masking will only occur with NaN''s.'
               ''
 }';
 im.labels = {

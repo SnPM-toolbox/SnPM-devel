@@ -110,9 +110,15 @@ nCond    = 2;			% Number of conditions
 nStud    = 2;			% Number of groups
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iStud iCond nSubj'; % PlugIn variables to save in cfg file
-global TEST;
-if isempty(TEST) || ~TEST
-    rand('seed',sum(100*clock));	% Initialise random number generator
+
+if snpm_get_defaults('shuffle_seed')
+    % Shuffle seed of random number generator
+    try
+        rng('shuffle');
+    catch
+        % Old syntax        
+        rand('seed',sum(100*clock));
+    end
 end
 iStudC   = [];			% +1/-1 version of iStud
 
@@ -277,7 +283,7 @@ end
 
 %-Check each perm in PiStuds sums to nStud1-nStud2
 if ~all(all(PiStud*ones(nSUBJ,1)==nSubj*[1 -1]'))
-	error('Invalid PiStud computed!'), end
+	error('SnPM:InvalidPiStud', 'Invalid PiStud computed!'), end
 
 %-Find (maybe) iStudC in PiStud, move iStudC to 1st; negate if neccesary
 %-----------------------------------------------------------------------
@@ -303,7 +309,7 @@ elseif length(perm)==0 & (nSUBJ<=12) & bAproxTst % MODIFIED FROM ORIGINAL CHANGE
     PiStud(1,:) = iStudC;
     perm = 1;
 else
-    error(['Bad PiStud (' num2str(perm) ')'])
+    error('SnPM:InvalidPiStud', ['Bad PiStud (' num2str(perm) ')'])
 end    
 
 %-Turn PiStud into PiCond

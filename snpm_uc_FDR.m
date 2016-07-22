@@ -103,7 +103,7 @@ cV = 1;
 %-----------------------------------------------------------------------
 if isstruct(Vs)
   if (abs(n) ~= length(Vs))
-    error(sprintf('n & number of mapped images doesn''t match (%d,%d)',...
+    error('SnPM:Invalidn', sprintf('n & number of mapped images doesn''t match (%d,%d)',...
 		  abs(n),length(Vs)));
   end
   Ts = spm_read_vols(Vs(1));
