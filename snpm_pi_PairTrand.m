@@ -98,6 +98,16 @@ nCond    = 2;			% Number of conditions
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iCond iRepl PiSubj';
 				% PlugIn variables to save in cfg file
+                
+if snpm_get_defaults('shuffle_seed')
+    % Shuffle seed of random number generator
+    try
+        rng('shuffle');
+    catch
+        % Old syntax        
+        rand('seed',sum(100*clock));
+    end
+end                
 
 %-Get number of subjects
 nSubj    = spm_input('# subjects','+1');
