@@ -41,7 +41,7 @@ run(test_oneSample, 'test_onesample_1')
 This section describes the bugs that have been reported, along with the appropriate fixes. 
 Updated versions of appropriate SnPM functions are available at [snpm13_updates](http://warwick.ac.uk/snpm/distribution/snpm13_updates)
 
-#####  SnPM 13.1.04
+#####  SnPM 13.1.05
  * fix: two-sample t-test with nscans>12 was errored due to call to undefined variable `nPerm` (bug introduced in previous release: 13.1.4) (`snpm_pi_TwoSampT`)
  * fix: warning on size of `SnPM_ST.mat` was never raised
  * Add seed shuffling for paired two-sample test modules (`snpm_pi_PairT`, `snpm_pi_PairTrand`)
