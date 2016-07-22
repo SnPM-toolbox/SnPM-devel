@@ -132,6 +132,29 @@ classdef test_twoSample < generic_test_snpm
             testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.nPerm = 15;
         end
         
+        % With approximate test
+        function test_twosample_approx_14scans(testCase)
+            testCase.testName = 'twosample_approx_14scans';
+            
+            try
+                % Syntax for newest Matlab versions
+                rng(200);
+            catch
+                % Old syntax
+                rand('seed',200);
+            end
+            for k = 4:7
+                testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.scans1{k,1} = ...
+                     fullfile(testCase.testDataDir, ['test_data_', num2str(k, '%02.0f'), '.nii']);
+            end
+            for k = 21:24
+                testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.scans2{k-17,1} = ...
+                     fullfile(testCase.testDataDir, ['test_data_gr2_', num2str(k, '%02.0f'), '.nii']);
+            end
+            
+            testCase.matlabbatch{1}.spm.tools.snpm.des.TwoSampT.nPerm = 15;
+        end        
+        
         % Global normalisation, normalisation: Proportional scaling scaled 
         % to default value (50)
         function test_twosample_propscaling(testCase)
