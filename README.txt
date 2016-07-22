@@ -4,14 +4,56 @@ This file describes the bugs that have been reported, along with the appropriate
 Updated versions of appropriate SnPM functions are available from in the snpm13_updates: 
 http://warwick.ac.uk/snpm/distribution/snpm13_updates
 
---- SnPM13.1.03 ---
+--- SnPM 13.1.05 ---
+ * fix: two-sample t-test with nscans>12 was errored due to call to undefined variable `nPerm` (bug introduced in previous release: 13.1.4) (`snpm_pi_TwoSampT`)
+ * fix: warning on size of `SnPM_ST.mat` was never raised
+ * Add seed shuffling for paired two-sample test modules (`snpm_pi_PairT`, `snpm_pi_PairTrand`)
+ * Version 13.1.05 (`snpm`)
+
+--- SnPM 13.1.04 ---
+* snpm
+SnPM version 13.1.04
+
+* snpm_bch_ui, snpm_cp, snpm_ui
+Fix: implicit masking for non-float datatypes
+
+* snpm_pi_ANOVAbtwnS, snpm_pi_ANOVAwithinS, snpm_pi_Corr, snpm_pi_Corr1S, 
+snpm_pi_OneSampT, snpm_pi_TwoSampPairT, snpm_pi_TwoSampT, snpm_pi_TwoSampTss
+Update syntax to set the seed of the random number generator (rng) 
+
+* snpm_defaults
+New SnPM global parameter shuffle_seed. If true, the rng uses a 'shuffle' seed providing different results for each run. If false Matlab's 'default' seed or any seed defined by the user will be used .
+
+* snpm_pi_TwoSampT
+Allows MC permutation (with reptitions) for large enough nPerms 
+
+* snpm_pp, snpm_ui
+Do not display figures in command-line mode
+
+* snpm, snpm_check_nperm, snpm_combo, snpm_cp, snpm_init, snpm_pi_ANOVAbtwnS,
+snpm_pi_ANOVAwithinS, snpm_pi_Corr, snpm_pi_Corr1S, snpm_pi_OneSampT, 
+snpm_pi_PairT, snpm_pi_PairTrand, snpm_pi_TwoSampPairT, snpm_pi_TwoSampT, 
+snpm_pi_TwoSampTss, snpm_pp, snpm_t2z, snpm_uc_FDR, snpm_ui, spm_append_96
+Add identifiers to errors and warnings
+
+* snpm_cp
+Fix: Do not assume statistic is T when computing cluster forming threshold from P-value
+
+* generic_test_snpm, skeleton_class, test_ANOVAbetween, 
+test_multisub_withinsubanova, test_multisubpaired2cond, 
+test_multisubsimpleregression, test_oneSample, test_onesub_regression, 
+test_onesub_twocondrepl, test_twoSample, test_twosample_twocond
+Test in command-line mode with no shuffling for the random seed, using new rng
+ syntax.
+
+--- Updates from SnPM 13.1.03 ---
 * snpm
 SnPM version 13.1.03
 
 * snpm_pi_PairT
 Now allows more than 52 subjects, as previously that would generate a "Maximum variable size allowed by the program" error message.
 
---- SnPM13.1.02 ---
+--- Updates from SnPM 13.1.02 ---
 * snpm
 SnPM version 13.1.02
 
@@ -21,7 +63,7 @@ Update contrast display for compatibility with Matlab R2014b.
 * generic_test_snpm
 Updates affecting tests only.
 
---- SnPM13.1.01 ---
+--- Updates from SnPM 13.1.01 ---
 * snpm
 SnPM version 13.1.01
 
