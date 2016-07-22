@@ -297,7 +297,7 @@ switch buttonName,
                         catch
                             rand('seed',200);
                         end
-                        design_two_sample_test(testDataDir, resDir, '0', {}, '0', 5, '15')
+                        design_two_sample_test(testDataDir, resDir, '0', {}, '0', 6, '15')
                     end
                     
                 case {'twosample_approx_14scans'}
@@ -313,12 +313,12 @@ switch buttonName,
                 case {'twosample_propscaling'}
                     if isempty(cfgFile) || redo
                         design_two_sample_test(testDataDir, resDir, ...
-                            '0', {}, '0', 5, '', 'proportional scaling')
+                            '0', {}, '0', 6, '', 'proportional scaling')
                     end
                 case {'twosample_proportional_global_user'}
                     if isempty(cfgFile) || redo
                         design_two_sample_test(testDataDir, resDir, ...
-                            '0', {}, '0', 5, '', 'proportional scaling', '50', '', '50', '1 3 2 2 3 1');
+                            '0', {}, '0', 6, '', 'proportional scaling', '50', '', '50', '1 3 2 2 3 1');
                     end
 %                             function test_twosample_proportional_user(testCase)
 %             
@@ -332,25 +332,25 @@ switch buttonName,
                 case {'twosample_propscaling_to_user'}
                     if isempty(cfgFile) || redo
                         design_two_sample_test(testDataDir, resDir, ...
-                            '0', {}, '0', 5, '', 'proportional scaling', '145')
+                            '0', {}, '0', 6, '', 'proportional scaling', '145')
                     end
                     
                 case {'twosample_grandmean_145'}
                     if isempty(cfgFile) || redo
                         design_two_sample_test(testDataDir, resDir, ...
-                            '0', {}, '0', 5, '', '', '', 'scaling to overall grand mean', '145')
+                            '0', {}, '0', 6, '', '', '', 'scaling to overall grand mean', '145')
                     end
                     
                 case {'twosample_grandmean_50'}
                     if isempty(cfgFile) || redo
                         design_two_sample_test(testDataDir, resDir, ...
-                            '0', {}, '0', 5, '', '', '', 'scaling to overall grand mean', '50')
+                            '0', {}, '0', 6, '', '', '', 'scaling to overall grand mean', '50')
                     end
                     
                 case {'twosample_ancova'}
                     if isempty(cfgFile) || redo
                         design_two_sample_test(testDataDir, resDir, ...
-                            '0', {}, '0', 5, '', 'AnCova', '')
+                            '0', {}, '0', 6, '', 'AnCova', '')
                     end
                     
                     % *** One-subject two-sample test ***
@@ -898,6 +898,13 @@ if nargin < 12
     end
 end
 
+if nSubjects == -1
+    unbalanced = true;
+    nSubjects = 6;
+else
+    unbalanced = false;
+end
+
 cwd = pwd;
 cd(testDataDir)
 % There is no snpmcfg.mat start snpm_ui and create it
@@ -908,7 +915,7 @@ for i = 1:(nSubjects/2)
     disp(sprintf(['\t' ...
         fullfile(testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
 end
-if nSubjects ~= -1 
+if ~unbalanced
     for i = 18:(18-1+(nSubjects/2))
         disp(sprintf(['\t' ...
             fullfile(testDataDir, ['test_data_gr2_' num2str(i, '%02.0f') '.nii'])]));
