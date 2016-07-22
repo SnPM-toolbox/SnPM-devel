@@ -227,7 +227,7 @@ else                                          % random method
     % Fill subsequent rows, checking that we're not repeating  
     for i=2:nPiCond
       tmp=PiCond(i-1,randperm(nScan));
-      if nPerm<=nPermMC
+      if job.nPerm<=nPermMC
 	while any(all(PiCond(1:(i-1),:)'==meshgrid(tmp,1:(i-1))'))
 	  tmp=PiCond(i-1,randperm(nScan));
 	end
