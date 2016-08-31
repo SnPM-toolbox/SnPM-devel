@@ -126,6 +126,14 @@ switch (lower(varargin{1}))
   end 
   
   [N,Z,M,A] = spm_max(ST,XYZ);
+  
+  % Enfore A to be a column vector. When XYZ locations are defined in a 1D 
+  % space, spm_max returns A as a row vector instead of a column which 
+  % makes find(A==i) fails later in the code below. 
+  if size(A,2) > 1
+      A = A';
+  end
+  
   Aindex = spm_clusters(XYZ); %- cluster indexes
     
   STCS = snpm_STcalc('initK',STCS,max(A),isPos,perm);
