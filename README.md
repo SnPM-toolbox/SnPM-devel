@@ -15,20 +15,16 @@ The SnPM toolbox provides an alternative to the Statistics section of [SPM](http
 ### Testing
 
 #### Initial set up 
-The first time you run the tests, you will first have to create a set of ground truth data and a file named `snpm_test_config.m` containing the reference SnPM version you used to compute the ground truth and the path to the ground truth folder. For example:
+The first time you run the tests, you will need to set up the `snpm_test_config.m` file to fill in `testDataDir` with the path to your ground truth folder. For example:
 ```
 global testDataDir;
 testDataDir = '~/snpm_test_data';
-global SnPMrefVersion;
-SnPMrefVersion = 'SnPM8';
 ```
 
 #### Run the test suite
-Then, the tests can be started (from the test data folder) with:
+Then, the tests can be started with:
 ```
-import matlab.unittest.TestSuite;
-suite = TestSuite.fromFolder(fullfile(spm_str_manip(which('snpm'), 'h'), 'test'));
-result = run(suite);
+snpm_tests
 ```
 
 #### Run a single test
