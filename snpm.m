@@ -65,6 +65,11 @@ if isempty(spm_figure('FindWin','Menu'))
 else
 	clc
 end
+% Add test code to Matlabpath
+if ~exist('test_oneSample', 'file')
+    addpath(fullfile(spm_file(which('snpm'), 'path'), 'test'));
+    addpath(fullfile(spm_file(which('snpm'), 'path'), 'test', 'common'));
+end
 snpm_defaults;
 [Finter,Fgraph,CmdLine] = spm('FnUIsetup','Statistical non-Parametric Mapping (SnPM)');
 snpm_init; % Initialize Matlab Batch system
