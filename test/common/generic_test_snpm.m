@@ -47,9 +47,19 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             % Disable warning on very small number of permutations
             warning('off','SnPM:VeryFewPermsCoarseExactPValues')
 
-            snpm_test_config;
-            cd(spm_str_manip(which('snpm_test_config'), 'h'))
             global testDataDir;
+            snpm_test_config;
+            if isempty(testDataDir)
+                error('test:emptytestDataDir', ...
+                    ['No test data directory specified, please fill in '...
+                    ' ''testDataDir'' variable in snpm_test_config.m'])
+            end
+            res_dir = fullfile(spm_file(testDataDir, 'path'), 'results');
+            if ~isdir(res_dir)
+                mkdir(res_dir)
+            end
+            cd(res_dir)
+            
             global SnPMrefVersion;
             testCase.SnPMrefVersion = SnPMrefVersion;
 

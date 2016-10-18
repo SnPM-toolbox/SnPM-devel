@@ -4,6 +4,11 @@ This file describes the bugs that have been reported, along with the appropriate
 Updated versions of appropriate SnPM functions are available from in the snpm13_updates: 
 http://warwick.ac.uk/snpm/distribution/snpm13_updates
 
+--- SnPM 13.1.06 ---
+ * fix: ANOVA between group "all zero"/"all equal" options were flipped in the menu of the matlabbatch.
+ * fix: snpm_cp can now handle XYZ locations in a 1D space.
+ * Version 13.1.06 (`snpm`)
+
 --- SnPM 13.1.05 ---
  * fix: two-sample t-test with nscans>12 was errored due to call to undefined variable `nPerm` (bug introduced in previous release: 13.1.4) (`snpm_pi_TwoSampT`)
  * fix: warning on size of `SnPM_ST.mat` was never raised

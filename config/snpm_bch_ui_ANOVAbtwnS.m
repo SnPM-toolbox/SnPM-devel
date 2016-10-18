@@ -64,7 +64,7 @@ nullHypAllZero         = cfg_menu;
 nullHypAllZero.tag     = 'nullHypAllZero';
 nullHypAllZero.name    = 'Null Hypothesis';
 nullHypAllZero.labels  = {'Groups are all equal' 'Groups are all zero'};
-nullHypAllZero.values  = {true false};
+nullHypAllZero.values  = {false true};
 nullHypAllZero.help    = {'','Null Hypothesis: Groups are all zero|all equal.'};
 
 
