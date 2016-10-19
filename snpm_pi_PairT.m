@@ -236,7 +236,7 @@ end
 %=======================================================================
 %-All possible labelings correspond to the binary representation of
 % numbers {1...2^nSubj}.
-if nSubj<=52
+if nSubj<=35
   if (bAproxTst)
     tmp = randperm(2^nSubj)-1;
     tmp = tmp(1:nPiSubj)';
