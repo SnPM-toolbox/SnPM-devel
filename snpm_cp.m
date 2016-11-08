@@ -784,7 +784,7 @@ nGroup2 = params.N - nGroup1;
 runOutDir = strcat(num2str(params.N),'_',num2str(nGroup1),'_',num2str(nGroup2));
 runInfo = strcat(runOutDir,'_',num2str(nPerm),'.mat');
 
-if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm == 2)
+if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm  >= 10000)
     RapidPT_path = '~/PermTest/RapidPT/';
     addpath(RapidPT_path);
     addpath(strcat(RapidPT_path,'postprocess'));
@@ -809,11 +809,18 @@ if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm == 2)
     [outputs, timings] = TwoSampleRapidPT(X, nPerm, nGroup1, write, RapidPT_path);
     MaxT = outputs.MaxT;
     save(strcat('outputs/MaxT',runInfo),'MaxT'); 
-    save('SnPMt.mat','SnPMt'); % Real t-statistic for each voxel.
     save(strcat('outputs/timings',runInfo),'timings');
     
-    brain = load_nii(Vt.fname);
-    rapidpt_postprocess(MaxT, SnPMt, XYZ, brain, alpha, params)
+    % Save variables for snpm_pp
+    MaxT = [MaxT;-MaxT];
+    [~, SnPMucp, ~, ~] = ttest2(X(1:nGroup1, :), X(nGroup1+1:end, :), 0.05, 'both', 'unequal');
+    save('SnPMucp.mat','SnPMucp')
+    save('XYZ.mat','XYZ');
+    eval(['save SnPM ',s_SnPM_save]);
+    save('SnPMt.mat','SnPMt'); % Real t-statistic for each voxel.
+    
+    
+    %rapidpt_postprocess(MaxT, SnPMt, XYZ, brain, alpha, params)
     
 else
 for i = 1:zdim
@@ -876,9 +883,6 @@ for i = 1:zdim
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    
     disp('Starting Permutation Testing...');
-%     if(nPerm >= 1000)
-%        [MaxT] = snpm_RapidPT(X,nPerm,sDesign);
-%     end
 
     % Loop over permutations
     %-----------------------------------------------------------------
@@ -1060,9 +1064,8 @@ for i = 1:zdim
     end 	% (for perm = StartPerm:nPerm) - Perm loop
 
     snpmPermTime = toc(snpmPermTime);
-    
-    outputs_filename = strcat('/u/v/a/vamsi/private/PermTest/outputs_parallel/',runOutDir,'/snpm/outputs_',runInfo);
-    timings_filename = strcat('/u/v/a/vamsi/private/PermTest/timings_parallel/',runOutDir,'/snpm/timings_',runInfo);
+    outputs_filename = strcat('outputs_',runInfo);
+    timings_filename = strcat('timings_',runInfo);
     save(timings_filename, 'snpmPermTime');
 
     %- save STCS
