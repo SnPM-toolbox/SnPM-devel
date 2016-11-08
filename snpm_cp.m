@@ -777,52 +777,46 @@ tic %-Start the clock: Timing code is commented with "clock" symbol: (>)
 %-Loop over planes (breaks out after first loop if bVolm)
 %-----------------------------------------------------------------------
 nP = [];
-nGroup1 = size(find(iCond == 1),2);
-params.N = size(X,1);
-params.V = size(X,2);
-nGroup2 = params.N - nGroup1;
-runOutDir = strcat(num2str(params.N),'_',num2str(nGroup1),'_',num2str(nGroup2));
-runInfo = strcat(runOutDir,'_',num2str(nPerm),'.mat');
 
-if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm  >= 10000)
-    RapidPT_path = '~/PermTest/RapidPT/';
-    addpath(RapidPT_path);
-    addpath(strcat(RapidPT_path,'postprocess'));
 
-    write = 0;
-    if(exist('outputs','dir') ~= 7)
-        mkdir('outputs');
-    end
+if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm  >= 1)
+    
+    params.N = size(X,1);
+    params.V = size(X,2);
     params.nPerm = nPerm;
     params.xdim = xdim; 
     params.ydim = ydim; 
     params.zdim = zdim; 
     params.origin = ORIGIN; 
-    params.nGroup1 = nGroup1; 
-    params.nGroup2 = params.N - nGroup1; 
-    alpha = [0.5 0.25 0.1 0.05 0.01 0.001];
-    avgImage = mean(X);
-    save(strcat('outputs/params',runInfo),'params');
-    save(strcat('outputs/XYZ',runInfo),'XYZ'); 
-    save(strcat('outputs/SnPMt',runInfo),'SnPMt'); 
-    save(strcat('outputs/avgImage',runInfo),'avgImage'); 
-    [outputs, timings] = TwoSampleRapidPT(X, nPerm, nGroup1, write, RapidPT_path);
-    MaxT = outputs.MaxT;
-    save(strcat('outputs/MaxT',runInfo),'MaxT'); 
-    save(strcat('outputs/timings',runInfo),'timings');
+    params.nGroup1 = size(find(iCond == 1),2); 
+    params.nGroup2 = params.N - params.nGroup1; 
+
+    datasetInfo = strcat(num2str(params.N),'_',num2str(params.nGroup1),'_',num2str(params.nGroup2));
+    runInfo = strcat(datasetInfo,'_',num2str(nPerm),'.mat');
+    save(strcat('params',runInfo),'params');
+
     
+    fullpath = mfilename('fullpath');
+    % We only need the directory of snpm_cp so we remove the 7 chars
+    % associated to snpm_cp in fullpath.
+    RapidPT_path = strcat(fullpath(1:end-7),'RapidPT_min');
+    addpath(RapidPT_path);
+
+    write = 0;
+    [outputs, timings] = TwoSampleRapidPT(X, nPerm, params.nGroup1, write, RapidPT_path);
+    MaxT = outputs.MaxT;
+    save(strcat('timings',runInfo),'timings');
+
     % Save variables for snpm_pp
     MaxT = [MaxT;-MaxT];
-    [~, SnPMucp, ~, ~] = ttest2(X(1:nGroup1, :), X(nGroup1+1:end, :), 0.05, 'both', 'unequal');
+    % Calculate uncorrected p-vals
+    [~, SnPMucp, ~, ~] = ttest2(X(1:params.nGroup1, :), X(params.nGroup1+1:end, :), 0.05, 'both', 'unequal');
     save('SnPMucp.mat','SnPMucp')
     save('XYZ.mat','XYZ');
     eval(['save SnPM ',s_SnPM_save]);
     save('SnPMt.mat','SnPMt'); % Real t-statistic for each voxel.
     
-    
-    %rapidpt_postprocess(MaxT, SnPMt, XYZ, brain, alpha, params)
-    
-else
+else % Run regular permutation testing
 for i = 1:zdim
     
   PlStart=toc;SmTime=0; %-Timestamp (>) 
@@ -1063,11 +1057,6 @@ for i = 1:zdim
 
     end 	% (for perm = StartPerm:nPerm) - Perm loop
 
-    snpmPermTime = toc(snpmPermTime);
-    outputs_filename = strcat('outputs_',runInfo);
-    timings_filename = strcat('timings_',runInfo);
-    save(timings_filename, 'snpmPermTime');
-
     %- save STCS
     if bST & pU_ST_Ut>=0
       if bhPerms %Double the STCS variables.
@@ -1116,22 +1105,6 @@ lP_pos_vol=reshape(lP_pos_image,DIM(1),DIM(2),DIM(3));
 spm_write_vol(VlP_pos, lP_pos_vol);
 
 % save MaxT for accuracy comparisson
-
-  params.nPerm = nPerm;
-  params.xdim = xdim; 
-  params.ydim = ydim; 
-  params.zdim = zdim; 
-  params.origin = ORIGIN; 
-  params.nGroup1 = nGroup1; 
-  params.nGroup2 = params.N - nGroup1; 
-  snpmOutputs.params = params;
-  snpmOutputs.MaxT = MaxT;
-  snpmOutputs.avgImage = mean(X);
-  snpmOutputs.XYZ = XYZ;
-  snpmOutputs.SnPMt = SnPMt;
-  save(outputs_filename, 'snpmOutputs');
-
-
 if STAT == 'T'
   if bhPerms
     nP_neg=1+1/(2*nPerm)-nP;
