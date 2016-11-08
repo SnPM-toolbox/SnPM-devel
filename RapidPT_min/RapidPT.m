@@ -2,10 +2,19 @@
 % % the following function computes the max Null statistic distribution 
 % % in its current format, the code only uses t-statistics
 
-%%% Corresponding paper :
+%%% Original Library:
+% % RapidPT: https://github.com/felipegb94/RapidPT
+
+%%% Corresponding papers :
 % % Speeding up Permutation Testing in Neuroimaging 
 % % C Hinrichs, VK Ithapu, Q Sun, SC Johnson, V Singh
 % % NIPS 2013
+
+% % Accelerating Permutation Testing in Neuroimaging through Subspace Tracking
+% % F Gutierrez-Barragan VK Ithapu, C Hinrichs, T Nichols, SC Johnson, V Singh
+% % Under Preparation
+
+
 
 %%% Arguments    
 % % 
@@ -41,7 +50,7 @@
 % %     inputs.data = '/home/user/mydata/pt_data.mat';
 % %     inputs.maxrank = 30; input.T = 1000; input.traintime = 50; 
 % %     inputs.display = 1;
-% %     outputs = Efficient_PT(inputs);
+% %     outputs = RapidPT(inputs);
 
 function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
 % RapidPermutationTesting 

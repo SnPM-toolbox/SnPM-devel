@@ -282,7 +282,8 @@ STalpha = SnPMdefs.STalpha;
 STprop  = SnPMdefs.STprop;
 
 s_SnPM_save = [s_SnPM_save ' STalpha STprop'];  % Save for PP
-
+s_SnPM_save = [s_SnPM_save ' RapidPT'];  % Save actual RaptidPT usage (0 or 1)
+RapidPT = SnPMdefs.RapidPT;
 %-Work out degrees of freedom
 %-----------------------------------------------------------------------
 q       = size([H C B G],1);		%-# observations
@@ -290,6 +291,10 @@ p       = size([H C B G],2);		%-# predictors
 r       = rank([H C B G]);		%-Model degrees of freedom
 df      = q - r;			%-Residual degrees of freedom
 nPerm   = size(PiCond,1);		%-# permutations
+
+if(nPerm  >= 10000 && strcmp('snpm_pi_TwoSampT',sDesFile))
+   SnPMdefs.RapidPT = 1; RapidPT = 1;
+end
 
 %-Get ORIGIN, etc
 %-----------------------------------------------------------------------
@@ -778,8 +783,7 @@ tic %-Start the clock: Timing code is commented with "clock" symbol: (>)
 %-----------------------------------------------------------------------
 nP = [];
 
-
-if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm  >= 10000)
+if(SnPMdefs.RapidPT)
     
     params.N = size(X,1);
     params.V = size(X,2);

@@ -49,3 +49,7 @@ SnPMdefs.CovVals = {
     '0'
     };
 
+% Use matrix completion acceleration?
+%------------------------------------------------------------------------
+SnPMdefs.RapidPT = 0; % 0 = Always off; 1 = On if nPerm>=10000; 2 = Always on.
+
