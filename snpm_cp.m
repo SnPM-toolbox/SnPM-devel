@@ -779,7 +779,7 @@ tic %-Start the clock: Timing code is commented with "clock" symbol: (>)
 nP = [];
 
 
-if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm  >= 1)
+if(strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm  >= 10000)
     
     params.N = size(X,1);
     params.V = size(X,2);
