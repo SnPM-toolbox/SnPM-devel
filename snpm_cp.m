@@ -293,14 +293,14 @@ nPerm   = size(PiCond,1);		%-# permutations
 
 % Check if we are using RapidPT
 s_SnPM_save = [s_SnPM_save ' UseRapidPT'];  % Save actual RaptidPT usage (0 or 1)
-UseRapidPT = SnPMdefs.RapidPT;
+UseRapidPT = 0;
 
 if(SnPMdefs.RapidPT == 2 && strcmp('snpm_pi_TwoSampT',sDesFile))
-    SnPMdefs.RapidPT = 2; UseRapidPT = 2;
+    UseRapidPT = 2;
 elseif(SnPMdefs.RapidPT == 1 && nPerm  >= 10000 && strcmp('snpm_pi_TwoSampT',sDesFile))
-    SnPMdefs.RapidPT = 1; UseRapidPT = 1;
+    UseRapidPT = 1;
 else
-    SnPMdefs.RapidPT = 0; UseRapidPT = 0;
+    UseRapidPT = 0;
 end
 
 %-Get ORIGIN, etc
