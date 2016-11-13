@@ -1316,7 +1316,7 @@ if length(strmatch('MIPtable',Report))>0
   
   %-Table Headers
   %----------------------------------------------------------------------
-  TabDat.tit = sprintf('%s: p-values adjusted for search volume',TitlStr);
+  TabDat.tit = sprintf('%s p-values adjusted for search volume',TitlStr);
   
   TabDat.hdr = {...
       'cluster',  'p(FWE-corr)',  '\itp\rm_{FWE-corr}';...
