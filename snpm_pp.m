@@ -1349,7 +1349,7 @@ if length(strmatch('MIPtable',Report))>0
   %-----------------------------------------------------------------------
   r = 0;
   bUsed = zeros(size(STC_SnPMt));
-  while max(STC_SnPMt.*(~bUsed)) & (y > 3)
+  while max(STC_SnPMt.*(~bUsed))
     
     [null, i] = max(STC_SnPMt.*(~bUsed));	% Largest t value
     j         = find(STC_r == STC_r(i));	% Maxima in same region
