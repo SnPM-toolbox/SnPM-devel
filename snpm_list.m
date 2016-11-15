@@ -1,10 +1,8 @@
 function varargout = spm_list(varargin)
 % Support function for snpm_pp.m
-% FORMAT spm_list('TxtList',TabDat,c)
 % FORMAT spm_list('CSVList',TabDat,ofile)
-% FORMAT spm_list('XLSList',TabDat,ofile)
 %
-% 
+% Tiny modification to spm_list to allow different number of columns in TabDat
 %_______________________________________________________________________
 % Copyright (C) 2016 The University of Warwick
 % snnpm_list.m, based on spm_list.m 6903
