@@ -126,7 +126,7 @@ varargout = {[0.7,1.0,0.7], 'Lime Green'};
 
 else
 %=======================================================================
-error('Unknown action string')
+error('SnPM:UnknownAction', 'Unknown action string')
 
 %=======================================================================
 end

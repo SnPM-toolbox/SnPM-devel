@@ -79,11 +79,18 @@
 
 %-Initialisation
 %-----------------------------------------------------------------------
-global TEST;
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'CovInt Xblk';	% PlugIn variables to save in cfg file
 
-
+if snpm_get_defaults('shuffle_seed')
+    % Shuffle seed of random number generator
+    try
+        rng('shuffle');
+    catch
+        % Old syntax        
+        rand('seed',sum(100*clock));
+    end
+end
 
 %-Get filenames of scans
 %-----------------------------------------------------------------------
@@ -114,7 +121,7 @@ if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
         end
         nGcs = size(Gc,2);
         if size(d,1) ~= q
-            error(sprintf('Covariate [%d,1] does not match number of scans [%d]',...
+            error('SnPM:InvalidCovariate', sprintf('Covariate [%d,1] does not match number of scans [%d]',...
                 size(job.cov(i).c,1),nScan))
         else
             %-Save raw covariates for printing later on
@@ -176,9 +183,6 @@ if bAproxTst
 	%-Approximate test :
 	% Build up random subset of all (within Xblk) permutations
 	%===============================================================
-    if isempty(TEST) || ~TEST
-        rand('seed',sum(100*clock))	%-Initialise random number generator
-    end
 	PiCond      = zeros(nPiCond,nScan);
 	PiCond(1,:) = 1+rem([0:Xblk*nXblk-1],Xblk);
 	for i = 2:nPiCond
@@ -241,18 +245,15 @@ end
 %-----------------------------------------------------------------------
 %-Check PiConds sum within Xblks to sum of first nXblk natural numbers
 if ~all(all(PiCond*spm_DesMtx(iXblk)== (Xblk+1)*Xblk/2 ))
-	error('Invalid PiCond computed!'), end
+	error('SnPM:InvalidPiCond', 'Invalid PiCond computed!'), end
 %-Convert to full permutations from permutations within blocks
 nPiCond = size(PiCond,1);
 PiCond = PiCond + meshgrid((iXblk-1)*Xblk,1:nPiCond);
 %-Randomise order of PiConds (except first) to allow interim analysis
-if isempty(TEST) || ~TEST
-    rand('seed',sum(100*clock))	%-Initialise random number generator
-end
 PiCond=[PiCond(1,:);PiCond(randperm(nPiCond-1)+1,:)];
 %-Check first permutation is null permutation
 if ~all(PiCond(1,:)==[1:nScan])
-	error('PiCond(1,:)~=[1:nScan]'); end
+	error('SnPM:InvalidPiCond', 'PiCond(1,:)~=[1:nScan]'); end
 
 
 %-Form non-null design matrix partitions (Globals handled later)

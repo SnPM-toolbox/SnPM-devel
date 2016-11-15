@@ -66,9 +66,9 @@ if nargin<3, Tol = 10^(-10); end
 
 %-Argument range and size checks
 %---------------------------------------------------------------------------
-if nargin<2, error('insufficient arguments'), end
-if length(df)~=1, error('df must be a scalar'), end
-if df<=0, error('df must be strictly positive'), end
+if nargin<2, error('SnPM:InsufficientArgs', 'insufficient arguments'), end
+if length(df)~=1, error('SnPM:Invaliddf', 'df must be a scalar'), end
+if df<=0, error('SnPM:Invaliddf', 'df must be strictly positive'), end
 
 %-Computation
 %===========================================================================

@@ -27,7 +27,7 @@ function e = spm_xyz2e(XYZ,V)
 
 %-Condition arguments
 %-----------------------------------------------------------------------
-if (nargin<2), error('Insufficient arguments'), end
+if (nargin<2), error('SnPM:InsufficientArguments', 'Insufficient arguments'), end
 
 ImDim  = V(1).dim';
 M      = V(1).mat(1:3, 1:3);

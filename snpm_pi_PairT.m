@@ -108,11 +108,22 @@
 nCond    = 2;			% Number of conditions
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iCond iRepl PiSubj';
+
+if snpm_get_defaults('shuffle_seed')
+    % Shuffle seed of random number generator
+    try
+        rng('shuffle');
+    catch
+        % Old syntax        
+        rand('seed',sum(100*clock));
+    end
+end
+
 				% PlugIn variables to save in cfg file
 
 %-Get number of subjects
 % nSubj    = spm_input('# subjects','+1');
-% if (nSubj==1), error('Use single subject plug for single subjects'); end    
+% if (nSubj==1), error('SnPM:SingleSubject', 'Use single subject plug for single subjects'); end    
 nSubj = numel(job.fsubject);
 
 %-Only consider one replication -- basically a RFX machine.
@@ -144,23 +155,23 @@ for subj=1:nSubj
         %-Check validity of tmpCond
         if length(tmpCond)==nScan
             if length(find(diff(sort(tmpCond)))) ~= nCond-1
-            error('Exactly ',[int2str(nCond), ...
+            error('SnPM:InvalidnCond', 'Exactly ',[int2str(nCond), ...
                 ' conditions must be supplied']);
             elseif sum(tmpCond)~=0
-            error(['Exactly ',int2str(nRepl),' As and ', ...
+            error('SnPM:InvalidnRepl', ['Exactly ',int2str(nRepl),' As and ', ...
                     int2str(nRepl),' Bs must be supplied']);
             elseif isempty(iCond)
             sCond=setstr(tmp([1,diff(sort(tmp))]~=0));
             Cond = tmpCond;		
             elseif any(iCond(1:nScan)~=tmpCond) & ...
                 any(iCond(1:nScan)~=(-tmpCond))
-            error(['Conditions index must be same as', ...
+            error('SnPM:InvalidiCond', ['Conditions index must be same as', ...
                     'first subject, or flipped']);
             else		
             Cond = tmpCond;		
             end
         else
-            error(['Enter indicies for ',int2str(nCond*nRepl),' scans'])
+            error('SnPM:InvalidiIndices', ['Enter indicies for ',int2str(nCond*nRepl),' scans'])
         end
     end
     iCond = [iCond, Cond];
@@ -181,7 +192,11 @@ iSUBJ = iSubj;
 %=======================================================================
 %-Work out how many perms, and ask about approximate tests
 %-----------------------------------------------------------------------
-nPiSubj_mx = 2^nSubj;
+if nSubj <= 52
+  nPiSubj_mx = 2^nSubj;
+else
+  nPiSubj_mx = Inf;
+end
 nPiSubj = job.nPerm;
 if job.nPerm >= nPiSubj_mx
     bAproxTst=0;
@@ -193,7 +208,7 @@ else
     bAproxTst=1;
 end
 if rem(nPiSubj,2)
-    error(['Number of perms must be even']);
+    error('SnPM:OddPermutations', ['Number of perms must be even']);
     nPiSubj = 0;	    
 end	  
 
@@ -204,7 +219,7 @@ end
 % 	tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiSubj),'+0');
 % 	tmp = floor(max([0,tmp]));
 % 	if rem(tmp,2)
-% 	    error(['Number of perms must be even']);
+% 	    error('SnPM:OddPermutations', ['Number of perms must be even']);
 % 	    tmp=0;	    
 % 	end	    
 %     end
@@ -221,28 +236,36 @@ end
 %=======================================================================
 %-All possible labelings correspond to the binary representation of
 % numbers {1...2^nSubj}.
-tmp = (0:(2^nSubj-1))';
-if (bAproxTst)
-  tmp = randperm(2^nSubj)-1;
-  tmp = tmp(1:nPiSubj)';
-end
-%-Generate labelings of subjects as +/-1
-PiSubj=[];
-for i=(nSubj-1):-1:0
-  PiSubj = [PiSubj,2*(tmp>=2^i)-1];
-  tmp = tmp - (tmp>=2^i)*2^i;
-end
-% Look for correct labeling
-d = find(all((PiSubj==meshgrid(iSubjC,1:size(PiSubj,1)))'));
-if (length(d)~=1 & ~bAproxTst)
-  error('Internal error: Correct labeling is not in the perms');
-elseif (length(d)~=1)
-  % Correct labeling randomly removed, insert at top
-  PiSubj(1,:) = iSubjC;
+if nSubj<=52
+  if (bAproxTst)
+    tmp = randperm(2^nSubj)-1;
+    tmp = tmp(1:nPiSubj)';
+  else
+    tmp = (0:(2^nSubj-1))';
+  end
+  %-Generate labelings of subjects as +/-1
+  PiSubj=[];
+  for i=(nSubj-1):-1:0
+    PiSubj = [PiSubj,2*(tmp>=2^i)-1];
+    tmp = tmp - (tmp>=2^i)*2^i;
+  end
+  % Look for correct labeling
+  d = find(all((PiSubj==meshgrid(iSubjC,1:size(PiSubj,1)))'));
+  if (length(d)~=1 & ~bAproxTst)
+    error('SnPM:CorrectLabelMissing', 'Internal error: Correct labeling is not in the perms');
+  elseif (length(d)~=1)
+    % Correct labeling randomly removed, insert at top
+    PiSubj(1,:) = iSubjC;
+  else
+    % Swap correct labeling to top
+    PiSubj(d,:) = PiSubj(1,:);
+    PiSubj(1,:) = iSubjC(1:nSubj);
+  end
 else
-  % Swap correct labeling to top
-  PiSubj(d,:) = PiSubj(1,:);
-  PiSubj(1,:) = iSubjC(1:nSubj);
+  % Here we are always approximate 
+  PiSubj = [...
+      iSubjC
+      2*randi(2,nPiSubj-1,nSubj)-3];
 end
 
 %-If not approximate then we can just calc half

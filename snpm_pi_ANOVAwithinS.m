@@ -108,21 +108,27 @@
 
 %-Initialisation
 %-----------------------------------------------------------------------
-global TEST;
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iRepl sHCform_Mtx';		        % PlugIn variables to save in cfg file
-if isempty(TEST) || ~TEST
-    rand('seed',sum(100*clock));	% Initialise random number generator
+
+if snpm_get_defaults('shuffle_seed')
+    % Shuffle seed of random number generator
+    try
+        rng('shuffle');
+    catch
+        % Old syntax        
+        rand('seed',sum(100*clock));
+    end
 end
 
 %-Get number of subjects
 nSubj    = size(job.fsubject,2);%spm_input('# subjects','+1');
-if (nSubj==1), error('Use single subject plug for single subjects'); end    
+if (nSubj==1), error('SnPM:SingleSubj', 'Use single subject plug for single subjects'); end    
 
 %-Get number of scans per subject - nSubj x nRepl design
 nRepl    =  unique(arrayfun(@(x) numel(x.scans), job.fsubject));%spm_input('# scans per subject','+1');
 if numel(nRepl) > 1
-    error('All subjects must have the same number of replications')
+    error('SnPM:DifferentReplications', 'All subjects must have the same number of replications')
 end
 
 
@@ -267,7 +273,7 @@ elseif length(perm)==0 & (nSubj<=12) & bAproxTst
     PiCond(1,:) = iCond;
     perm = 1;
 else    
-    error(['Bad PiCond (' num2str(perm) ')'])
+    error('SnPM:InvalidPiCond', ['Bad PiCond (' num2str(perm) ')'])
 end    
 
 

@@ -15,7 +15,7 @@ classdef test_multisubsimpleregression < generic_test_snpm
             
             nSubjects = 4;
             for i = 1:nSubjects
-                testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.P{i} = ...
+                testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.P{i,1} = ...
                      fullfile(testCase.testDataDir, ['test_data_', num2str(i, '%02.0f'), '.nii,1']);
             end
             testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.CovInt = [1 3 5 0];
@@ -69,7 +69,13 @@ classdef test_multisubsimpleregression < generic_test_snpm
         function test_multisubsimpleregression_approx(testCase)
             testCase.testName = 'multisubsimpleregression_approx';
             
-            rand('seed',200);
+            try
+                % Syntax for newest Matlab versions
+                rng(200);
+            catch
+                % Old syntax
+                rand('seed',200);
+            end
             testCase.matlabbatch{1}.spm.tools.snpm.des.Corr.nPerm = 14;
         end
     end

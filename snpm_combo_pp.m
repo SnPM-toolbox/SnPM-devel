@@ -179,10 +179,10 @@ if bSpatEx & (C_MaxT <= ST_Ut) & (alpha ~= 1)
   str = 'Voxelwise corrected threshold = %g, which is smaller ';
   str = [str 'than minimum saved suprathreshold information (%g)'];
   str = [str '\nAll results significant voxelwise.'];
-  warning(sprintf(str,C_MaxT,ST_Ut))
+  warning('SnPM:VoxelwiseCorrThreshSmaller', sprintf(str,C_MaxT,ST_Ut))
 end
 if bSpatEx~=1
-  error('Suprathreshold stats not collected!  Cannot do cluster-combining!')
+  error('SnPM:SupraStatMissing', 'Suprathreshold stats not collected!  Cannot do cluster-combining!')
 end
 
 %-Get primary threshold for STC analysis if requested
@@ -202,12 +202,14 @@ if bSpatEx
         % upper tail p-values to specify primary threshold
         if alpha == 1	% Not filtering on significance
             if ~(primaryThresh>=ST_Ut)
-                error(['Using pseudo-statistics you can''t use (uncorrected)'... 
+                error('SnPM:PseudoStatWithPValueThreshold', ...
+                    ['Using pseudo-statistics you can''t use (uncorrected)'... 
                         'upper tail p-values to specify primary threshold']);
             end   
         else
             if ~(primaryThresh>=ST_Ut && primaryThresh<C_MaxT)
-                        error(['Using pseudo-statistics you can''t use (uncorrected)'... 
+                        error('SnPM:PseudoStatWithPValueThreshold', ...
+                            ['Using pseudo-statistics you can''t use (uncorrected)'... 
                                 'upper tail p-values to specify primary threshold']);
             end  
         end
@@ -216,14 +218,14 @@ if bSpatEx
         pU_ST_Ut  = 1-spm_Tcdf(ST_Ut,df);
         if alpha==1	% Not filtering on significance
             if ~( primaryThresh>=ST_Ut || (primaryThresh>0 && primaryThresh<=pU_ST_Ut_filt))
-                error(['Primary threshold must be >=' num2str(ST_Ut) ...
+                error('SnPM:InvalidPrimaryThresh', ['Primary threshold must be >=' num2str(ST_Ut) ...
                     ' and >0 and <=' num2str(pU_ST_Ut_filt) ]);
             end  
         else
             pU_C_MaxT = 1-spm_Tcdf(C_MaxT,df);
             if ~((primaryThresh>=ST_Ut && primaryThresh<C_MaxT) || ...
                     (primaryThresh>pU_C_MaxT && primaryThresh<=pU_ST_Ut_filt))
-                error(['Primary threshold must be >=' num2str(ST_Ut) ...
+                error('SnPM:InvalidPrimaryThresh', ['Primary threshold must be >=' num2str(ST_Ut) ...
                     ' and <' num2str(C_MaxT) ' or >' num2str(pU_C_MaxT) ...
                     ' and <= ' num2str(pU_ST_Ut_filt)]);
             end
@@ -241,7 +243,7 @@ if bSpatEx
     %
     Theta = job.Thr.Clus.ClusMass.Theta;
     if (Theta<0+tol || Theta>1-tol)
-        error('Theta should be between 0 and 1');
+        error('SnPM:InvalidTheta', 'Theta should be between 0 and 1');
     end
     mTheta = Theta/(1-Theta);  %-Weight for mass combining
     
@@ -385,7 +387,7 @@ if bSpatEx
 	%-Check XYZ for points > ST_Ut in perm 1 matches
 	% XYZ computed above for SnPMt > ST_Ut
 	if ~all(all( SnPM_ST(1:3,SnPM_ST(5,:)==1) == XYZ ))
-		error('ST XYZ don''t match between STCS & thresh')
+		error('SnPM:InvalidSTXYZ', 'ST XYZ don''t match between STCS & thresh')
 	end
 
         %-- VOXEL CLUSTER COMBINED TEST STATISTICS ----

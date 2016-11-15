@@ -94,9 +94,15 @@
 %-----------------------------------------------------------------------
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'iCond';		% PlugIn variables to save in cfg file
-global TEST;
-if isempty(TEST) || ~TEST % When testing the code we need a fixed seed
-    rand('seed',sum(100*clock));	% Initialise random number generator
+
+if snpm_get_defaults('shuffle_seed')
+    % Shuffle seed of random number generator
+    try
+        rng('shuffle');
+    catch
+        % Old syntax        
+        rand('seed',sum(100*clock));
+    end
 end
 
 %-Get filenames and iCond, the condition labels
@@ -118,7 +124,7 @@ if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
         end
         nGcs = size(Gc,2);
         if size(d,1) ~= q
-            error(sprintf('Covariate [%d,1] does not match number of subjects [%d]',...
+            error(sprintf('SnPM:InvalidCovariate', 'Covariate [%d,1] does not match number of subjects [%d]',...
                 size(job.cov(i).c,1),nScan))
         else
             %-Save raw covariates for printing later on
@@ -244,7 +250,7 @@ elseif length(perm)==0 & (nScan<=12) & bAproxTst
     PiCond(1,:) = iCond;
     perm = 1;
 else    
-    error(['Bad PiCond (' num2str(perm) ')'])
+    error('SnPM:PiCond', ['Bad PiCond (' num2str(perm) ')'])
 end    
 
 

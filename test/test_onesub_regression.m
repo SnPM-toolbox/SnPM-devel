@@ -70,7 +70,13 @@ classdef test_onesub_regression < generic_test_snpm
         function test_onesub_regression_approx(testCase)
             testCase.testName = 'onesub_regression_approx';
             
-            rand('seed',200);
+            try
+                % Syntax for newest Matlab versions
+                rng(200);
+            catch
+                % Old syntax
+                rand('seed',200);
+            end
             
             testCase.matlabbatch{1}.spm.tools.snpm.des.Corr1S.nPerm = 25;
         end

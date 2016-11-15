@@ -512,19 +512,19 @@ if BATCH
     else
         % Cluster-wise inference
         if exist(fullfile(CWD,'SnPM_ST.mat'))~=2 & exist(fullfile(CWD,'STCS.mat'))~=2
-            error(['ERROR: Cluster-wise inference requested, but no cluster information saved.\n',...
+            error(['SnPM:NoClusterInfo', 'ERROR: Cluster-wise inference requested, but no cluster information saved.\n',...
             'Re-configure analysis changing "Cluster inference" to "Yes" and re-run.\n'])
         end
         %%% Sort out the cluster-forming threshold
         if pU_ST_Ut==-1  % No threshold was set in snpm_ui.
             if isnan(job.Thr.Clus.ClusSize.CFth)
-                error('ERROR: Cluster-forming threshold set to NaN in results with "slow" cluster inference method used in compoutation.  \nRe-run results specifying a cluster-forming threshold.\n')
+                error('SnPM:NoClusterFormingThresh', 'ERROR: Cluster-forming threshold set to NaN in results with "slow" cluster inference method used in compoutation.  \nRe-run results specifying a cluster-forming threshold.\n')
             end
             % Save original ST_Ut
             ST_Ut_0 = ST_Ut;
             CFth=job.Thr.Clus.ClusSize.CFth;
             if (CFth<=0)
-                error('ERROR: Cluster-forming threshold must be strictly positive.\nRe-run results with a cluster-forming threshold greater than 0.\n')
+                error('SnPM:InvalidClusterFormingThresh', 'ERROR: Cluster-forming threshold must be strictly positive.\nRe-run results with a cluster-forming threshold greater than 0.\n')
             end
             if bVarSm
                 %-If using pseudo-statistics then can't use (uncorrected) 
@@ -544,9 +544,9 @@ if BATCH
                 
                 if (CFth < ST_Ut)%(CFth>=ST_Ut-tol)
                     if isnan(pCFth)
-                        error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STprop in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
+                        error('SnPM:InvalidClusterFormingThresh', sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STprop in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
                     else
-                        error(sprintf('ERROR: Cluster-forming threshold of P=%0.4f (T=%0.2f) specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming P-value threshold of %0.2f or lower.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',pCFth,CFth,ST_Ut,p_ST_Ut))
+                        error('SnPM:InvalidClusterFormingThresh', sprintf('ERROR: Cluster-forming threshold of P=%0.4f (T=%0.2f) specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming P-value threshold of %0.2f or lower.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',pCFth,CFth,ST_Ut,p_ST_Ut))
                     end
                 end
             else
@@ -564,9 +564,9 @@ if BATCH
 
                 if (CFth < ST_Ut) %(CFth>=ST_Ut-tol)
                     if isnan(pCFth) % statistic-value cluster-forming threshold
-                        error(sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
+                        error('SnPM:InvalidClusterFormingThresh', sprintf('ERROR: Cluster-forming threshold of %0.2f specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming threshold of %0.2f or higher.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',CFth,ST_Ut,ST_Ut))
                     else
-                        error(sprintf('ERROR: Cluster-forming threshold of P=%0.4f (T=%0.2f) specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming P-value threshold of %0.2f or lower.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',pCFth,CFth,ST_Ut,p_ST_Ut))
+                        error('SnPM:InvalidClusterFormingThresh', sprintf('ERROR: Cluster-forming threshold of P=%0.4f (T=%0.2f) specified, but statistic image information only saved for %0.2f and greater. \nRe-run results with a cluster-forming P-value threshold of %0.2f or lower.  (Alternatively, increase SnPMdefs.STalpha in snpm_defaults.m, re-start SnPM, and re-compute analysis.)\n',pCFth,CFth,ST_Ut,p_ST_Ut))
                     end
                 end
             end
@@ -576,7 +576,7 @@ if BATCH
                 ST_Ut = CFth;
         else % Threshold *was* set in snpm_ui.
             if ~isnan(job.Thr.Clus.ClusSize.CFth)
-                error(sprintf('ERROR: Cluster-forming threshold of T=%0.2f was already set during analysis configuration; hence, in results, cluster-forming threshold must be left as "NaN".\nRe-run results with cluster-forming threshold set to NaN.\n',ST_Ut))
+                error('SnPM:InvalidClusterFormingThresh', sprintf('ERROR: Cluster-forming threshold of T=%0.2f was already set during analysis configuration; hence, in results, cluster-forming threshold must be left as "NaN".\nRe-run results with cluster-forming threshold set to NaN.\n',ST_Ut))
             end
         end
         u=ST_Ut; % Flag use of a statistic-value threshold
@@ -822,8 +822,9 @@ if bSpatEx
       try
         load(fullfile(CWD,'SnPM_ST'))
       catch exception
-          if strcmp(exception.message, 'File may be corrupt.')
-              warning(['SnPM_ST file can not be loaded. Consider using' ...
+          if strcmp(exception.identifier, 'MATLAB:load:unableToReadMatFile')
+              warning('SnPM:SnPMSTFileNotLOaded', ...
+                  ['SnPM_ST file can not be loaded. Consider using' ...
                   ' ''set cluster-forming threshold now (fast)'' option' ...
                   ' in SnPM ''Specify''.']);
           end
@@ -883,7 +884,7 @@ if bSpatEx
                 if diffWithRounded > tolerance
                  Locs_vox_alter = MAT\Locs_mm;
                  diffWithRounded_alter = max(abs(Locs_vox_alter(:)-round(Locs_vox(:))));
-                 error(['''Locs_vox'' must be integers (difference is ' num2str(diffWithRounded) ...
+                 error('SnPM:NonIntegerLocsvox', ['''Locs_vox'' must be integers (difference is ' num2str(diffWithRounded) ...
                      ' or ' num2str(diffWithRounded_alter) ')']);
                 else
                  Locs_vox = round(Locs_vox); 
@@ -969,11 +970,11 @@ if bSpatEx
 	% XYZ computed above for SnPMt > ST_Ut
 	%if pU_ST_Ut==-1 
 	% if ~all(all( SnPM_ST(1:3,SnPM_ST(5,:)==1) == XYZ ))
-	%	error('ST XYZ don''t match between STCS & thresh')
+	%	error('SnPM:InvalidSTXYZ', 'ST XYZ don''t match between STCS & thresh')
 	% end
 	%else
 	 if ~all(all( STCstats(1:3,:) == XYZ ))
-		error('ST XYZ don''t match between STCS & thresh')
+		error('SnPM:InvalidSTXYZ', 'ST XYZ don''t match between STCS & thresh')
 	 end
 	%end
 end
@@ -1025,7 +1026,7 @@ else
 	  % Thresholding based on uncorrected P-values
 	  Q = find(SnPMucp < alpha_ucp);
 	else
-	  error('Coding error')
+	  error('SnPM:CodingError', 'Coding error')
 	end
 	if ~isnan(u)
 	  fprintf('Filtering statistic image, voxelwise...');
@@ -1140,8 +1141,9 @@ if bSpatEx
 	end
 end
 
-
-
+% Display only if *not* in command line mode
+if ~spm_get_defaults('cmdline')
+    
 %=======================================================================
 %-D I S P L A Y :   Max report
 %=======================================================================
@@ -1438,6 +1440,8 @@ if length(strmatch('MIPtable',Report))>0
 
 end
 
+end
+
 %- Image output?
 %=======================================================================
 %-Write out filtered SnPMt?
@@ -1525,7 +1529,7 @@ if strcmp(Typ,'max')
 elseif  strcmp(Typ,'uncor')
   TitStr = 'Distribution: Observed Uncorrected P-values';
 else
-  error('Unknown type string')
+  error('SnPM:UnknownString', 'Unknown type string')
 end  
 
 pos1 = [0.125 0.50 0.75 0.3];
@@ -1614,12 +1618,12 @@ elseif ~isempty(C)
     title('Permutation Distribution: Maximum Cluster Size (cuberoot plot)','FontSize',14)
     xlabel(sprintf('Max Cluster Size Observed = %g  Cluster Threshold = %g',C(1),cC))
   else
-    warning('Uncorrected cluster size not supported yet!')
+    warning('SnPM:UncorrectedClustSize', 'Uncorrected cluster size not supported yet!')
     title('Permutation Distribution: (Uncorrected) Cuberoot Cluster Size','FontSize',14)
     xlabel(sprintf('Max Cluster Size Observed = %g  Cluster Threshold = %g',C(1),cC))
   end
   Ylim = get(gca,'ylim'); Xlim = get(gca,'xlim');
-  set(gca,'Xticklabel',num2str(str2num(get(gca,'Xticklabel')).^3))
+  set(gca,'Xticklabel',num2str(str2double(cellstr(get(gca,'Xticklabel'))).^3))
   line(rC(1)*[1 1],Ylim.*[1 0.95],'LineStyle','--','color',[1 0 0]);
   text(rC(1)+diff(Xlim)*0.01,Ylim(2)*0.95,'Observed','FontSize',10)
   line(cC.^(1/3)*[1 1],Ylim.*[1 0.85],'LineStyle','-');
@@ -1643,7 +1647,7 @@ return
 
 function v = BoundCheck(val,Range,ErrMsg)
 if val<Range(1) | val>Range(2)
-  error([ErrMsg ': ' num2str(val)])
+  error('SnPM:RangeError', [ErrMsg ': ' num2str(val)])
 else
   v=val;
 end

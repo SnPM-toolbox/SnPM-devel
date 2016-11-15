@@ -49,7 +49,7 @@ function varargout=snpm(Action)
 
 %-Parameters
 %-----------------------------------------------------------------------
-SnPMver    = 'SnPM13.1.02';
+SnPMver    = 'SnPM13.1.06';
 
 %-Format arguments
 %-----------------------------------------------------------------------
@@ -64,6 +64,11 @@ if isempty(spm_figure('FindWin','Menu'))
 	clc
 else
 	clc
+end
+% Add test code to Matlabpath
+if ~exist('test_oneSample', 'file')
+    addpath(fullfile(spm_file(which('snpm'), 'path'), 'test'));
+    addpath(fullfile(spm_file(which('snpm'), 'path'), 'test', 'common'));
 end
 snpm_defaults;
 [Finter,Fgraph,CmdLine] = spm('FnUIsetup','Statistical non-Parametric Mapping (SnPM)');
@@ -106,7 +111,7 @@ disp('SnPM13 tools are available in the SPM batch window under SPM -> Tools -> S
 
 else
 %=======================================================================
-error('Unknown action string')
+error('SnPM:UnknownAction', 'Unknown action string')
 
 %=======================================================================
 end

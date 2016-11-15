@@ -23,7 +23,7 @@ classdef test_multisub_withinsubanova < generic_test_snpm
             % Fill the design part in the batch
             for i = 1:nSubjects
                 for j = 1:nScansPerSub
-                    testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.fsubject(i).scans{j} = ...
+                    testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.fsubject(i).scans{j,1} = ...
                      fullfile(testCase.testDataDir, ['test_data_', num2str((i-1)*nScansPerSub+j, '%02.0f'), '.nii,1']);
                 end
             end
@@ -48,7 +48,13 @@ classdef test_multisub_withinsubanova < generic_test_snpm
         function test_multisub_withinsubanova_approx(testCase)
             testCase.testName = 'multisub_withinsubanova_approx';
             
-            rand('seed',200);            
+            try
+                % Syntax for newest Matlab versions
+                rng(200);
+            catch
+                % Old syntax
+                rand('seed',200);
+            end
             testCase.matlabbatch{1}.spm.tools.snpm.des.ANOVAwithinS.nPerm = 13;
         end
     end
