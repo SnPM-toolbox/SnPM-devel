@@ -296,9 +296,9 @@ nPerm   = size(PiCond,1);		%-# permutations
 s_SnPM_save = [s_SnPM_save ' UseRapidPT'];  % Save actual RaptidPT usage (0 or 1)
 UseRapidPT = 0;
 
-if(SnPMdefs.RapidPT == 2 && strcmp('snpm_pi_TwoSampT',sDesFile))
+if(snpm_get_defaults('RapidPT') == 2 && strcmp('snpm_pi_TwoSampT',sDesFile))
     UseRapidPT = 2;
-elseif(SnPMdefs.RapidPT == 1 && nPerm  >= 10000 && strcmp('snpm_pi_TwoSampT',sDesFile))
+elseif(snpm_get_defaults('RapidPT') == 1 && nPerm  >= 10000 && strcmp('snpm_pi_TwoSampT',sDesFile))
     UseRapidPT = 1;
 else
     UseRapidPT = 0;
@@ -818,7 +818,7 @@ if(UseRapidPT >= 1)
     
     fullpath = mfilename('fullpath');
     % We only need the directory of snpm_cp so we remove the 7 chars
-    % associated to snpm_cp in fullpath.
+    % associated to 'snpm_cp' in fullpath.
     RapidPT_path = strcat(fullpath(1:end-7),'RapidPT_min');
     addpath(RapidPT_path);
 
