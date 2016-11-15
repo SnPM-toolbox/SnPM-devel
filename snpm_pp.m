@@ -1306,6 +1306,8 @@ if length(strmatch('MIPtable',Report))>0
   Fmtst = {	'%0.4f', '%0.4f', '%0.0f', ...                  %-Cluster
 		'%0.4f', '%0.4f', '%6.2f','%0.4f', ...		%-Voxel
 		'%3.0f', '%3.0f', '%3.0f'};			%-XYZ
+  TabDat.fmt = Fmtst(1:7);
+  TabDat.fmt(8) = {'%3.0f %4.0f %3.0f '};  % Needed for compatibilty with spm_list
   
   %-Column Locations
   %-----------------------------------------------------------------------
@@ -1326,9 +1328,8 @@ if length(strmatch('MIPtable',Report))>0
       'peak',     'p(FDR-corr)',  '\itq\rm_{FDR-corr}';...
       'peak',      STAT,          sprintf('\\it%s',STAT);...
       'peak',     'p(uncorr)',    '\itp\rm_{uncorr}';...
-      '',         'x,y,z {mm}',   [units{:}]}';...
-
-  TabDat.fmt = Fmtst;
+      '',         'x,y,z {mm}',   [units{:}]}';
+  
   %-Table filtering note
   %----------------------------------------------------------------------
   if isinf(Num)
@@ -1336,7 +1337,7 @@ if length(strmatch('MIPtable',Report))>0
   else
     TabDat.str = sprintf('table shows %d local maxima more than %.1fmm apart',Num,Dis);
     end 
-  TabDat.dat = cell(0,10);
+  TabDat.dat = cell(0,8);
 
   StrAttr = {'Fontsize',10,'ButtonDownFcn','get(gcbo, ''UserData'')',...
 	     'HorizontalAlignment','right'};
@@ -1369,7 +1370,7 @@ if length(strmatch('MIPtable',Report))>0
       end
     end
     
-    TabDat.dat(r,3:10)={STC_N(i),Pt(i),Pfdr(i),STC_SnPMt(i),Pu(i),STC_XYZ(1,i),STC_XYZ(2,i),STC_XYZ(3,i)};
+    TabDat.dat(r,3:8)={STC_N(i),Pt(i),Pfdr(i),STC_SnPMt(i),Pu(i),STC_XYZ(:,i)};
 
     if (y>3)
       text(tCol(3)+0.04,y,sprintf(Fmtst{3},STC_N(i)),'UserData',STC_N(i),StrAttrB{:})
@@ -1395,7 +1396,7 @@ if length(strmatch('MIPtable',Report))>0
 	if length(D) < Num
 	  r = r + 1;				% Next row
 
-	  TabDat.dat(r,4:10)={Pt(i),Pfdr(i),STC_SnPMt(i),Pu(i),STC_XYZ(1,i),STC_XYZ(2,i),STC_XYZ(3,i)};
+	  TabDat.dat(r,4:8)={Pt(i),Pfdr(i),STC_SnPMt(i),Pu(i),STC_XYZ(:,i)};
 
 	  if (y>3)
 	    text(tCol(4)+0.08,y,sprintf(Fmtst{4}, Pt(d)),'UserData',Pt(d),StrAttr{:})
