@@ -4,17 +4,17 @@ function snpm_cp(CWD)
 %
 % CWD -	Directory containing SnPMcfg.mat configuration file
 %_______________________________________________________________________
-% 
+%
 % snpm_cp is the engine of the SnPM toolbox and implements the general
-% linear model for a set of design matrices, each design matrix 
+% linear model for a set of design matrices, each design matrix
 % constituting one permutation.  First the "correct" permutation
-% is calculated in its entirety, then all subsequent permutations are 
-% calculated, possibly on a plane-by-plane basis.  
+% is calculated in its entirety, then all subsequent permutations are
+% calculated, possibly on a plane-by-plane basis.
 %
 % The output of snpm_cp parallels spm_spm: for the correct permutation
 % image files containing parameter estimates, statistic values, and F
 % values are saved (this is in distinction from SnPM2 and previous
-% versions, where this information was saved in .mat files); the permutation 
+% versions, where this information was saved in .mat files); the permutation
 % distribution of the statistic interest and (optionally) suprathreshold
 % stats are also saved.  All results are written to the directory
 % that CfgFile resides in.  IMPORTANT: Existing results are overwritten
@@ -37,7 +37,7 @@ function snpm_cp(CWD)
 % and related data.
 %
 %   BETA.mat contains a p x S matrix of the p parameter estimates at
-% each of the S voxels for the correct permutation.  These parameters 
+% each of the S voxels for the correct permutation.  These parameters
 % include all effects specified by the design matrix.
 %
 %   SnPMt.mat contains a 1 x S matrix of the statistic of interest (either
@@ -47,7 +47,7 @@ function snpm_cp(CWD)
 %   SnPMucp.mat contains a 1 x S matrix of the nonparametric P values of
 % the statistic of interest supplied for all S voxels at locations XYZ.
 %
-%   SnPM.mat contains a collection of strings and matrices that pertain 
+%   SnPM.mat contains a collection of strings and matrices that pertain
 % to the analysis.  In contrast to spm_spm's SPM.mat, most of the essential
 % matrices are in the any of the matrices stored here in the CfgFile
 % and hence are not duplicated here.   Included are the number of voxels
@@ -55,37 +55,37 @@ function snpm_cp(CWD)
 % for complete listing.
 %
 % snpm_cp writes out the following image files (for each image, there are
-% two files: .img and .hdr files)  
-%  
+% two files: .img and .hdr files)
+%
 % beta_**** (from 0001 to p): p images of p parameter estimates at each
 % voxel for the correct permutation. These p parameters include all
-% effects specified by the design matrix. 
+% effects specified by the design matrix.
 %
-% ResMS: One image of residual mean square errors at each voxel. 
-% 
+% ResMS: One image of residual mean square errors at each voxel.
+%
 % (SnPM, like SPM, only implements single tailed tests. In the following
 % files, '+' or '-' correspond to 'positive' or 'negative' effects (as in
 % snpm_pp.m). Here, '+' images are the images for large values,
 % indicating evidence against the null hypothesis in favour of a positive
 % alternative (activation, or positive slope in a covariate analysis))
-% 
+%
 % snpmT+ & snpmT-: Images of the statistic of interest (either t or
-% pseduo-t if variance smoothing is used), positive or negative. 
+% pseduo-t if variance smoothing is used), positive or negative.
 % The numbers (i.e. not NaN) saved in snpmT+ images are also saved in the
-% SnPMt.mat file. 
-% 
+% SnPMt.mat file.
+%
 % lP+ & lP-: Images of -log10(uncorrected non-parametric P-values,
 % positive or negative).
-% 
+%
 % lP_FWE+ & lP_FWE-: Images of -log10(FWE-corrected non-parametric
 % P-values, positive or negative). Here, FWE-corrected non-parametric
 % P-values are the proportion of the permutation distribution for the
-% maximal statistic which exceeds the statistic image at the voxel. 
+% maximal statistic which exceeds the statistic image at the voxel.
 %
 % lP_FDR+ & lP_FDR-: Images of -log10(FDR-corrected non-parametric
-% P-values, positive or negative). 
+% P-values, positive or negative).
 %
-% The following is an example of matlab codes for reading in an image file. 
+% The following is an example of matlab codes for reading in an image file.
 % P='.../.../beta_0001.img';
 % V=spm_vol(P);
 % Y=spm_read_vols(V);
@@ -95,7 +95,7 @@ function snpm_cp(CWD)
 %-----------------------------------------------------------------------
 %
 % As an "engine", snpm_cp does not produce any graphics; if the SPM windows
-% are open, a progress thermometer bar will be displayed.  
+% are open, a progress thermometer bar will be displayed.
 %
 % If out-of-memory problems are encountered, the first line of defense is to
 % run snpm_cp in a virgin matlab session with out first starting SPM.
@@ -108,6 +108,7 @@ function snpm_cp(CWD)
 % V              Volume handles (see spm_vol)
 % df             Residual degrees of freedom of raw t-statistic
 % MaxT           nPerm x 2 matrix of [max;min] t-statistics per perm
+% MaxCSS         nPerm x 2 matrix of [max;min] cluster-like support score
 % ST_Ut          Threshold above which suprathreshold info was collected.
 %                Voxel locations, t and perm are saved in SnPM_ST.mat for
 %                t's greater than ST_Ut. ST_Ut=Inf if not saving STCdata
@@ -115,7 +116,7 @@ function snpm_cp(CWD)
 % s_SnPM_save    List of variables saved in SnPM.mat file
 % CfgFile        SnPM config sile used (full pathname)
 % s_SnPMcfg_save List of variables saved in SnPMcfg.mat file
-% 
+%
 % Data structure of SnPM_ST.mat: suprathreshold stats (if collected)
 %-----------------------------------------------------------------------
 % 5xn matrix, each column containing:
@@ -154,10 +155,10 @@ function snpm_cp(CWD)
 % If bVolm is true, this function will load the entire dataset (all
 % planes, all subjects) into memory.  If bVolm is false the dataset
 % will be loaded a plane at a time (all subjects), but smoothing the
-% variance in the z-direction is not permitted.  A version that 
+% variance in the z-direction is not permitted.  A version that
 % does not load the whole volume but allows volumetric smoothing
 % is under development.
-% 
+%
 % For designs with large number of permutations AND bVolm true, a possible
 % approach would be have a stopping feature where the user had decided
 % "enough" permutations had run.  Not sure if this is useful.
@@ -177,7 +178,7 @@ function snpm_cp(CWD)
 % nP      - WorkDim vector of nonparametric P-values
 %
 %-Supratreshold Threshold
-% 
+%
 % STalpha - if parametric T, critical val for STalpha ised
 % STprop  - if pseudo T, 100*(1-STprop)%ile of correct perm's values used
 
@@ -191,22 +192,22 @@ if isempty(defaults), spm_defaults; end
 fprintf('\nSnPM: snpm_cp\n'),fprintf('%c','='*ones(1,72)),fprintf('\n')
 disp('Initialising...');
 bWin = ~isempty(spm_figure('FindWin','Interactive'));
-s_SnPM_save = 's_SnPM_save CfgFile s_SnPMcfg_save S V df1 df MaxT ST_Ut STAT';
+s_SnPM_save = 's_SnPM_save CfgFile s_SnPMcfg_save S V df1 df MaxT MaxCSS ST_Ut STAT';
 
 %-Check arguments & parameters from CfgFile
 %-----------------------------------------------------------------------
 if nargin == 0
-  tmp = spm_select(1,'SnPMcfg.mat','Select SnPMcfg.mat CfgFile...');
-  drawnow
-  CWD = spm_str_manip(tmp,'hd');
+    tmp = spm_select(1,'SnPMcfg.mat','Select SnPMcfg.mat CfgFile...');
+    drawnow
+    CWD = spm_str_manip(tmp,'hd');
 end
 if strcmp(CWD, '.')
-  CWD=pwd;
-end  
+    CWD=pwd;
+end
 if ~strcmp(pwd,CWD)
-  cd(CWD)
-  CWD=pwd;
-  fprintf('Changing directory to %s\n',CWD);
+    cd(CWD)
+    CWD=pwd;
+    fprintf('Changing directory to %s\n',CWD);
 end
 CfgFile = fullfile(CWD,'SnPMcfg.mat');
 
@@ -214,39 +215,39 @@ CfgFile = fullfile(CWD,'SnPMcfg.mat');
 %-----------------------------------------------------------------------
 load(CfgFile);
 if isempty([H C])
-  error('SnPM:NoModel', 'No model specified; [H C] empty'); 
+    error('SnPM:NoModel', 'No model specified; [H C] empty');
 end
 if ~isempty(H) & ~isempty(C)
-    error('SnPM:HierarchicalAndCov', 'Cannot have both heirachical and covariate effects'); 
+    error('SnPM:HierarchicalAndCov', 'Cannot have both heirachical and covariate effects');
 end
 if size(CONT,2) ~= size([H C B G],2)
-    error('SnPM:InvalidContrast','Contrast problem; wrong number of columns'); 
+    error('SnPM:InvalidContrast','Contrast problem; wrong number of columns');
 end
 if size(CONT,1) > 1
-  warning('SnPM:FContrast', ...
-          'F contrast!  F statistic images are being created.'); 
-  STAT = 'F';
-  if (CONT(1,:) == -CONT(2,:))
-    CONT = CONT(1,:);
-  end
+    warning('SnPM:FContrast', ...
+        'F contrast!  F statistic images are being created.');
+    STAT = 'F';
+    if (CONT(1,:) == -CONT(2,:))
+        CONT = CONT(1,:);
+    end
 else
-  STAT = 'T';
+    STAT = 'T';
 end
 if rank(CONT)<size(CONT,1)
-  [u s] = spm_svd(CONT'); % Kill zero-rank components
-  CONT = full(u*sqrt(s))';
+    [u s] = spm_svd(CONT'); % Kill zero-rank components
+    CONT = full(u*sqrt(s))';
 end
 if ~bVolm & bVarSm & vFWHM(3)
-  error('SnPM:ZSmoothVolume', 'Cannot z-smooth variance in non-volumetric mode'); 
+    error('SnPM:ZSmoothVolume', 'Cannot z-smooth variance in non-volumetric mode');
 end
 if exist('bVarAlph')~=1
-  bVarAlph=0; 
+    bVarAlph=0;
 end
 if bVarAlph & ~(~bVarSm & bVolm)
-  error('SnPM:AlphaVolumePseudo', 'No pseudo t or nonvolumetric w/ variable alpha');
+    error('SnPM:AlphaVolumePseudo', 'No pseudo t or nonvolumetric w/ variable alpha');
 end
 if ~bVolm & pU_ST_Ut>=0
-  error('SnPM:STCSNotVolume', 'Must work volumetrically to computer STCS on-the-fly');
+    error('SnPM:STCSNotVolume', 'Must work volumetrically to computer STCS on-the-fly');
 end
 % Re-map files to avoid Endian headaches; note if NaN's available
 NaNrep=0;
@@ -261,13 +262,13 @@ end
 %-Delete files from previous analyses, if they exist
 %-----------------------------------------------------------------------
 files = {	'^ResMS\..{3}$','^beta_.{4}\..{3}', '^lP_.{4}\..{3}',...
-		'^lP.{1}\..{3}','^snpm.{2}\..{3}','^snpm.{1}\..{3}'};
+    '^lP.{1}\..{3}','^snpm.{2}\..{3}','^snpm.{1}\..{3}'};
 
 for i=1:length(files)
-  j = spm_select('List',pwd,files{i});
-  for k=1:size(j,1)
-    spm_unlink(deblank(j(k,:)));
-  end
+    j = spm_select('List',pwd,files{i});
+    for k=1:size(j,1)
+        spm_unlink(deblank(j(k,:)));
+    end
 end
 
 spm_unlink SnPM.mat SnPM_ST.mat SnPMt.mat SnPMucp.mat XYZ.mat SnPM_pp.mat ...
@@ -279,7 +280,7 @@ spm_unlink SnPM.mat SnPM_ST.mat SnPMt.mat SnPMucp.mat XYZ.mat SnPM_pp.mat ...
 
 %-Suprathreshold parameters
 %-----------------------------------------------------------------------
-STalpha = snpm_get_defaults('STalpha'); 
+STalpha = snpm_get_defaults('STalpha');
 STprop  = snpm_get_defaults('STprop');
 
 s_SnPM_save = [s_SnPM_save ' STalpha STprop'];  % Save for PP
@@ -306,18 +307,18 @@ ORIGIN = IMAT(1:3,4);
 %-----------------------------------------------------------------------
 bMask = 0;
 if bVarAlph
-  Vwt    = spm_vol(Pwt);
-  MinwP  = repmat(Inf,nPerm,2);
-  s_SnPM_save = [s_SnPM_save ' MinwP Pwt Vwt'];
-  bMask = 1;
+    Vwt    = spm_vol(Pwt);
+    MinwP  = repmat(Inf,nPerm,2);
+    s_SnPM_save = [s_SnPM_save ' MinwP Pwt Vwt'];
+    bMask = 1;
 elseif exist('Pwt')==1
-  Vwt    = spm_vol(Pwt);
-  s_SnPM_save = [s_SnPM_save ' Pwt Vwt'];
-  bMask = 1;
+    Vwt    = spm_vol(Pwt);
+    s_SnPM_save = [s_SnPM_save ' Pwt Vwt'];
+    bMask = 1;
 elseif ~isempty(MASK)
-  Vwt    = spm_vol(MASK);
-  s_SnPM_save = [s_SnPM_save ' Vwt'];
-  bMask = 1;
+    Vwt    = spm_vol(MASK);
+    s_SnPM_save = [s_SnPM_save ' Vwt'];
+    bMask = 1;
 end
 
 %-Useful quantities - handy for later
@@ -328,9 +329,9 @@ zdim     = DIM(3);			%-Z dimension
 PlDim    = xdim*ydim;			%-Plane size in voxels
 VolDim   = xdim*ydim*zdim;		%-Volume size in voxels
 if bVolm,
-  WorkDim = VolDim;	%-Working dimension (if volumetric)
+    WorkDim = VolDim;	%-Working dimension (if volumetric)
 else
-  WorkDim = PlDim;	%-Working dimension (if plane by plane)
+    WorkDim = PlDim;	%-Working dimension (if plane by plane)
 end
 
 %-Location vectors --> In units of mm <--
@@ -347,12 +348,13 @@ xyPl = [x;y];  % All x & y's in one plane
 TH    = TH*ones(1,WorkDim);	%-Global activities
 S     = 0;			%-Volume analyzed
 MaxT  = repmat(-Inf,nPerm,2);	%-Max t
+MaxCSS  = repmat(-Inf,nPerm,2);	%-Max cluster-like support score
 nP    = zeros(1,WorkDim);	%-Nonparam P's
 XYZ_total=[];                   %-the variable for keeping all XYZ
 %-If working plane by plane, preallocate Q & XYZ for speed/mem. efficiency
-if ~bVolm, 
-  Q    = zeros(1,PlDim);
-  XYZ  = zeros(3,PlDim);
+if ~bVolm,
+    Q    = zeros(1,PlDim);
+    XYZ  = zeros(3,PlDim);
 end
 
 SmTime = 0;					%-Smoothing time
@@ -366,32 +368,32 @@ Vt=V(1);
 %-Initialize image structures.
 %
 for ii=1:p
-  fname= sprintf('beta_%04d.img',ii);
-  descrip=sprintf('beta_%04d hats',ii);
-  Vbeta(ii)=snpm_clone_vol(Vt,fname,descrip);
-end  
+    fname= sprintf('beta_%04d.img',ii);
+    descrip=sprintf('beta_%04d hats',ii);
+    Vbeta(ii)=snpm_clone_vol(Vt,fname,descrip);
+end
 Vbeta = spm_create_vol(Vbeta);
 
 VResMS=snpm_clone_vol(Vt,'ResMS.img','Residual sum-of-squares');
 VResMS=spm_create_vol(VResMS);
 if bVarSm==0
-  str = sprintf('%c_{%d} statistic',STAT,df);
+    str = sprintf('%c_{%d} statistic',STAT,df);
 else
-  if STAT=='T'
-    str = sprintf('SmVar T_{%d} statistic, %fx%fx%f VarSm',df,vFWHM);
-  elseif STAT=='F'
-    str = sprintf('SmVar F_{%d,%d} statistic, %fx%fx%f VarSm',...
-		  [rank(CONT) df],vFWHM);
-  end
+    if STAT=='T'
+        str = sprintf('SmVar T_{%d} statistic, %fx%fx%f VarSm',df,vFWHM);
+    elseif STAT=='F'
+        str = sprintf('SmVar F_{%d,%d} statistic, %fx%fx%f VarSm',...
+            [rank(CONT) df],vFWHM);
+    end
 end
 if STAT=='T'
-  VT_pos=snpm_clone_vol(Vt,'snpmT+.img',[str,' (+ve)']);
-  VT_pos=spm_create_vol(VT_pos);
-  VT_neg=snpm_clone_vol(Vt,'snpmT-.img',[str,' (-ve)']);
-  VT_neg=spm_create_vol(VT_neg);
+    VT_pos=snpm_clone_vol(Vt,'snpmT+.img',[str,' (+ve)']);
+    VT_pos=spm_create_vol(VT_pos);
+    VT_neg=snpm_clone_vol(Vt,'snpmT-.img',[str,' (-ve)']);
+    VT_neg=spm_create_vol(VT_neg);
 elseif STAT=='F'
-  VF=snpm_clone_vol(Vt,'snpmF.img',str);
-  VF=spm_create_vol(VF);
+    VF=snpm_clone_vol(Vt,'snpmF.img',str);
+    VF=spm_create_vol(VF);
 end
 
 VlP_pos=snpm_clone_vol(Vt, 'lP+.img', '-log10(uncor. non-para. P, +ve)');
@@ -402,29 +404,29 @@ VlP_FDR_pos=snpm_clone_vol(Vt, 'lP_FDR+.img','-log10(FDR-corr. P, +ve)');
 VlP_FDR_pos=spm_create_vol(VlP_FDR_pos);
 
 if STAT=='T'
-  VlP_neg=snpm_clone_vol(Vt, 'lP-.img', '-log10(uncor. non-para. P, -ve)');
-  VlP_neg=spm_create_vol(VlP_neg);
-  VlP_FWE_neg=snpm_clone_vol(Vt, 'lP_FWE-.img','-log10(FWE-corr. P, -ve)');
-  VlP_FWE_neg=spm_create_vol(VlP_FWE_neg);
-  VlP_FDR_neg=snpm_clone_vol(Vt, 'lP_FDR-.img','-log10(FDR-corr. P, -ve)');
-  VlP_FDR_neg=spm_create_vol(VlP_FDR_neg);
+    VlP_neg=snpm_clone_vol(Vt, 'lP-.img', '-log10(uncor. non-para. P, -ve)');
+    VlP_neg=spm_create_vol(VlP_neg);
+    VlP_FWE_neg=snpm_clone_vol(Vt, 'lP_FWE-.img','-log10(FWE-corr. P, -ve)');
+    VlP_FWE_neg=spm_create_vol(VlP_FWE_neg);
+    VlP_FDR_neg=snpm_clone_vol(Vt, 'lP_FDR-.img','-log10(FDR-corr. P, -ve)');
+    VlP_FDR_neg=spm_create_vol(VlP_FDR_neg);
 end
 
 if bVarAlph
-  VlwP=snpm_clone_vol(Vt, 'lwP.img','-log10(weighted p-value)');
-  VlwP=spm_create_vol(VlwP);
-end  
+    VlwP=snpm_clone_vol(Vt, 'lwP.img','-log10(weighted p-value)');
+    VlwP=spm_create_vol(VlwP);
+end
 
-%	
+%
 %-Initialize image data.
 %
 lP_pos_image=repmat(NaN,1,VolDim);
 lP_FWE_pos_image=repmat(NaN,1, VolDim);
 lP_FDR_pos_image=repmat(NaN,1, VolDim);
 if STAT=='T'
-  lP_neg_image=repmat(NaN,1,VolDim);
-  lP_FWE_neg_image=repmat(NaN,1, VolDim);	
-  lP_FDR_neg_image=repmat(NaN,1, VolDim);	
+    lP_neg_image=repmat(NaN,1,VolDim);
+    lP_FWE_neg_image=repmat(NaN,1, VolDim);
+    lP_FDR_neg_image=repmat(NaN,1, VolDim);
 end
 
 %=======================================================================
@@ -439,261 +441,261 @@ disp('Working on correct permutation...');
 SnPMt=[]; %Initialzie SnPMt,which will store the t's from correct permutation.
 
 for i = 1:zdim
-  
-  %-Initialize the image data for this slice/volume
-  %---------------------------------------------------------------------
-  BETA_image=repmat(NaN,p,WorkDim);
-  ResSS_image=repmat(NaN,1,WorkDim);
-  if STAT=='T'
-    T_pos_image=repmat(NaN,1,WorkDim);
-    T_neg_image=repmat(NaN,1,WorkDim);
-  elseif STAT=='F'
-    F_image=repmat(NaN,1,WorkDim);
-  end
-  
-  if bVarAlph
-    lwP_image=repmat(NaN, 1, WorkDim); 
-  end
-  
-  %-Form data matrix for this slice/volume
-  %---------------------------------------------------------------------
-  X     = zeros(q,WorkDim);
-  if bMask, 
-    Wt = zeros(1,WorkDim); 
-  else
-    Wt = 1;
-  end
-  if bVolm
-    for j = 1:q
-      for k = 1:zdim
-        tmp    = spm_slice_vol(V(j),spm_matrix([0 0 k]), ...
-			       [xdim ydim],0);
-        X(j,(k-1)*PlDim+1:k*PlDim) = tmp(:)';
-      end
-    end
-  else
-    for j = 1:q
-      tmp    = spm_slice_vol(V(j),spm_matrix([0 0 i]), ...
-			     [xdim ydim],0);
-      X(j,:) = tmp(:)';
-    end
-  end
-  if bMask
-    if bVolm
-      for k = 1:zdim
-        j = Vwt.mat\MAT*[xyPl;repmat(k,1,PlDim);ones(1,PlDim)];
-        tmp    = spm_get_data(Vwt,j,false);
-        tmp(~isfinite(tmp) | tmp<0) = 0;
-        Wt(1,(k-1)*PlDim+1:k*PlDim) = tmp(:)';
-      end
-    else
-      j = Vwt.mat\MAT*[xyPl;repmat(i,1,PlDim);ones(1,PlDim)];
-      tmp = spm_get_data(Vwt,j,false);
-      tmp(~isfinite(tmp) | tmp<0) = 0;
-      Wt  = tmp(:)';
-    end
-  end
-  
-  
-  %-Eliminate background voxels (based on threshold TH), and
-  % eliminate voxels where there are no differences across scans.
-  %---------------------------------------------------------------------
-  if ImMASK & NaNrep==0
-    Q = find(all(X>TH) & any(diff(X)) & Wt & all(X~=0));
-  else
-    Q = find(all(X>TH) & any(diff(X)) & Wt);
-  end
-
-  if length(Q)
-   
-    X     = X(:,Q);
-    S     = S + length(Q); 			%-Volume 
-    if bVolm
-      XYZ   = [ x(rem(Q-1,PlDim)+1);          ...
-		y(rem(Q-1,PlDim)+1);            ...
-		z(ceil(Q/PlDim))      ]; %-Locations
-    else
-      XYZ   = [ x(rem(Q-1,PlDim)+1);         ...
-		y(rem(Q-1,PlDim)+1);         ...
-		z(i)*ones(1,length(Q))];	%-Locations
-    end 
     
-    % Convert Voxels to mm's
-    XYZ = MAT*[XYZ;ones(1,length(Q))]; XYZ(4,:) = [];
-    
-    if (bMask)
-      Wt    = Wt(1,Q);
-    end
-    
-    perm = 1;
-
-    %-Estimate parameters and sum of squares due to error.
-    % Use pseudo inverse rather than BETA=inv(D'*D)*D'*X for 
-    % D = DesMtx, to allow for non-unique designs. See matlab help.
-    %-----------------------------------------------------------------
-    BETA  = pinv([H C B G])*X;
-    ResSS = sum((X - [H C B G]*BETA).^2);
-    
-    %-Variance smoothing.
-    % Blurred mask is used to truncate kernal to brain; if not
-    % used variance at edges would be underestimated due to
-    % convolution with zero activity out side the brain.
-    %-----------------------------------------------------------------
-    if bVarSm
-      if bVolm
-        SmResSS   = zeros(xdim, ydim, zdim);
-        SmMask    = zeros(xdim, ydim, zdim);
-        TmpVol    = zeros(xdim, ydim, zdim);
-        TmpVol(Q) = ones(size(Q));
-        % FWHM in voxels (and not in mm) as TmpVol is not a struct 
-        spm_smooth(TmpVol,SmMask,vFWHM./VOX);
-        TmpVol(Q) = ResSS;
-        % FWHM in voxels (and not in mm) as TmpVol is not a struct 
-        spm_smooth(TmpVol,SmResSS,vFWHM./VOX);
-
-        ResSS     = SmResSS(Q)./SmMask(Q);
-      else
-        TmpPl     = zeros(xdim,ydim);
-        TmpPl(Q)  = ones(size(Q));
-        SmMask    = spm_conv(TmpPl, vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
-        TmpPl(Q)  = ResSS;
-        SmResSS   = spm_conv(TmpPl, vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
-
-        ResSS     = SmResSS(Q)./SmMask(Q);
-      end
-    end
-    
-    %-Compute t-statistics for specified compounds of parameters
-    %-----------------------------------------------------------
-    T      = zeros(1,size(BETA,2));
-    Co     = CONT;
+    %-Initialize the image data for this slice/volume
+    %---------------------------------------------------------------------
+    BETA_image=repmat(NaN,p,WorkDim);
+    ResSS_image=repmat(NaN,1,WorkDim);
     if STAT=='T'
-      % t, as usual
-      T(1,:) = Co*BETA./sqrt((ResSS*(Co*pinv([H C B G]'*[H C B G])*Co'))/df);
-    else
-      % F!
-      pX   = pinv([H C B G]);
-      T(1,:) = (sum(((Co*BETA)'*inv(Co*pinv([H C B G]'*[H C B G])*Co'))' .* ...
-		    (Co*BETA),1)/rank(Co)) ./ (ResSS/df);
-    end	
-    
-    %-Save Max T statistic
-    %-----------------------------------------------------------
-    MaxT(perm,:) = max([ max(T(1,:)), -min(T(1,:));   ...
-		    MaxT(perm,1),  MaxT(perm,2) ]);
-    
-    %-Save min weighted p-value
-    %-----------------------------------------------------------
-    if bVarAlph,
-      MinwP(perm,:) = min([ min(Wt.*(1-spm_Tcdf(T(1,:),df))),     ...
-		    min(Wt.*(1-spm_Tcdf(-T(1,:),df)));    ...
-		    MinwP(perm,1), MinwP(perm,2) ]);
-    end
-    
-    %-Save weighted p-value (later converted into corr'd wt'd p-val)
-    %-----------------------------------------------------------
-    if bVarAlph,
-      wP = [Wt.*(1-spm_Tcdf( T(1,:),df));  ...
-	    Wt.*(1-spm_Tcdf(-T(1,:),df))];
-    end
-
-    %-Adjustment (remove effects of no interest) & save
-    %-----------------------------------------------------------
-    XA = X - [zeros(size([H C])) B G]*BETA;
-    
-    %
-    %- New! Write out data images.
-    %- Input image data.
-    BETA_image(:,Q)=BETA;
-    ResSS_image(:,Q)=ResSS;
-    if STAT=='T'
-      T_pos_image(:,Q)=T;
-      T_neg_image(:,Q)=-T;
+        T_pos_image=repmat(NaN,1,WorkDim);
+        T_neg_image=repmat(NaN,1,WorkDim);
     elseif STAT=='F'
-      F_image(:,Q)=T;
+        F_image=repmat(NaN,1,WorkDim);
     end
-	
+    
     if bVarAlph
-      lwP_image(:,Q)=-log10(wP);
-    end  
-	
-    if bVolm
-      SnPMt=T; % save T's
+        lwP_image=repmat(NaN, 1, WorkDim);
+    end
+    
+    %-Form data matrix for this slice/volume
+    %---------------------------------------------------------------------
+    X     = zeros(q,WorkDim);
+    if bMask,
+        Wt = zeros(1,WorkDim);
     else
-      SnPMt=[SnPMt,T]; % save T's.
+        Wt = 1;
     end
-
-    XYZ_total=[XYZ_total, XYZ];
-	
-    %if bVarAlph,
-    %  spm_append_96('SnPMwP',wP);      % wt'd p-val of Stat du jour
-    %end
-	    
-     
-  end %(if length(Q))
-    
-  %-The image of the volume or the slice should be written out no matter length(Q)=1
-  %or 0. 
-  if bVolm
-    for ii=1:p
-      BETA_vol=reshape(BETA_image(ii,:),DIM(1),DIM(2),DIM(3));
-      spm_write_vol(Vbeta(ii),BETA_vol);
+    if bVolm
+        for j = 1:q
+            for k = 1:zdim
+                tmp    = spm_slice_vol(V(j),spm_matrix([0 0 k]), ...
+                    [xdim ydim],0);
+                X(j,(k-1)*PlDim+1:k*PlDim) = tmp(:)';
+            end
+        end
+    else
+        for j = 1:q
+            tmp    = spm_slice_vol(V(j),spm_matrix([0 0 i]), ...
+                [xdim ydim],0);
+            X(j,:) = tmp(:)';
+        end
     end
-    
-    ResSS_vol=reshape(ResSS_image,DIM(1),DIM(2),DIM(3));
-    spm_write_vol(VResMS, ResSS_vol);
-    
-    if STAT=='T'
-      T_pos_vol=reshape(T_pos_image,DIM(1),DIM(2),DIM(3));
-      spm_write_vol(VT_pos,T_pos_vol);
-      
-      T_neg_vol=reshape(T_neg_image,DIM(1),DIM(2),DIM(3));
-      spm_write_vol(VT_neg,T_neg_vol);
-      
-    elseif STAT=='F'
-      F_vol=reshape(F_image,DIM(1),DIM(2),DIM(3));
-      spm_write_vol(VF,F_vol);
-    end
-	  
-    if bVarAlph
-      lwP_vol=reshape(lwP_image, DIM(1), DIM(2), DIM(3));
-      spm_write_vol(VlwP, lwP_vol);
-    end
-	  
-  else  
-    for ii=1:p
-      BETA_plate=reshape(BETA_image(ii,:), DIM(1), DIM(2));
-      spm_write_plane(Vbeta(ii),BETA_plate,i);
+    if bMask
+        if bVolm
+            for k = 1:zdim
+                j = Vwt.mat\MAT*[xyPl;repmat(k,1,PlDim);ones(1,PlDim)];
+                tmp    = spm_get_data(Vwt,j,false);
+                tmp(~isfinite(tmp) | tmp<0) = 0;
+                Wt(1,(k-1)*PlDim+1:k*PlDim) = tmp(:)';
+            end
+        else
+            j = Vwt.mat\MAT*[xyPl;repmat(i,1,PlDim);ones(1,PlDim)];
+            tmp = spm_get_data(Vwt,j,false);
+            tmp(~isfinite(tmp) | tmp<0) = 0;
+            Wt  = tmp(:)';
+        end
     end
     
-    ResSS_plate=reshape(ResSS_image, DIM(1), DIM(2));
-    spm_write_plane(VResMS,ResSS_plate,i);
-	    
-    if STAT=='T'
-      T_pos_plate=reshape(T_pos_image, DIM(1), DIM(2));
-      spm_write_plane(VT_pos,T_pos_plate,i);
-      
-      T_neg_plate=reshape(T_neg_image, DIM(1), DIM(2));
-      spm_write_plane(VT_neg,T_neg_plate,i);
-	  
-    elseif STAT=='F'
-      F_plate=reshape(F_image, DIM(1), DIM(2));
-      spm_write_plane(VF,F_plate,i);
-    end  
-	    
-    if bVarAlph
-      lwP_plate=reshape(lwP_image, DIM(1), DIM(2));
-      spm_write_plane(VlwP, lwP_plate,i);
-    end
-  end	  
     
-  %-Whole volume complete in one pass if volumetric
-  if bVolm
-    break
-  end
+    %-Eliminate background voxels (based on threshold TH), and
+    % eliminate voxels where there are no differences across scans.
+    %---------------------------------------------------------------------
+    if ImMASK & NaNrep==0
+        Q = find(all(X>TH) & any(diff(X)) & Wt & all(X~=0));
+    else
+        Q = find(all(X>TH) & any(diff(X)) & Wt);
+    end
+    
+    if length(Q)
+        
+        X     = X(:,Q);
+        S     = S + length(Q); 			%-Volume
+        if bVolm
+            XYZ   = [ x(rem(Q-1,PlDim)+1);          ...
+                y(rem(Q-1,PlDim)+1);            ...
+                z(ceil(Q/PlDim))      ]; %-Locations
+        else
+            XYZ   = [ x(rem(Q-1,PlDim)+1);         ...
+                y(rem(Q-1,PlDim)+1);         ...
+                z(i)*ones(1,length(Q))];	%-Locations
+        end
+        
+        % Convert Voxels to mm's
+        XYZ = MAT*[XYZ;ones(1,length(Q))]; XYZ(4,:) = [];
+        
+        if (bMask)
+            Wt    = Wt(1,Q);
+        end
+        
+        perm = 1;
+        
+        %-Estimate parameters and sum of squares due to error.
+        % Use pseudo inverse rather than BETA=inv(D'*D)*D'*X for
+        % D = DesMtx, to allow for non-unique designs. See matlab help.
+        %-----------------------------------------------------------------
+        BETA  = pinv([H C B G])*X;
+        ResSS = sum((X - [H C B G]*BETA).^2);
+        
+        %-Variance smoothing.
+        % Blurred mask is used to truncate kernal to brain; if not
+        % used variance at edges would be underestimated due to
+        % convolution with zero activity out side the brain.
+        %-----------------------------------------------------------------
+        if bVarSm
+            if bVolm
+                SmResSS   = zeros(xdim, ydim, zdim);
+                SmMask    = zeros(xdim, ydim, zdim);
+                TmpVol    = zeros(xdim, ydim, zdim);
+                TmpVol(Q) = ones(size(Q));
+                % FWHM in voxels (and not in mm) as TmpVol is not a struct
+                spm_smooth(TmpVol,SmMask,vFWHM./VOX);
+                TmpVol(Q) = ResSS;
+                % FWHM in voxels (and not in mm) as TmpVol is not a struct
+                spm_smooth(TmpVol,SmResSS,vFWHM./VOX);
+                
+                ResSS     = SmResSS(Q)./SmMask(Q);
+            else
+                TmpPl     = zeros(xdim,ydim);
+                TmpPl(Q)  = ones(size(Q));
+                SmMask    = spm_conv(TmpPl, vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
+                TmpPl(Q)  = ResSS;
+                SmResSS   = spm_conv(TmpPl, vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
+                
+                ResSS     = SmResSS(Q)./SmMask(Q);
+            end
+        end
+        
+        %-Compute t-statistics for specified compounds of parameters
+        %-----------------------------------------------------------
+        T      = zeros(1,size(BETA,2));
+        Co     = CONT;
+        if STAT=='T'
+            % t, as usual
+            T(1,:) = Co*BETA./sqrt((ResSS*(Co*pinv([H C B G]'*[H C B G])*Co'))/df);
+        else
+            % F!
+            pX   = pinv([H C B G]);
+            T(1,:) = (sum(((Co*BETA)'*inv(Co*pinv([H C B G]'*[H C B G])*Co'))' .* ...
+                (Co*BETA),1)/rank(Co)) ./ (ResSS/df);
+        end
+        
+        %-Save Max T statistic
+        %-----------------------------------------------------------
+        MaxT(perm,:) = max([ max(T(1,:)), -min(T(1,:));   ...
+            MaxT(perm,1),  MaxT(perm,2) ]);
+        
+        %-Save min weighted p-value
+        %-----------------------------------------------------------
+        if bVarAlph,
+            MinwP(perm,:) = min([ min(Wt.*(1-spm_Tcdf(T(1,:),df))),     ...
+                min(Wt.*(1-spm_Tcdf(-T(1,:),df)));    ...
+                MinwP(perm,1), MinwP(perm,2) ]);
+        end
+        
+        %-Save weighted p-value (later converted into corr'd wt'd p-val)
+        %-----------------------------------------------------------
+        if bVarAlph,
+            wP = [Wt.*(1-spm_Tcdf( T(1,:),df));  ...
+                Wt.*(1-spm_Tcdf(-T(1,:),df))];
+        end
+        
+        %-Adjustment (remove effects of no interest) & save
+        %-----------------------------------------------------------
+        XA = X - [zeros(size([H C])) B G]*BETA;
+        
+        %
+        %- New! Write out data images.
+        %- Input image data.
+        BETA_image(:,Q)=BETA;
+        ResSS_image(:,Q)=ResSS;
+        if STAT=='T'
+            T_pos_image(:,Q)=T;
+            T_neg_image(:,Q)=-T;
+        elseif STAT=='F'
+            F_image(:,Q)=T;
+        end
+        
+        if bVarAlph
+            lwP_image(:,Q)=-log10(wP);
+        end
+        
+        if bVolm
+            SnPMt=T; % save T's
+        else
+            SnPMt=[SnPMt,T]; % save T's.
+        end
+        
+        XYZ_total=[XYZ_total, XYZ];
+        
+        %if bVarAlph,
+        %  spm_append_96('SnPMwP',wP);      % wt'd p-val of Stat du jour
+        %end
+        
+        
+    end %(if length(Q))
+    
+    %-The image of the volume or the slice should be written out no matter length(Q)=1
+    %or 0.
+    if bVolm
+        for ii=1:p
+            BETA_vol=reshape(BETA_image(ii,:),DIM(1),DIM(2),DIM(3));
+            spm_write_vol(Vbeta(ii),BETA_vol);
+        end
+        
+        ResSS_vol=reshape(ResSS_image,DIM(1),DIM(2),DIM(3));
+        spm_write_vol(VResMS, ResSS_vol);
+        
+        if STAT=='T'
+            T_pos_vol=reshape(T_pos_image,DIM(1),DIM(2),DIM(3));
+            spm_write_vol(VT_pos,T_pos_vol);
+            
+            T_neg_vol=reshape(T_neg_image,DIM(1),DIM(2),DIM(3));
+            spm_write_vol(VT_neg,T_neg_vol);
+            
+        elseif STAT=='F'
+            F_vol=reshape(F_image,DIM(1),DIM(2),DIM(3));
+            spm_write_vol(VF,F_vol);
+        end
+        
+        if bVarAlph
+            lwP_vol=reshape(lwP_image, DIM(1), DIM(2), DIM(3));
+            spm_write_vol(VlwP, lwP_vol);
+        end
+        
+    else
+        for ii=1:p
+            BETA_plate=reshape(BETA_image(ii,:), DIM(1), DIM(2));
+            spm_write_plane(Vbeta(ii),BETA_plate,i);
+        end
+        
+        ResSS_plate=reshape(ResSS_image, DIM(1), DIM(2));
+        spm_write_plane(VResMS,ResSS_plate,i);
+        
+        if STAT=='T'
+            T_pos_plate=reshape(T_pos_image, DIM(1), DIM(2));
+            spm_write_plane(VT_pos,T_pos_plate,i);
+            
+            T_neg_plate=reshape(T_neg_image, DIM(1), DIM(2));
+            spm_write_plane(VT_neg,T_neg_plate,i);
+            
+        elseif STAT=='F'
+            F_plate=reshape(F_image, DIM(1), DIM(2));
+            spm_write_plane(VF,F_plate,i);
+        end
+        
+        if bVarAlph
+            lwP_plate=reshape(lwP_image, DIM(1), DIM(2));
+            spm_write_plane(VlwP, lwP_plate,i);
+        end
+    end
+    
+    %-Whole volume complete in one pass if volumetric
+    if bVolm
+        break
+    end
 end
 
-% Make an error if actually 'no voxels in brain'. 
+% Make an error if actually 'no voxels in brain'.
 if perm==0, error('SnPM:NoVoxelsInBrain', 'No voxels in brain'); end
 
 save SnPMt SnPMt
@@ -703,59 +705,92 @@ save SnPMt SnPMt
 XYZ=XYZ_total;
 save XYZ XYZ
 
+% Run TFCE
+if bTFCE
+    height_exp = param_TFCE(1);
+    extent_exp = param_TFCE(2);
+    connect = param_TFCE(3);
+    step_size = param_TFCE(4);
+    
+    % assume that perm is 1
+    if STAT=='T'
+        CSS_pos_vol = snpm_tfce(T_pos_vol, height_exp, extent_exp, connect, step_size);
+        CSS_pos=snpm_clone_vol(Vt,'snpm_CSS_T+.img', 'TFCE img on T+');
+        CSS_pos=spm_create_vol(CSS_pos);
+        spm_write_vol(CSS_pos, CSS_pos_vol);
+        maxCSS = max(CSS_pos_vol(:));
+        
+        CSS_neg_vol = snpm_tfce(T_neg_vol, height_exp, extent_exp, connect, step_size);
+        CSS_neg=snpm_clone_vol(Vt,'snpm_CSS_T-.img', 'TFCE img on T-');
+        CSS_neg=spm_create_vol(CSS_neg);
+        spm_write_vol(CSS_neg, CSS_neg_vol);
+        minCSS = max(CSS_neg_vol(:));
+        %fprintf('\tCluster-like support scores on T+, T-: [%.3f, %.3f]\n', maxCSS, minCSS);
+        MaxCSS(perm,:) = [maxCSS, minCSS];
+        
+    elseif STAT=='F'
+        CSS_pos_vol = snpm_tfce(F_vol, height_exp, extent_exp, connect, step_size);
+        CSS_pos=snpm_clone_vol(Vt,'snpm_CSS_F.img', 'TFCE img on F');
+        CSS_pos=spm_create_vol(CSS_pos);
+        spm_write_vol(CSS_pos, CSS_pos_vol);
+        maxCSS = max(CSS_pos_vol(:));
+        %fprintf('\tCluster-like support scores on F: [%.3f, %.3f]\n', maxCSS);
+        MaxCSS(perm,1) = maxCSS;
+    end
+end % bTFCE
 
 %-Set SupraThreshold t-threshold
 %=======================================================================
-if bST 
-  if pU_ST_Ut==-1 % No threshold has been set yet.
-    if bVarSm
-      load SnPMt
-      SnPMt = sort(SnPMt')';
-      ST_Ut = SnPMt(round((1-STprop)*length(SnPMt)));
-      % clear SnPMt
-    else
-      ST_Ut = spm_invTcdf(1 - STalpha, df);
+if bST
+    if pU_ST_Ut==-1 % No threshold has been set yet.
+        if bVarSm
+            load SnPMt
+            SnPMt = sort(SnPMt')';
+            ST_Ut = SnPMt(round((1-STprop)*length(SnPMt)));
+            % clear SnPMt
+        else
+            ST_Ut = spm_invTcdf(1 - STalpha, df);
+        end
+    else            % A threshold has been set.
+        if bVarSm
+            if (pU_ST_Ut < 1)
+                ST_Ut = spm_invNcdf(1-pU_ST_Ut);
+                warning('snpm_cp:pseudoTFormingThresholdP',...
+                    ['Pseudo-T cluster-forming threshold defined by '...
+                    'P-value using Gaussian approximation P=' num2str(pU_ST_Ut)...
+                    ' -> Z=' num2str(ST_Ut) '; actual Pseudo-T threshold '...
+                    'unknown but may be higher than ' num2str(ST_Ut) '.']);
+            else
+                ST_Ut=pU_ST_Ut;
+            end
+        else
+            if (pU_ST_Ut>1)
+                ST_Ut=pU_ST_Ut;
+            else
+                if STAT == 'T'
+                    ST_Ut = spm_invTcdf(1-pU_ST_Ut, df);
+                else
+                    ST_Ut = spm_invFcdf(1-pU_ST_Ut, df1, df);
+                end
+            end
+        end
     end
-  else            % A threshold has been set.    
-    if bVarSm
-        if (pU_ST_Ut < 1)
-            ST_Ut = spm_invNcdf(1-pU_ST_Ut);
-            warning('snpm_cp:pseudoTFormingThresholdP',...
-                ['Pseudo-T cluster-forming threshold defined by '...
-                'P-value using Gaussian approximation P=' num2str(pU_ST_Ut)...
-                ' -> Z=' num2str(ST_Ut) '; actual Pseudo-T threshold '...
-                'unknown but may be higher than ' num2str(ST_Ut) '.']);
-        else
-            ST_Ut=pU_ST_Ut;
-        end
-    else
-      if (pU_ST_Ut>1)
-        ST_Ut=pU_ST_Ut;
-      else
-        if STAT == 'T'
-                ST_Ut = spm_invTcdf(1-pU_ST_Ut, df);
-        else
-                ST_Ut = spm_invFcdf(1-pU_ST_Ut, df1, df);
-        end
-      end   
-    end 
-  end  
-  StartPerm = 1;   % redo 1st perm for ST stats
+    StartPerm = 1;   % redo 1st perm for ST stats
 else
-  ST_Ut = Inf;
-  StartPerm = 2;
+    ST_Ut = Inf;
+    StartPerm = 2;
 end
 
 %-Save correctly labeled T's
 if bVolm & (StartPerm==2)
-  T0 = T;
-  nPtmp = ones(size(T));
-  if bhPerms
-    nPtmp = nPtmp + (T0<=0);
-  end
+    T0 = T;
+    nPtmp = ones(size(T));
+    if bhPerms
+        nPtmp = nPtmp + (T0<=0);
+    end
 else
-  StartPerm = 1;
-  nPtmp=[];
+    StartPerm = 1;
+    nPtmp=[];
 end
 
 
@@ -765,17 +800,17 @@ end
 %-Cycle over planes (or just once for volumetric mode)
 
 %-If working plane by plane, preallocate Q & XYZ for speed/mem. efficiency
-if ~bVolm, 
-  Q    = zeros(1,PlDim);
-  XYZ  = zeros(3,PlDim);
+if ~bVolm,
+    Q    = zeros(1,PlDim);
+    XYZ  = zeros(3,PlDim);
 end
 
 %-Setup progress bar
 if bWin && ~bVolm
-  spm_progress_bar('Init',zdim,'Looping over (perms within) planes...','Plane')
+    spm_progress_bar('Init',zdim,'Looping over (perms within) planes...','Plane')
 elseif bWin
-  spm_progress_bar('Init',nPerm,'Volumetric mode...','Permutation')
-  spm_progress_bar('Set',StartPerm-1)
+    spm_progress_bar('Init',nPerm,'Volumetric mode...','Permutation')
+    spm_progress_bar('Set',StartPerm-1)
 end
 tic %-Start the clock: Timing code is commented with "clock" symbol: (>)
 
@@ -784,276 +819,304 @@ tic %-Start the clock: Timing code is commented with "clock" symbol: (>)
 nP = [];
 for i = 1:zdim
     
-  PlStart=toc;SmTime=0; %-Timestamp (>) 
-	
-  if bVolm
-    disp('Working on the whole volume');
-  else
-    fprintf('\tPlane %3d: ',i); 
-  end
+    PlStart=toc;SmTime=0; %-Timestamp (>)
     
-  %-Form data matrix for this slice (done in correctPerm code above if bVolm)
-  %---------------------------------------------------------------------
-  if ~bVolm
-    X     = zeros(q,PlDim);
-    for j = 1:q
-      tmp = spm_slice_vol(V(j),spm_matrix([0 0 i]),[xdim ydim],0);
-      X(j,:) = tmp(:)';
-    end
-    if bMask
-      j = Vwt.mat\MAT*[xyPl;repmat(i,1,PlDim);ones(1,PlDim)];
-      tmp = spm_get_data(Vwt,j,false);
-      tmp(~isfinite(tmp) | tmp<0) = 0;
-      Wt  = tmp(:)';
+    if bVolm
+        disp('Working on the whole volume');
+    else
+        fprintf('\tPlane %3d: ',i);
     end
     
-    %-Eliminate background voxels (based on global threshold TH),
-    % and eliminate voxels where there are no differences across scans.
-    %-----------------------------------------------------------------
-    Q = find(all(X > TH) & any(diff(X)) & Wt);
-  end % (if ~bVolm)
-    
-  if length(Q)
-    if ~bVolm, 
-      X = X(:,Q); 
-    end	%-Already done if bVolm
-    
-    if bST & ~bVolm			%-XYZ already done if bVolm
-      XYZ   = [ x(rem(Q-1,PlDim)+1);          ...
-        y(rem(Q-1,PlDim)+1);          ...
-        z(i)*ones(length(Q),1)];	%-Locations
-      XYZ = MAT*[XYZ;ones(1,length(Q))]; 
-      XYZ(4,:) = [];
-    end 
-		
-    if bVarSm & ~bVolm			%-Smoothing & plane-by-plane
-      SmStart = toc;			%-Timestamp (>)
-      TmpPl     = zeros(xdim,ydim);
-      TmpPl(Q)  = ones(size(Q));
-      SmMask     = spm_conv(TmpPl, vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
-      SmTime = SmTime + toc-SmStart;	%-Timestamp (>)
-    end
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Initialize structure STCS 
-    if bST & pU_ST_Ut>=0
-      STCS = snpm_STcalc('init',nPerm); 
-    end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	
-	
-    %-Loop over permutations
-    %-----------------------------------------------------------------
-    for perm = StartPerm:nPerm
-      PmStart = toc;			%-Timestamp (>)
-
-      if bVolm 
-        SmTime=0;			%-Timestamp (>)
-      else
-        clear T BETA ResSS; 	%-Clean up
-      end
-
-      %-Rebuild H C for current permuation
-      %-----------------------------------------------------------
-      HC = eval(sHCform);
-      
-      %-Estimate parameters and sum of squares due to error
-      %-Use pseudo inverse rather than BETA=inv(D'*D)*D'*X
-      % for D = DesMtx, to allow for non-unique designs. 
-      % See matlab help.
-      %-----------------------------------------------------------
-      BETA  = pinv([HC B G])*X;
-      ResSS = sum((X - [HC B G]*BETA).^2);
-      
-      if bVarSm
-        SmStart=toc;			%-Timestamp (>)
-        if bVolm
-          TmpVol(Q) = ResSS;
-          % FWHM in voxels (and not in mm) as TmpVol is not a struct 
-          spm_smooth(TmpVol,SmResSS,vFWHM./VOX);
-          ResSS     = SmResSS(Q)./SmMask(Q);
-        else
-          TmpPl(Q)  = ResSS;
-          SmResSS   = spm_conv(TmpPl,vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
-          ResSS     = SmResSS(Q)./SmMask(Q);
+    %-Form data matrix for this slice (done in correctPerm code above if bVolm)
+    %---------------------------------------------------------------------
+    if ~bVolm
+        X     = zeros(q,PlDim);
+        for j = 1:q
+            tmp = spm_slice_vol(V(j),spm_matrix([0 0 i]),[xdim ydim],0);
+            X(j,:) = tmp(:)';
         end
-        SmTime = SmTime + toc-SmStart;	%-Timestamp (>)
-      end
-	    
-      %-Compute t-statistics for specified contrast of parameters
-      %-----------------------------------------------------------
-      T      = zeros(1,size(BETA,2));
-      Co     = CONT;
-      if STAT=='T'
-        % t, as usual
-        T(1,:) = Co*BETA./sqrt((ResSS*(Co*pinv([HC B G]'*[HC B G])*Co'))/df);
-      else
-        % F!
-        pX   = pinv([HC B G]);
-        T(1,:) = (sum(((Co*BETA)'*inv(Co*pinv([HC B G]'*[HC B G])*Co'))' .* ...
-                (Co*BETA),1)/size(Co,1)) ./ (ResSS/df);
-      end	
-      
-      
-      %-Save Max T statistic
-      %-----------------------------------------------------------
-      MaxT(perm,:) = max([ max(T(1,:)), -min(T(1,:));      ...
-		    MaxT(perm,1), MaxT(perm,2) ]);
-	    
-      %-Update nonparametric P-value
-      %-----------------------------------------------------------
-      if (perm==1)
-        T0 = T;
-        nPtmp = ones(size(T));
-        if bhPerms
-          nPtmp = nPtmp + (T0<=0);
+        if bMask
+            j = Vwt.mat\MAT*[xyPl;repmat(i,1,PlDim);ones(1,PlDim)];
+            tmp = spm_get_data(Vwt,j,false);
+            tmp(~isfinite(tmp) | tmp<0) = 0;
+            Wt  = tmp(:)';
         end
-      else
-        if bhPerms
-          nPtmp = nPtmp + (T>=T0) + (-T>=T0);   % NB: Worry if T0=T=0
-                  % if STAT=='T', then T, 
-                  % T0 >=0, so (-T>=T0) 
-                  % will be empty.
-        else
-          nPtmp = nPtmp + (T>=T0);
+        
+        %-Eliminate background voxels (based on global threshold TH),
+        % and eliminate voxels where there are no differences across scans.
+        %-----------------------------------------------------------------
+        Q = find(all(X > TH) & any(diff(X)) & Wt);
+    end % (if ~bVolm)
+    
+    if length(Q)
+        if ~bVolm,
+            X = X(:,Q);
+        end	%-Already done if bVolm
+        
+        if bST & ~bVolm			%-XYZ already done if bVolm
+            XYZ   = [ x(rem(Q-1,PlDim)+1);          ...
+                y(rem(Q-1,PlDim)+1);          ...
+                z(i)*ones(length(Q),1)];	%-Locations
+            XYZ = MAT*[XYZ;ones(1,length(Q))];
+            XYZ(4,:) = [];
         end
-      end
-      
-      %-Save min weighted p-value
-      %-----------------------------------------------------------
-      if bVarAlph,
-        MinwP(perm,:) = min([ min(Wt.*(1-spm_Tcdf( T(1,:),df))),     ...
-              min(Wt.*(1-spm_Tcdf(-T(1,:),df)));    ...
-              MinwP(perm,1), MinwP(perm,2) ]);
-      end
-      
-      %-Save T,XYZ,perm for suprathreshold analysis
-      %-----------------------------------------------------------
-      if bST 
-
-        if pU_ST_Ut==-1  % No threshold set - save mountain tops
-          clear d1 d2
-          d1 = find(T(1,:) >  ST_Ut);
-          d2 = find(T(1,:) < -ST_Ut);
-          spm_append_96('SnPM_ST',[                            ...
-          XYZ(:,d1),               XYZ(:,d2);              ...
-          T(1,d1),                 -T(1,d2);               ...
-          perm*ones(1,length(d1)), -perm*ones(1,length(d2)) ...
-          ],'Consider using ''set cluster-forming threshold now (fast)'' option');
-
-        else  % pU_ST_Ut>=0 - threshold set
-
-          clear d1 d2 SnPM_ST_Pos SnPM_ST_Neg
-          d1 = find(T(1,:) >  ST_Ut);
-          d2 = find(T(1,:) < -ST_Ut);
-          SnPM_ST_Pos=[               ...
-          XYZ(:,d1);              ...
-          T(1,d1)];  
-
-          SnPM_ST_Neg=[               ...
-          XYZ(:,d2);              ...
-          -T(1,d2)];
-
-          if STAT== 'F'
-            loop = 1;
-          else
-            loop = 1:2;
-          end
-
-          for isPos = loop %1 for positive; 2 for negative
-            if isPos==1
-              SnPM_ST = SnPM_ST_Pos;
+        
+        if bVarSm & ~bVolm			%-Smoothing & plane-by-plane
+            SmStart = toc;			%-Timestamp (>)
+            TmpPl     = zeros(xdim,ydim);
+            TmpPl(Q)  = ones(size(Q));
+            SmMask     = spm_conv(TmpPl, vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
+            SmTime = SmTime + toc-SmStart;	%-Timestamp (>)
+        end
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Initialize structure STCS
+        if bST & pU_ST_Ut>=0
+            STCS = snpm_STcalc('init',nPerm);
+        end
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
+        
+        %-Loop over permutations
+        %-----------------------------------------------------------------
+        for perm = StartPerm:nPerm
+            PmStart = toc;			%-Timestamp (>)
+            
+            if bVolm
+                SmTime=0;			%-Timestamp (>)
             else
-              SnPM_ST = SnPM_ST_Neg;
+                clear T BETA ResSS; 	%-Clean up
             end
-
-            % consider Permuation NO. perm
-            if ~isempty(SnPM_ST)
-              Locs_mm=SnPM_ST(1:3,:);
-              Locs_mm (4,:) = 1;
-              Locs_vox = IMAT * Locs_mm;
-
-              % Sometimes Locs_vox are not exactly integers and this raises an
-              % error later in the code. Here check that the values are
-              % integers with respect to a level of absolute tolerance (~10^-14)
-              % and enforce Locs_vox to be integers.
-              diffWithRounded = max(abs(Locs_vox(:)-round(Locs_vox(:))));
-              tolerance = 10^-10;
-              if diffWithRounded > tolerance
-                 Locs_vox_alter = MAT\Locs_mm;
-                 diffWithRounded_alter = max(abs(Locs_vox_alter(:)-round(Locs_vox(:))));
-                 error('SnPM:NonIntegerLocs', ['''Locs_vox'' must be integers (difference is ' num2str(diffWithRounded) ...
-                     ' or ' num2str(diffWithRounded_alter) ')']);
-              else
-                 Locs_vox = round(Locs_vox); 
-              end
-
-              STCS = snpm_STcalc('update',STCS, SnPM_ST(4,:),...
-              Locs_vox(1:3,:),isPos,perm,pU_ST_Ut,df);
-
-              %save perm 1 stats for use later -[X;Y;Z;T;perm;STCno]
-              if (perm==1)
-                tmp = spm_clusters(Locs_vox(1:3,:));
-                STCstats=[SnPM_ST;perm*ones(1,size(SnPM_ST,2));tmp];
-                if isPos==1
-                  save SnPM_pp STCstats
+            
+            %-Rebuild H C for current permuation
+            %-----------------------------------------------------------
+            HC = eval(sHCform);
+            
+            %-Estimate parameters and sum of squares due to error
+            %-Use pseudo inverse rather than BETA=inv(D'*D)*D'*X
+            % for D = DesMtx, to allow for non-unique designs.
+            % See matlab help.
+            %-----------------------------------------------------------
+            BETA  = pinv([HC B G])*X;
+            ResSS = sum((X - [HC B G]*BETA).^2);
+            
+            if bVarSm
+                SmStart=toc;			%-Timestamp (>)
+                if bVolm
+                    TmpVol(Q) = ResSS;
+                    % FWHM in voxels (and not in mm) as TmpVol is not a struct
+                    spm_smooth(TmpVol,SmResSS,vFWHM./VOX);
+                    ResSS     = SmResSS(Q)./SmMask(Q);
                 else
-                  STCstats_Neg = STCstats;
-                  save SnPM_pp_Neg STCstats_Neg
+                    TmpPl(Q)  = ResSS;
+                    SmResSS   = spm_conv(TmpPl,vFWHM(1)/VOX(1),vFWHM(2)/VOX(2));
+                    ResSS     = SmResSS(Q)./SmMask(Q);
                 end
-              end			
-            end  % if ~isempty(SnPM_ST) 
-          end  % for isPos=loop    
-        end % pU_ST_Ut==-1 
-
-      end % bST
-      
-      %-Print status at each perm if bVolm (& stop maybe)
-      %-----------------------------------------------------------
-      if bVolm
-	if bWin, spm_progress_bar('Set',perm), end
-	%-Printout timing information (>)
-	fprintf('\tPerm %4d: %3d''%2d" (%3d%% Sm)\n', perm, ...
-		floor((toc-PmStart)/60),round(rem(toc-PmStart,60)), ...
-		round(100*SmTime/(toc-PmStart)))
-	
-      end % (if bVolm)
-
-    end 	% (for perm = StartPerm:nPerm) - Perm loop
+                SmTime = SmTime + toc-SmStart;	%-Timestamp (>)
+            end
+            
+            %-Compute t-statistics for specified contrast of parameters
+            %-----------------------------------------------------------
+            T      = zeros(1,size(BETA,2));
+            Co     = CONT;
+            if STAT=='T'
+                % t, as usual
+                T(1,:) = Co*BETA./sqrt((ResSS*(Co*pinv([HC B G]'*[HC B G])*Co'))/df);
+            else
+                % F!
+                pX   = pinv([HC B G]);
+                T(1,:) = (sum(((Co*BETA)'*inv(Co*pinv([HC B G]'*[HC B G])*Co'))' .* ...
+                    (Co*BETA),1)/size(Co,1)) ./ (ResSS/df);
+            end
+            
+            %-Save Max T statistic
+            %-----------------------------------------------------------
+            MaxT(perm,:) = max([ max(T(1,:)), -min(T(1,:));      ...
+                MaxT(perm,1), MaxT(perm,2) ]);
+            
+            %-Update nonparametric P-value
+            %-----------------------------------------------------------
+            if (perm==1)
+                T0 = T;
+                nPtmp = ones(size(T));
+                if bhPerms
+                    nPtmp = nPtmp + (T0<=0);
+                end
+            else
+                if bhPerms
+                    nPtmp = nPtmp + (T>=T0) + (-T>=T0);   % NB: Worry if T0=T=0
+                    % if STAT=='T', then T,
+                    % T0 >=0, so (-T>=T0)
+                    % will be empty.
+                else
+                    nPtmp = nPtmp + (T>=T0);
+                end
+            end
+            
+            %-Save min weighted p-value
+            %-----------------------------------------------------------
+            if bVarAlph,
+                MinwP(perm,:) = min([ min(Wt.*(1-spm_Tcdf( T(1,:),df))),     ...
+                    min(Wt.*(1-spm_Tcdf(-T(1,:),df)));    ...
+                    MinwP(perm,1), MinwP(perm,2) ]);
+            end
+            
+            %-Run TFCE and save the max cluster-like support score
+            %-----------------------------------------------------------
+            if bTFCE
+                height_exp = param_TFCE(1);
+                extent_exp = param_TFCE(2);
+                connect = param_TFCE(3);
+                step_size = param_TFCE(4);
+                
+                if STAT=='T'
+                    T_pos_vol = NaN(xdim, ydim, zdim);
+                    T_pos_vol(Q) = T;
+                    CSS_pos_vol = snpm_tfce(T_pos_vol, height_exp, extent_exp, connect, step_size);
+                    maxCSS = max(CSS_pos_vol(:));
+                    
+                    T_neg_vol = NaN(xdim, ydim, zdim);
+                    T_neg_vol(Q) = -T;
+                    CSS_neg_vol = snpm_tfce(T_neg_vol, height_exp, extent_exp, connect, step_size);
+                    minCSS = max(CSS_neg_vol(:));
+                    MaxCSS(perm,:) = [maxCSS, minCSS];
+                    
+                elseif STAT=='F'
+                    F_vol = NaN(xdim, ydim, zdim);
+                    F_vol(Q) = T;                    
+                    CSS_pos_vol = snpm_tfce(F_vol, height_exp, extent_exp, connect, step_size);
+                    maxCSS = max(CSS_pos_vol(:));
+                    MaxCSS(perm,1) = maxCSS;
+                end
+            end % bTFCE
+            
+            %-Save T,XYZ,perm for suprathreshold analysis
+            %-----------------------------------------------------------
+            if bST
+                
+                if pU_ST_Ut==-1  % No threshold set - save mountain tops
+                    clear d1 d2
+                    d1 = find(T(1,:) >  ST_Ut);
+                    d2 = find(T(1,:) < -ST_Ut);
+                    spm_append_96('SnPM_ST',[                            ...
+                        XYZ(:,d1),               XYZ(:,d2);              ...
+                        T(1,d1),                 -T(1,d2);               ...
+                        perm*ones(1,length(d1)), -perm*ones(1,length(d2)) ...
+                        ],'Consider using ''set cluster-forming threshold now (fast)'' option');
+                    
+                else  % pU_ST_Ut>=0 - threshold set
+                    
+                    clear d1 d2 SnPM_ST_Pos SnPM_ST_Neg
+                    d1 = find(T(1,:) >  ST_Ut);
+                    d2 = find(T(1,:) < -ST_Ut);
+                    SnPM_ST_Pos=[               ...
+                        XYZ(:,d1);              ...
+                        T(1,d1)];
+                    
+                    SnPM_ST_Neg=[               ...
+                        XYZ(:,d2);              ...
+                        -T(1,d2)];
+                    
+                    if STAT== 'F'
+                        loop = 1;
+                    else
+                        loop = 1:2;
+                    end
+                    
+                    for isPos = loop %1 for positive; 2 for negative
+                        if isPos==1
+                            SnPM_ST = SnPM_ST_Pos;
+                        else
+                            SnPM_ST = SnPM_ST_Neg;
+                        end
+                        
+                        % consider Permuation NO. perm
+                        if ~isempty(SnPM_ST)
+                            Locs_mm=SnPM_ST(1:3,:);
+                            Locs_mm (4,:) = 1;
+                            Locs_vox = IMAT * Locs_mm;
+                            
+                            % Sometimes Locs_vox are not exactly integers and this raises an
+                            % error later in the code. Here check that the values are
+                            % integers with respect to a level of absolute tolerance (~10^-14)
+                            % and enforce Locs_vox to be integers.
+                            diffWithRounded = max(abs(Locs_vox(:)-round(Locs_vox(:))));
+                            tolerance = 10^-10;
+                            if diffWithRounded > tolerance
+                                Locs_vox_alter = MAT\Locs_mm;
+                                diffWithRounded_alter = max(abs(Locs_vox_alter(:)-round(Locs_vox(:))));
+                                error('SnPM:NonIntegerLocs', ['''Locs_vox'' must be integers (difference is ' num2str(diffWithRounded) ...
+                                    ' or ' num2str(diffWithRounded_alter) ')']);
+                            else
+                                Locs_vox = round(Locs_vox);
+                            end
+                            
+                            STCS = snpm_STcalc('update',STCS, SnPM_ST(4,:),...
+                                Locs_vox(1:3,:),isPos,perm,pU_ST_Ut,df);
+                            
+                            %save perm 1 stats for use later -[X;Y;Z;T;perm;STCno]
+                            if (perm==1)
+                                tmp = spm_clusters(Locs_vox(1:3,:));
+                                STCstats=[SnPM_ST;perm*ones(1,size(SnPM_ST,2));tmp];
+                                if isPos==1
+                                    save SnPM_pp STCstats
+                                else
+                                    STCstats_Neg = STCstats;
+                                    save SnPM_pp_Neg STCstats_Neg
+                                end
+                            end
+                        end  % if ~isempty(SnPM_ST)
+                    end  % for isPos=loop
+                end % pU_ST_Ut==-1
+                
+            end % bST
+            
+            %-Print status at each perm if bVolm (& stop maybe)
+            %-----------------------------------------------------------
+            if bVolm
+                if bWin, spm_progress_bar('Set',perm), end
+                %-Printout timing information (>)
+                fprintf('\tPerm %4d: %3d''%2d" (%3d%% Sm)\n', perm, ...
+                    floor((toc-PmStart)/60),round(rem(toc-PmStart,60)), ...
+                    round(100*SmTime/(toc-PmStart)))
+                
+            end % (if bVolm)
+            
+        end 	% (for perm = StartPerm:nPerm) - Perm loop
+        
+        %- save STCS
+        if bST & pU_ST_Ut>=0
+            if bhPerms %Double the STCS variables.
+                STCS = snpm_STcalc('double',STCS);
+            end
+            
+            save STCS STCS
+        end
+        
+    end 	% (length(Q)) - Conditional on non-zero voxels
+    nP = [nP, nPtmp];
+    nPtmp = [];
     
-    %- save STCS
-    if bST & pU_ST_Ut>=0
-      if bhPerms %Double the STCS variables.
-	STCS = snpm_STcalc('double',STCS);
-      end
-	     	    
-      save STCS STCS
+    if bVolm
+        break
     end
     
-  end 	% (length(Q)) - Conditional on non-zero voxels
-  nP = [nP, nPtmp];
-  nPtmp = [];
-  
-  if bVolm 
-    break
-  end
+    %-Print status at each plane if ~bVolm
+    %-----------------------------------------------------------
+    if bWin, spm_progress_bar('Set',i), end
+    %-Printout timing information (>)
+    fprintf('%3d''%2d" (%3d%% Sm)\n', ...
+        floor((toc-PlStart)/60),round(rem(toc-PlStart,60)), ...
+        round(100*SmTime/(toc-PlStart)))
     
-  %-Print status at each plane if ~bVolm
-  %-----------------------------------------------------------
-  if bWin, spm_progress_bar('Set',i), end
-  %-Printout timing information (>)
-  fprintf('%3d''%2d" (%3d%% Sm)\n', ...
-	  floor((toc-PlStart)/60),round(rem(toc-PlStart,60)), ...
-	  round(100*SmTime/(toc-PlStart)))
-  
 end		% (for i = 1:zdim) - loop over planes
 
 fprintf('\n\nPermutations are done. Writing out images.\n')
 
 if bhPerms
-  nP = nP/(2*nPerm);
+    nP = nP/(2*nPerm);
 else
-  nP = nP/nPerm;
+    nP = nP/nPerm;
 end
 SnPMucp=nP;
 save SnPMucp SnPMucp
@@ -1068,16 +1131,16 @@ lP_pos_vol=reshape(lP_pos_image,DIM(1),DIM(2),DIM(3));
 spm_write_vol(VlP_pos, lP_pos_vol);
 
 if STAT == 'T'
-  if bhPerms
-    nP_neg=1+1/(2*nPerm)-nP;
-  else 
-    nP_neg=1+1/nPerm-nP;
-  end
-
-  lP_neg=-log10(nP_neg);
-  lP_neg_image(spm_xyz2e(XYZ_total, Vt))=lP_neg;
-  lP_neg_vol=reshape(lP_neg_image,DIM(1),DIM(2),DIM(3));
-  spm_write_vol(VlP_neg, lP_neg_vol);
+    if bhPerms
+        nP_neg=1+1/(2*nPerm)-nP;
+    else
+        nP_neg=1+1/nPerm-nP;
+    end
+    
+    lP_neg=-log10(nP_neg);
+    lP_neg_image(spm_xyz2e(XYZ_total, Vt))=lP_neg;
+    lP_neg_vol=reshape(lP_neg_image,DIM(1),DIM(2),DIM(3));
+    spm_write_vol(VlP_neg, lP_neg_vol);
 end
 
 %
@@ -1088,37 +1151,37 @@ tol = 1e-4;	% Tolerance for comparing real numbers
 cP_pos=zeros(size(nP));
 
 if bhPerms
-	MaxT   = [ MaxT; flipud(fliplr(MaxT)) ];
+    MaxT   = [ MaxT; flipud(fliplr(MaxT)) ];
 end
 MaxT_pos=MaxT(:,1);
 
 for t = MaxT_pos'
-	%-FEW-corrected p is proportion of randomisation greater or
-	% equal to statistic.
-	%-Use a > b -tol rather than a >= b to avoid comparing
-	% two reals for equality.
-	cP_pos = cP_pos + (t > SnPMt -tol);
+    %-FEW-corrected p is proportion of randomisation greater or
+    % equal to statistic.
+    %-Use a > b -tol rather than a >= b to avoid comparing
+    % two reals for equality.
+    cP_pos = cP_pos + (t > SnPMt -tol);
 end
 
 if STAT =='T'
-  cP_neg=zeros(size(nP));
-  MaxT_neg=MaxT(:,2);
-
-  for t = MaxT_neg'
+    cP_neg=zeros(size(nP));
+    MaxT_neg=MaxT(:,2);
+    
+    for t = MaxT_neg'
         cP_neg = cP_neg + (t > -SnPMt -tol);
-  end
+    end
 end
 
 if bhPerms
-  cP_pos = cP_pos / (2* nPerm);
-  if STAT=='T'	
-    cP_neg = cP_neg / (2* nPerm);
-  end
-else 
-  cP_pos = cP_pos / nPerm;  
-  if STAT=='T'
-    cP_neg = cP_neg / nPerm;
-  end
+    cP_pos = cP_pos / (2* nPerm);
+    if STAT=='T'
+        cP_neg = cP_neg / (2* nPerm);
+    end
+else
+    cP_pos = cP_pos / nPerm;
+    if STAT=='T'
+        cP_neg = cP_neg / nPerm;
+    end
 end
 
 lP_FWE_pos=-log10(cP_pos);
@@ -1127,10 +1190,10 @@ lP_FWE_pos_vol=reshape(lP_FWE_pos_image,DIM(1),DIM(2),DIM(3));
 spm_write_vol(VlP_FWE_pos, lP_FWE_pos_vol);
 
 if STAT=='T'
-  lP_FWE_neg=-log10(cP_neg);
-  lP_FWE_neg_image(spm_xyz2e(XYZ_total, Vt))=lP_FWE_neg;
-  lP_FWE_neg_vol=reshape(lP_FWE_neg_image,DIM(1),DIM(2),DIM(3));
-  spm_write_vol(VlP_FWE_neg, lP_FWE_neg_vol);
+    lP_FWE_neg=-log10(cP_neg);
+    lP_FWE_neg_image(spm_xyz2e(XYZ_total, Vt))=lP_FWE_neg;
+    lP_FWE_neg_vol=reshape(lP_FWE_neg_image,DIM(1),DIM(2),DIM(3));
+    spm_write_vol(VlP_FWE_neg, lP_FWE_neg_vol);
 end
 
 %
@@ -1150,14 +1213,14 @@ lP_FDR_pos_vol=reshape(lP_FDR_pos_image,DIM(1),DIM(2),DIM(3));
 spm_write_vol(VlP_FDR_pos, lP_FDR_pos_vol);
 
 if STAT =='T'
-  [snP_neg,I_neg]=sort(nP_neg);
-  Pfdr_neg=snpm_P_FDR([],[],'P',[],snP_neg');
-  Pfdr_neg(I_neg) = Pfdr_neg;
-  lP_FDR_neg=-log10(Pfdr_neg);
-  lP_FDR_neg_image(spm_xyz2e(XYZ_total, Vt))=lP_FDR_neg;
-
-  lP_FDR_neg_vol=reshape(lP_FDR_neg_image,DIM(1),DIM(2),DIM(3));
-  spm_write_vol(VlP_FDR_neg, lP_FDR_neg_vol);
+    [snP_neg,I_neg]=sort(nP_neg);
+    Pfdr_neg=snpm_P_FDR([],[],'P',[],snP_neg');
+    Pfdr_neg(I_neg) = Pfdr_neg;
+    lP_FDR_neg=-log10(Pfdr_neg);
+    lP_FDR_neg_image(spm_xyz2e(XYZ_total, Vt))=lP_FDR_neg;
+    
+    lP_FDR_neg_vol=reshape(lP_FDR_neg_image,DIM(1),DIM(2),DIM(3));
+    spm_write_vol(VlP_FDR_neg, lP_FDR_neg_vol);
 end
 
 
@@ -1180,7 +1243,7 @@ else
     Rank = sum([MaxT(1:perm,1)] >= MaxT(1,1));
 end
 fprintf(['\nCorrect Perm has max t %g & rank %d out of %d ', ...
-	'completed permutations\n'],MaxT(1,1),Rank,perm*(bhPerms+1));
+    'completed permutations\n'],MaxT(1,1),Rank,perm*(bhPerms+1));
 fprintf('\n\tRun snpm_pp for full results\n\n');
 
 

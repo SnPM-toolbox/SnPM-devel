@@ -118,6 +118,7 @@ function snpm_ui(varargin)
 % sVarSm        Sring describing variance Smoothing (empty if bVarSm=0)
 % bVolm         Flag for volumetric computation (whole volume at once)
 % bST           Flag for collection of superthreshold info 
+% bTFCE         Flag for calculating threshold-free cluster score
 % sDesFile      Name of PlugIn design file
 % sDesign       Description of PlugIn design
 % V             Memory mapping handles
@@ -278,6 +279,7 @@ G=[];Gnames='';	% Covariates (no interest)
 Gc=[];		% Covariates (no interest)	| Required only for covariate
 Gcnames=[];	% Names of covariates		| by factor interactions
 bST=0;		% Flag for collection of superthreshold info
+bTFCE=0;	% Flag for calculating threshold-free cluster score
 bVarSm=0;	% Flag for variance smoothing
 vFWHM=[0,0,0];	% FWHM for variance smoothing
 sVarSm='';	% String describing Variance Smoothing
@@ -330,7 +332,10 @@ end
 
 %-Ask about collecting Supra-Threshold cluster statistics
 %-----------------------------------------------------------------------
-bST = ~isfield(job.ST,'ST_none');
+% if 'ST_none' or 'ST_tfce' is chosen, bST = 0 & pU_ST_Ut = NaN 
+% if 'ST_later' is chosen, bST = 1 & pU_ST_Ut = -1
+% if 'ST_now' is chosen, bST = 1 & pU_ST_Ut = job.ST.ST_U;
+bST = ~or(isfield(job.ST,'ST_none'), isfield(job.ST,'ST_tfce'));
 
 % Add: get primary threshold for STC analysis if requested
 if bST
@@ -349,6 +354,14 @@ if bST
 else
   pU_ST_Ut=NaN; 
 end  
+
+%-Ask whether to apply threshold-free cluster enhancement
+bTFCE = isfield(job.ST,'ST_tfce');
+if bTFCE
+    param_TFCE = job.ST.ST_tfce;
+else
+    param_TFCE = NaN;
+end
 
 
 %-Global normalization options
@@ -584,7 +597,7 @@ CONT  = [CONT, zeros(size(CONT,1),size([B G],2))];
 s_SnPMcfg_save = ['s_SnPMcfg_save H C B G HCBGnames P PiCond ',...
 	'sPiCond bhPerms sHCform iGloNorm sGloNorm GM rg GX GMscale CONT ',...
 	'THRESH MASK ImMASK TH bVarSm vFWHM sVarSm bVolm bST sDesFile sDesign ',...
-        'V pU_ST_Ut df1 ', ...
+        'V pU_ST_Ut df1 bTFCE param_TFCE ', ...
 	'sDesSave ',sDesSave];
 eval(['save SnPMcfg ',s_SnPMcfg_save])
 
