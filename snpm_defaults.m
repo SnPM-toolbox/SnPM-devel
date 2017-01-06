@@ -20,6 +20,7 @@ global SnPMdefs
 SnPMdefs.STalpha = 0.01; % T values above this sig are save for ST analysis
 SnPMdefs.STprop  = 0.10; % 100*(1-STprop)%ile of observed Psuedo T values saved
 SnPMdefs.ST_U    = 2.03; % Default cluster-forming threshold set pre-analysis
+SnPMdefs.ST_tfce = [2 0.5 18 0.1]; % Height exponent, Extent exponent, Connectivity, Step size, respectively. See Threshold-free Cluster Enhancement (Smith & Nichols, 2009)
 
 % Work in "high memory" mode?
 %------------------------------------------------------------------------
