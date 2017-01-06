@@ -164,7 +164,19 @@ ClusMass.tag = 'ClusMass';
 ClusMass.val = {PFilt PrimThresh theta};
 ClusMass.help = {'Specify cluster-mass inference'};
 
+FWEthCSS        = cfg_entry;
+FWEthCSS.tag    = 'FWEthCSS';
+FWEthCSS.name   = 'Significance Level (FWE Corrected)';
+FWEthCSS.strtype= 'e';
+FWEthCSS.num    = [1 1];
+FWEthCSS.def    = @(val)snpm_get_defaults('FWElevel', val{:});
+FWEthCSS.help   = {'Enter a FWE significance level threshold.  This threshold is applied to a cluster-like support score image.'};
 
+ClusTFCE = cfg_branch;
+ClusTFCE.name = 'Threshold-free cluster inference';
+ClusTFCE.tag = 'ClusTFCE';
+ClusTFCE.val = {FWEthCSS};
+ClusTFCE.help = {'Specify threshold-free inference'};
 
 Clus = cfg_choice;
 Clus.name = 'Cluster-Level Inference';
@@ -176,7 +188,7 @@ Clus.help = {'Select cluster-level statistic'};
 ThrType        = cfg_choice;
 ThrType.name   = 'Type of Thresholding';
 ThrType.tag    = 'Thr';
-ThrType.values = {Vox Clus};
+ThrType.values = {Vox ClusTFCE Clus};
 ThrType.val    = {Vox};
 ThrType.help   = {
     'Choose between voxel-wise and cluster-wise inference.'

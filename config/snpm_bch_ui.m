@@ -137,11 +137,25 @@ ST_now.help    = {
 		 };
 ST_now.def     = @(val)snpm_get_defaults('ST_U');
 
+% adding TFCE
+ST_tfce         = cfg_entry;
+ST_tfce.tag     = 'ST_tfce';
+ST_tfce.name    = 'Yes, do threshold-free cluster inference (fast)';
+ST_tfce.strtype = 'e';
+ST_tfce.num     = [1 4];
+ST_tfce.help    = {
+    'Cluster inference without setting cluster-forming threshold.'
+    ''
+    'Define height exponent, extent exponent, connectivity, step size, respectively. See Threshold-free Cluster Enhancement (Smith & Nichols, 2009) paper for details.'
+    };
+ST_tfce.def     = @(val)snpm_get_defaults('ST_tfce');
+
+
 ST         = cfg_choice;
 ST.tag     = 'ST';
 ST.name    = 'Cluster inference';
 ST.val     = {ST_none};
-ST.values  = {ST_none ST_later ST_now};
+ST.values  = {ST_none ST_tfce ST_later ST_now};
 ST.help    = {'','Cluster inference in SnPM requires a substantial addtional computational and (possible) disk space burden, and hence is not done by default.',...
 	      'If performing cluster size inference, you can choose to set the cluster-forming threshold later, in which case a large amount of information is written to disk on each permutation.',...
 	      'Alternatively, you can choose to set the cluster-forming threshold now (pre-computation); this requires no additional disk space.  However, if you decide you want a different cluster-forming threshold you have to completely re-run the analysis.'};
