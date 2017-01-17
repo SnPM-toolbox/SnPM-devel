@@ -7,10 +7,6 @@ function [ ] = ValidateInputs( inputs )
 %       * inputs.testingType
 
     assert(isfield(inputs,'data'), 'Input Error: inputs.data is a required input..');
-    assert(isfield(inputs,'testingType'), 'Input Error: inputs.testingType is a required input (select between OneSample and TwoSample).');
-    if(strcmp(inputs.testingType,'TwoSample'))
-     %   assert(isfield(inputs,'labels'), 'Input Error: inputs.labels is a required input..');
-    end
 
 end
 

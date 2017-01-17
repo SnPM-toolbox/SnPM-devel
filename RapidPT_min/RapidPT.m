@@ -9,7 +9,6 @@
 % % Speeding up Permutation Testing in Neuroimaging 
 % % C Hinrichs, VK Ithapu, Q Sun, SC Johnson, V Singh
 % % NIPS 2013
-
 % % Accelerating Permutation Testing in Neuroimaging through Subspace Tracking
 % % F Gutierrez-Barragan VK Ithapu, C Hinrichs, T Nichols, SC Johnson, V Singh
 % % Under Preparation
@@ -20,7 +19,7 @@
 % % 
 % %     %%% INPUTS
 % %     A structure filed with following arguments
-% %     inputs.datapath    :       path to mat file containing the data matrix 
+% %     inputs.data    :       path to mat file containing the data matrix 
 % %                                (REQUIRED) Two fields : data and labeling
 % %                                data - a matrix of size N X V
 % %                                labels - a vector of length N (2 groups)
