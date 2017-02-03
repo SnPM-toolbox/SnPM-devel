@@ -12,7 +12,7 @@ The SnPM toolbox provides an alternative to the Statistics section of [SPM](http
  - [Download](http://www.warwick.ac.uk/snpm/snpmreg)
 
 
-### Testing
+### Non-regression testing
 
 #### Download test data and set up test data directory (first time only)
 The first time you will run the tests, clone the test data:
