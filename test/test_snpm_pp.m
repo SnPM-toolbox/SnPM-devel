@@ -38,8 +38,8 @@ classdef test_snpm_pp < matlab.unittest.TestCase
               error('SnPM:NotTestDataDir', 'Test data directory not set, please update snpm_test_config');
             end
             
-            testCase.parentDataDir = spm_str_manip(testDataDir, 'h');
-            testCase.testDataDir = testDataDir;
+            testCase.parentDataDir = testDataDir;
+            testCase.testDataDir = fullfile(testDataDir, 'data');
             
             testCase.warningId = '';
         end

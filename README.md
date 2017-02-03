@@ -12,13 +12,22 @@ The SnPM toolbox provides an alternative to the Statistics section of [SPM](http
  - [Download](http://www.warwick.ac.uk/snpm/snpmreg)
 
 
-### Testing
+### Non-regression testing
 
-#### Initial set up 
-The first time you run the tests, you will need to set up the `snpm_test_config.m` file to fill in `testDataDir` with the path to your ground truth folder. For example:
+#### Download test data and set up test data directory (first time only)
+The first time you will run the tests, clone the test data:
+```
+git clone git@github.com:cmaumet/SnPM_test_data.git
+```
+Then, fill in the `testDataDir` variable in `snpm_test_config.m` to point to the data you just downloaded. For example:
 ```
 global testDataDir;
 testDataDir = '~/snpm_test_data';
+```
+You can then untrack the configuration file in git (to avoid pushing your local configuration to the main repository):
+```
+git update-index --assume-unchanged test/snpm_test_config.m
+
 ```
 
 #### Run the test suite
