@@ -15,9 +15,9 @@ The SnPM toolbox provides an alternative to the Statistics section of [SPM](http
 ### Non-regression testing
 
 #### Download test data and set up test data directory (first time only)
-The first time you will run the tests, clone the test data:
+The first time you will run the tests, clone the test data (from [here](https://github.com/SnPM-toolbox/SnPM_test_data)) :
 ```
-git clone git@github.com:cmaumet/SnPM_test_data.git
+git clone git@github.com:SnPM-toolbox/SnPM_test_data.git
 ```
 Then, fill in the `testDataDir` variable in `snpm_test_config.m` to point to the data you just downloaded. For example:
 ```
