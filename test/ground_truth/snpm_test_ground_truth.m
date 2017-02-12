@@ -27,17 +27,18 @@ function snpm_test_ground_truth()
     case 'yes',
       disp('Start re-computation of ground truth')
       
-      resultDir = fullfile(spm_str_manip(testDataDir, 'h'), 'results');
+      resultDir = fullfile(testDataDir, 'results');
+      dataDir = fullfile(testDataDir, 'data');
 
       % ---- one-sample tests ----
 
       % test 1: onesample_1
       matlabbatch{1}.spm.tools.snpm.des.OneSampT.P = {
-          fullfile(testDataDir, 'su_control01', 'cn_sess1', 'con_0001.img,1')
-          fullfile(testDataDir, 'su_control02', 'cn_sess1', 'con_0001.img,1')
-          fullfile(testDataDir, 'su_control03', 'cn_sess1', 'con_0001.img,1')
-          fullfile(testDataDir, 'su_control04', 'cn_sess1', 'con_0001.img,1')
-          fullfile(testDataDir, 'su_control05', 'cn_sess1', 'con_0001.img,1')
+          fullfile(dataDir, 'su_control01', 'cn_sess1', 'con_0001.img,1')
+          fullfile(dataDir, 'su_control02', 'cn_sess1', 'con_0001.img,1')
+          fullfile(dataDir, 'su_control03', 'cn_sess1', 'con_0001.img,1')
+          fullfile(dataDir, 'su_control04', 'cn_sess1', 'con_0001.img,1')
+          fullfile(dataDir, 'su_control05', 'cn_sess1', 'con_0001.img,1')
       };
       matlabbatch{1}.spm.tools.snpm.des.OneSampT.dir = {fullfile(resultDir, 'GT', 'onesample_1')}; 
       SnPMmatFile = fullfile(resultDir, 'GT', 'onesample_1', 'SnPMcfg.mat');

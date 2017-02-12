@@ -54,7 +54,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                     ['No test data directory specified, please fill in '...
                     ' ''testDataDir'' variable in snpm_test_config.m'])
             end
-            res_dir = fullfile(spm_file(testDataDir, 'path'), 'results');
+            data_dir = fullfile(testDataDir, 'data');
+            res_dir = fullfile(testDataDir, 'results');
             if ~isdir(res_dir)
                 mkdir(res_dir)
             end
@@ -67,8 +68,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
               error('SnPM:NotTestDataDir', 'Test data directory not set, please update snpm_test_config');
             end
             
-            testCase.parentDataDir = spm_str_manip(testDataDir, 'h');
-            testCase.testDataDir = testDataDir;
+            testCase.parentDataDir = testDataDir;
+            testCase.testDataDir = data_dir;
             
             % By default t-test
             testCase.stattype = 't';
