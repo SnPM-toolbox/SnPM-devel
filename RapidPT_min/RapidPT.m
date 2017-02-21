@@ -87,7 +87,7 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
    
     binRes = 0.05; 
     maxnullBins = -9:binRes:9; %% bin resolution in maxnull histogram computation
-    subV = round(sub*V); %% number of samples used per permutation
+    subV = CheckSamplingRate(N, V, sub); %% number of samples used per permutation
     maxTStatistics = zeros(1, numPermutations); %% estimated max statistics for all permutations
 
 %% Training for low rank subsapace and residual priors
