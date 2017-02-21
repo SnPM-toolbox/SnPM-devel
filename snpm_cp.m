@@ -828,7 +828,7 @@ if(UseRapidPT >= 1)
     save(strcat('timings',runInfo),'timings');
 
     % Save variables for snpm_pp
-    MaxT = [MaxT;-MaxT];
+    MaxT = [MaxT',-MaxT'];
     % Calculate uncorrected p-vals
     [~, SnPMucp, ~, ~] = ttest2(X(1:params.nGroup1, :), X(params.nGroup1+1:end, :), 0.05, 'both', 'unequal');
     save('SnPMucp.mat','SnPMucp')

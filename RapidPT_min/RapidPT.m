@@ -56,6 +56,8 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
 %   Modified permutation testing algorithm described in the following paper
 %   Speeding up Permutation Testing in Neuroimaging  C Hinrichs, VK Ithapu, Q Sun, SC Johnson, V Singh, NIPS 2013
     
+    rng(1);
+
     fprintf('Starting RapidPermutationTesting...\n');
     tTotal = tic;
     fprintf('Adding Paths...\n');
