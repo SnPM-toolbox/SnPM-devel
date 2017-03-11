@@ -456,14 +456,8 @@ if (isempty(Gc) & ~isempty(G)), Gc=G; Gcnames=Gnames; end
 %-MMap image files
 V = spm_vol(P);
 
-%-Check compatability of images (Bombs for single image)
-%-----------------------------------------------------------------------
-if any(any(diff(cat(1,V(:).dim),1,1),1)&[1,1,1]) 
-	error('SnPM:ImageDirections', 'images do not all have the same dimensions')
-end
-if any(any(any(diff(cat(3,V(:).mat),1,3),3)))
-	error('SnPM:ImageOrientationsResolutions','images do not all have same orientation & voxel size')
-end
+%-Check compatability of images
+spm_check_orientations(V);
 
 %-Get ORIGIN, etc
 DIM    = [V(1).dim(1)   V(1).dim(2)   V(1).dim(3)]';
