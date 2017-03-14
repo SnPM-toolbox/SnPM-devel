@@ -265,7 +265,7 @@ elseif length(perm)==0 & (nScan<=12) & bAproxTst
     % so can we can just replace first perm.
     PiCond(1,:) = iCond;
     perm = 1;
-else    
+elseif job.nPerm<=nPermMC
     error('SnPM:InvalidPiCond', ['Bad PiCond (' num2str(perm) ')'])
 end    
 
