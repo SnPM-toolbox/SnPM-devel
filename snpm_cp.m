@@ -430,13 +430,14 @@ end
 if STAT=='T'
   VT_pos=snpm_clone_vol(Vt,'snpmT+.img',[str,' (+ve)']);
   VT_pos=spm_create_vol(VT_pos);
-  nidm_json.(con_name).('nidm_StatisticMap__prov_atLocation') = 'snpmT+.img';
+  nidm_json.('Contrasts').(con_name).('nidm_StatisticMap__prov_atLocation') = 'snpmT+.img';
   VT_neg=snpm_clone_vol(Vt,'snpmT-.img',[str,' (-ve)']);
   VT_neg=spm_create_vol(VT_neg);
-  nidm_json.(con_neg_name).('nidm_StatisticMap__prov_atLocation') = 'snpmT-.img';
+  nidm_json.('Contrasts').(con_neg_name).('nidm_StatisticMap__prov_atLocation') = 'snpmT-.img';
 elseif STAT=='F'
   VF=snpm_clone_vol(Vt,'snpmF.img',str);
   VF=spm_create_vol(VF);
+  nidm_json.('Contrasts').(con_name).('nidm_StatisticMap__prov_atLocation') = 'snpmF.img';
 end
 
 VlP_pos=snpm_clone_vol(Vt, 'lP+.img', '-log10(uncor. non-para. P, +ve)');
