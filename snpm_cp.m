@@ -209,10 +209,13 @@ if ~strcmp(pwd,CWD)
   fprintf('Changing directory to %s\n',CWD);
 end
 CfgFile = fullfile(CWD,'SnPMcfg.mat');
+NIDMFile = fullfile(CWD,'snpm_nidm.json');
 
 %-Load config file & catch all problem cases now
 %-----------------------------------------------------------------------
 load(CfgFile);
+nidm_json = spm_jsonread(NIDMFile);
+
 if isempty([H C])
   error('SnPM:NoModel', 'No model specified; [H C] empty'); 
 end
@@ -1194,6 +1197,7 @@ clear X
 %-Save key variables
 %=======================================================================
 eval(['save SnPM ',s_SnPM_save])
+spm_jsonwrite(NIDMFile, nidm_json)
 
 %-Print quick summary info (allowing for STOPing)
 %=======================================================================

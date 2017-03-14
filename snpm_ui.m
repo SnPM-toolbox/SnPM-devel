@@ -589,7 +589,7 @@ s_SnPMcfg_save = ['s_SnPMcfg_save H C B G HCBGnames P PiCond ',...
         'V pU_ST_Ut df1 nidm_json', ...
 	'sDesSave ',sDesSave];
 eval(['save SnPMcfg ',s_SnPMcfg_save])
-
+spm_jsonwrite('snpm_nidm.json',nidm_json)
 
 
 if ~spm_get_defaults('cmdline')

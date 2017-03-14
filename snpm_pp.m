@@ -369,7 +369,7 @@ end
 load(fullfile(CWD,'SnPMcfg'))
 load(fullfile(CWD,'SnPM'))
 load(fullfile(CWD,'SnPMucp'))
-
+nidm_json = spm_jsonread(fullfile(CWD,'snpm_nidm.json'));
 
 %-Ask whether positive or negative effects be analysed
 %-----------------------------------------------------------------------
@@ -1430,7 +1430,8 @@ if length(strmatch('MIPtable',Report))>0
   nidm_inference.('Clusters') = nidm_clusters;
   clear i j k D d r
   
-  
+  nidm_json.('Inferences') = nidm_inference;
+  spm_jsonwrite('snpm_nidm.json', nidm_json)
   %-Footnote with SnPM parameters
   %=======================================================================
   line([0,1],[0.5,0.5],'LineWidth',1,'Color','r')
@@ -1688,6 +1689,7 @@ elseif ~isempty(C)
   text(cC.^(1/3)+diff(Xlim)*0.01,Ylim(2)*0.85,'Threshold','FontSize',10)
 
 end
+
 
 return
 
