@@ -931,7 +931,7 @@ if bSpatEx
                 %-Save perm 1 stats for use later - [X;Y;Z;T;perm;STCno]
                 tmp = spm_clusters(Locs_vox(1:3,:));
                 
-                nidm_json.('nidm_ClusterDefinitionCriteria__nidm_hasConnectivityCriterion') = 'nidm_voxel18connected';
+                nidm_json.('Inferences').('nidm_ClusterDefinitionCriteria__nidm_hasConnectivityCriterion') = 'nidm_voxel18connected';
                 if isPos==1
                     STCstats_Pos = [ SnPM_ST(:,tQ); tmp];
                     if bNeg==0
@@ -1178,7 +1178,7 @@ if bSpatEx
 end
 
 % Display only if *not* in command line mode
-if ~spm_get_defaults('cmdline')
+if true%~spm_get_defaults('cmdline')
     
 %=======================================================================
 %-D I S P L A Y :   Max report
@@ -1383,17 +1383,17 @@ if length(strmatch('MIPtable',Report))>0
     text(tCol(10),y,sprintf(Fmtst{10},STC_XYZ(3,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
     
     nidm_cluster.('nidm_SupraThresholdCluster__nidm_clusterSizeInVoxels') = STC_N(i);
-    nidm_peaks.('1').('nidm_Peak__nidm_pValueFWER') = Pt(i);
-    nidm_peaks.('1').('nidm_Peak__nidm_qValueFDR') = Pfdr(i);
-    nidm_peaks.('1').('nidm_Peak__prov_value') = STC_SnPMt(i);
-    nidm_peaks.('1').('nidm_Peak__nidm_pValueUncorrected') = Pu(i);
-    nidm_peaks.('1').('nidm_Coordinate__nidm_coordinateVector') = STC_XYZ(1:3,i);    
+    nidm_peaks.('Peak_1').('nidm_Peak__nidm_pValueFWER') = Pt(i);
+    nidm_peaks.('Peak_1').('nidm_Peak__nidm_qValueFDR') = Pfdr(i);
+    nidm_peaks.('Peak_1').('nidm_Peak__prov_value') = STC_SnPMt(i);
+    nidm_peaks.('Peak_1').('nidm_Peak__nidm_pValueUncorrected') = Pu(i);
+    nidm_peaks.('Peak_1').('nidm_Coordinate__nidm_coordinateVector') = STC_XYZ(1:3,i);    
     
     y = y -1;
     
     %-Print up to 3 secondary maxima (>8mm apart)
     %-------------------------------------------------------------------
-    nidm_inference.('nidm_PeakDefinitionCriteria__nidm_minDistanceBetweenPeaks') = 8;
+    nidm_json.('Inferences').('nidm_PeakDefinitionCriteria__nidm_minDistanceBetweenPeaks') = 8;
     [null, k] = sort(-STC_SnPMt(j));	% Sort on t value
     D         = i;
     for i = 1:length(k)
@@ -1414,24 +1414,24 @@ if length(strmatch('MIPtable',Report))>0
 	  y = y -1;
 	end
       end
-      nidm_peaks.(num2str(i)).('nidm_Peak__nidm_pValueFWER') = Pt(d);
-      nidm_peaks.(num2str(i)).('nidm_Peak__nidm_qValueFDR') = Pfdr(d);
-      nidm_peaks.(num2str(i)).('nidm_Peak__prov_value') = STC_SnPMt(d);
-      nidm_peaks.(num2str(i)).('nidm_Peak__nidm_pValueUncorrected') = Pu(d);
-      nidm_peaks.(num2str(i)).('nidm_Coordinate__nidm_coordinateVector') = STC_XYZ(1:3,d);
+      nidm_peaks.(['Peak_' num2str(i)]).('nidm_Peak__nidm_pValueFWER') = Pt(d);
+      nidm_peaks.(['Peak_' num2str(i)]).('nidm_Peak__nidm_qValueFDR') = Pfdr(d);
+      nidm_peaks.(['Peak_' num2str(i)]).('nidm_Peak__prov_value') = STC_SnPMt(d);
+      nidm_peaks.(['Peak_' num2str(i)]).('nidm_Peak__nidm_pValueUncorrected') = Pu(d);
+      nidm_peaks.(['Peak_' num2str(i)]).('nidm_Coordinate__nidm_coordinateVector') = STC_XYZ(1:3,d);
     end
+    
+    nidm_cluster.('Peaks') = nidm_peaks;
+    nidm_clusters.(['Cluster_' num2str(r)]) = nidm_cluster;
     
     bUsed(j) = (bUsed(j) | 1 );		%-Mark maxima as "used"
     r = r + 1;				% Next region
-    
-    nidm_cluster.('Peaks') = nidm_peaks;
-    nidm_clusters(num2str(r)) = nidm_cluster;
   end
   nidm_inference.('Clusters') = nidm_clusters;
   clear i j k D d r
   
-  nidm_json.('Inferences') = nidm_inference;
-  spm_jsonwrite('snpm_nidm.json', nidm_json)
+  nidm_json.('Inferences').(contrast_id) = nidm_inference;
+  spm_jsonwrite('snpm_nidm_thresh.json', nidm_json)
   %-Footnote with SnPM parameters
   %=======================================================================
   line([0,1],[0.5,0.5],'LineWidth',1,'Color','r')

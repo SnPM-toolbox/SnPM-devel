@@ -236,15 +236,23 @@ if size(CONT,1) > 1
   if (CONT(1,:) == -CONT(2,:))
     CONT = CONT(1,:);
   end
-  con_name = [mat2str(CONT) ' (F)'];
+  con_name = 'Positive';
   nidm_json.('Contrasts').(con_name) = contrast;
 else
-  con_name = [mat2str(CONT) ' (T)'];  
-  con_neg_name = [mat2str(-CONT) ' (T)'];
+  con_name = 'Positive';  
+  con_neg_name = 'Negative';
   STAT = 'T';
+  
   contrast.('nidm_StatisticMap__nidm_statisticType') = 'obo_tstatistic';
-  nidm_json.('Contrasts').(con_name) = contrast;
-  nidm_json.('Contrasts').(con_neg_name) = contrast;
+  contrast_pos = contrast;
+  contrast_neg = contrast;
+  contrast_pos.('nidm_ContrastMap__nidm_contrastName') = ['T: ' mat2str(CONT)];
+  contrast_pos.('obo_contrastweightmatrix__prov_value') = CONT;
+  contrast_neg.('nidm_ContrastMap__nidm_contrastName') = ['T: ' mat2str(-CONT)];
+  contrast_neg.('obo_contrastweightmatrix__prov_value') = -CONT;
+  
+  nidm_json.('Contrasts').(con_name) = contrast_pos;
+  nidm_json.('Contrasts').(con_neg_name) = contrast_neg;
 end
 
 if rank(CONT)<size(CONT,1)
@@ -307,7 +315,10 @@ r       = rank([H C B G]);		%-Model degrees of freedom
 df      = q - r;			%-Residual degrees of freedom
 nPerm   = size(PiCond,1);		%-# permutations
 
-nidm_json.('Contrasts').(con_name).('nidm_StatisticMap__nidm_errorDegreesOfFreedom') = df;
+con_names = fieldnames(nidm_json.('Contrasts'));
+for i = 1:numel(con_names)
+    nidm_json.('Contrasts').(con_names{i}).('nidm_StatisticMap__nidm_errorDegreesOfFreedom') = df;
+end
 
 %-Get ORIGIN, etc
 %-----------------------------------------------------------------------
@@ -337,7 +348,7 @@ elseif ~isempty(MASK)
   bMask = 1;
 end
 % Add updated nidm_json to the saved variables
-s_SnPM_save = [s_SnPM_save 'nidm_json con_name con_neg_name'];
+s_SnPM_save = [s_SnPM_save ' con_name con_neg_name'];
 
 %-Useful quantities - handy for later
 %-----------------------------------------------------------------------
@@ -389,7 +400,7 @@ for ii=1:p
   descrip=sprintf('beta_%04d hats',ii);
   Vbeta(ii)=snpm_clone_vol(Vt,fname,descrip);
   
-  nidm_json.('ParameterEstimateMaps').(descrip).(...
+  nidm_json.('ParameterEstimateMaps').(genvarname(descrip)).(...
       'nidm_ParameterEstimateMap__prov_atLocation') = fname;
 end  
 Vbeta = spm_create_vol(Vbeta);
