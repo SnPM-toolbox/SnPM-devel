@@ -223,15 +223,27 @@ if size(CONT,2) ~= size([H C B G],2)
     error('SnPM:InvalidContrast','Contrast problem; wrong number of columns'); 
 end
 if size(CONT,1) > 1
+  nidm_json.('Contrasts') = struct();
+  contrast = struct();
+  contrast.('obo_contrastweightmatrix/prov:value') = CONT;
   warning('SnPM:FContrast', ...
           'F contrast!  F statistic images are being created.'); 
   STAT = 'F';
+  contrast.('nidm_StatisticMap/nidm_statisticType') = 'obo_Fstatistic';
   if (CONT(1,:) == -CONT(2,:))
     CONT = CONT(1,:);
   end
+  con_name = [mat2str(CONT) ' (F)'];
+  nidm_json.('Contrasts').(con_name) = contrast;
 else
+  con_name = [mat2str(CONT) ' (T)'];  
+  con_neg_name = [mat2str(-CONT) ' (T)'];
   STAT = 'T';
+  contrast.('nidm_StatisticMap/nidm_statisticType') = 'obo_tstatistic';
+  nidm_json.('Contrasts').(con_name) = contrast;
+  nidm_json.('Contrasts').(con_neg_name) = contrast;
 end
+
 if rank(CONT)<size(CONT,1)
   [u s] = spm_svd(CONT'); % Kill zero-rank components
   CONT = full(u*sqrt(s))';
@@ -292,6 +304,8 @@ r       = rank([H C B G]);		%-Model degrees of freedom
 df      = q - r;			%-Residual degrees of freedom
 nPerm   = size(PiCond,1);		%-# permutations
 
+nidm_json.('Contrasts').(con_name).('nidm_StatisticMap/nidm_errorDegreesOfFreedom') = df;
+
 %-Get ORIGIN, etc
 %-----------------------------------------------------------------------
 DIM    = [V(1).dim(1)   V(1).dim(2)   V(1).dim(3)];
@@ -319,6 +333,8 @@ elseif ~isempty(MASK)
   s_SnPM_save = [s_SnPM_save ' Vwt'];
   bMask = 1;
 end
+% Add updated nidm_json to the saved variables
+s_SnPM_save = [s_SnPM_save 'nidm_json con_name con_neg_name'];
 
 %-Useful quantities - handy for later
 %-----------------------------------------------------------------------
@@ -369,11 +385,16 @@ for ii=1:p
   fname= sprintf('beta_%04d.img',ii);
   descrip=sprintf('beta_%04d hats',ii);
   Vbeta(ii)=snpm_clone_vol(Vt,fname,descrip);
+  
+  nidm_json.('ParameterEstimateMaps').(descrip).(...
+      'nidm_ParameterEstimateMap/prov:atLocation') = fname;
 end  
 Vbeta = spm_create_vol(Vbeta);
 
 VResMS=snpm_clone_vol(Vt,'ResMS.img','Residual sum-of-squares');
 VResMS=spm_create_vol(VResMS);
+nidm_json.('nidm_ResidualMeanSquaresMap/prov:atLocation') = 'ResMS.img';
+
 if bVarSm==0
   str = sprintf('%c_{%d} statistic',STAT,df);
 else
@@ -387,8 +408,10 @@ end
 if STAT=='T'
   VT_pos=snpm_clone_vol(Vt,'snpmT+.img',[str,' (+ve)']);
   VT_pos=spm_create_vol(VT_pos);
+  nidm_json.(con_name).('nidm_StatisticMap/prov:atLocation') = 'snpmT+.img';
   VT_neg=snpm_clone_vol(Vt,'snpmT-.img',[str,' (-ve)']);
   VT_neg=spm_create_vol(VT_neg);
+  nidm_json.(con_neg_name).('nidm_StatisticMap/prov:atLocation') = 'snpmT-.img';
 elseif STAT=='F'
   VF=snpm_clone_vol(Vt,'snpmF.img',str);
   VF=spm_create_vol(VF);
