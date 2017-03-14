@@ -242,8 +242,11 @@ else
   con_name = 'Positive';  
   con_neg_name = 'Negative';
   STAT = 'T';
-  
-  contrast.('nidm_StatisticMap__nidm_statisticType') = 'obo_tstatistic';
+  if bVarSm
+    contrast.('nidm_StatisticMap__nidm_statisticType') = 'nidm_smoothedtstatistic';
+  else
+    contrast.('nidm_StatisticMap__nidm_statisticType') = 'obo_tstatistic';
+  end
   contrast_pos = contrast;
   contrast_neg = contrast;
   contrast_pos.('nidm_ContrastMap__nidm_contrastName') = ['T: ' mat2str(CONT)];
@@ -314,6 +317,11 @@ p       = size([H C B G],2);		%-# predictors
 r       = rank([H C B G]);		%-Model degrees of freedom
 df      = q - r;			%-Residual degrees of freedom
 nPerm   = size(PiCond,1);		%-# permutations
+
+nidm_json.('Inferences').('nidm_NonParametricNullDistribution__nidm_numberOfPermutations') = nPerm;
+nidm_json.('Inferences').('nidm_NonParametricNullDistribution__nidm_hasResamplingScheme') = 'nidm_Permutation';
+nidm_json.('Inferences').('nidm_NonParametricNullDistribution__nidm_hasApproximationMethod') = 'nidm_MonteCarlo';
+nidm_json.('Inferences').('nidm_NonParametricNullDistribution__nidm_maximumNumberOfPermutations') = nPiCond_mx;
 
 con_names = fieldnames(nidm_json.('Contrasts'));
 for i = 1:numel(con_names)
