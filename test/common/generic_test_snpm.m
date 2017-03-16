@@ -219,6 +219,14 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), ...
                 ['GT_' strrep(testCase.SnPMrefVersion, '.', '') '_' version('-release')], testCase.testName);
             
+            if ~exist(testCase.interResDir, 'dir')
+                warning(['Ground truth data for ' version('-release') ' is not available yet' ... 
+                    ', please consider sending an update at https://github.com/SnPM-toolbox/SnPM_test_data.' ...
+                    ' Data generated with 2014b will be used instead for testing.']);
+                testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), ...
+                    ['GT_' strrep(testCase.SnPMrefVersion, '.', '') '_2014b'], testCase.testName);
+            end
+            
             if ~exist(testCase.batchResDir, 'dir')
                 mkdir(testCase.batchResDir);
             else
