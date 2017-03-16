@@ -1446,7 +1446,8 @@ elseif ~isempty(C)
   end
   Ylim = get(gca,'ylim'); Xlim = get(gca,'xlim');
   versions = strsplit(version, '.');
-  if str2num(versions{1})==8 &&  str2num(versions{2})==4
+  if str2num(versions{1})==8 &&  str2num(versions{2})>=4 || ...
+     str2num(versions{1})>8
       set(gca,'Xticklabel',num2str(str2num(strvcat(get(gca,'Xticklabel'))).^3))
   else
     set(gca,'Xticklabel',num2str(str2num(get(gca,'Xticklabel')).^3))
