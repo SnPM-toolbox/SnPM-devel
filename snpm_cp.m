@@ -216,6 +216,24 @@ NIDMFile = fullfile(CWD,'snpm_nidm.json');
 load(CfgFile);
 nidm_json = spm_jsonread(NIDMFile);
 
+if strcmp(sDesFile, 'snpm_pi_OneSampT') || ...
+        strcmp(sDesFile, 'snpm_pi_ANOVAwithinS')
+    % Sign flipping
+    nidm_json.('nidm_ErrorModel__nidm_hasErrorDistribution') = {'obo_nonparametricdistribution', 'obo_symmetricdistribution'};
+    nidm_json.('nidm_ErrorModel__nidm_errorVarianceHomogeneous') = false;
+    nidm_json.('nidm_ErrorModel__nidm_varianceMapWiseDependence') = 'nidm_IndependentParameter';
+    nidm_json.('nidm_ErrorModel__nidm_hasErrorDependence') = 'nidm_IndependentError';
+else
+    % Permutation
+    nidm_json.('nidm_ErrorModel__nidm_hasErrorDistribution') = 'obo_nonparametricdistribution';
+    nidm_json.('nidm_ErrorModel__nidm_errorVarianceHomogeneous') = true;
+    nidm_json.('nidm_ErrorModel__nidm_varianceMapWiseDependence') = 'nidm_IndependentParameter';
+    % TODO: the 'obo_exchangeable' term is not yet in STATO
+    nidm_json.('nidm_ErrorModel__nidm_hasErrorDependence') = 'obo_exchangeable';
+    nidm_json.('nidm_ErrorModel__nidm_dependenceMapWiseDependence') = 'nidm_IndependentParameter';
+end
+
+
 if isempty([H C])
   error('SnPM:NoModel', 'No model specified; [H C] empty'); 
 end

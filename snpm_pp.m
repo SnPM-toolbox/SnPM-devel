@@ -1178,7 +1178,8 @@ if bSpatEx
 end
 
 % Display only if *not* in command line mode
-if true%~spm_get_defaults('cmdline')
+nidm=true;
+if ~spm_get_defaults('cmdline') || nidm
     
 %=======================================================================
 %-D I S P L A Y :   Max report
@@ -1431,7 +1432,7 @@ if length(strmatch('MIPtable',Report))>0
   clear i j k D d r
   
   nidm_json.('Inferences').(contrast_id) = nidm_inference;
-  spm_jsonwrite('snpm_nidm_thresh.json', nidm_json)
+  
   %-Footnote with SnPM parameters
   %=======================================================================
   line([0,1],[0.5,0.5],'LineWidth',1,'Color','r')
@@ -1504,7 +1505,7 @@ end
 %- Image output?
 %=======================================================================
 %-Write out filtered SnPMt?
-if WrtFlt
+if WrtFlt || nidm
 	
   Fname = WrtFltFn;
   
@@ -1549,6 +1550,10 @@ if WrtFlt
   end
   Vs =  sf_close_vol(Vs);
   clear t
+  
+  nidm_json.('Inferences').(contrast_id).(...
+      'nidm_ExcursionSetMap__prov_atLocation') = Fname;
+  spm_jsonwrite('snpm_nidm_thresh.json', nidm_json)
 end
 
 %-Reset Interactive Window
