@@ -227,7 +227,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
                     ', please consider sending an update at https://github.com/SnPM-toolbox/SnPM_test_data.' ...
                     ' Data generated with 2014b will be used instead for testing and tolerance increased.']);
                 testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), ...
-                    ['GT_' strrep(testCase.SnPMrefVersion, '.', '') '_2014b'], testCase.testName);
+                    ['GT_' strrep(testCase.SnPMrefVersion, '.', '') '_2016b'], testCase.testName);
                 testCase.stat_tolerance = 10^(-6);
             end
             
