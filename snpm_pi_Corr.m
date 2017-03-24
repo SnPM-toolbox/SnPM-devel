@@ -73,7 +73,7 @@
 iGloNorm = '123';		% Allowable Global norm. codes
 sDesSave = 'CovInt';		% PlugIn variables to save in cfg file
 
-
+global TEST;
 
 %-Get filenames of scans
 %-----------------------------------------------------------------------
@@ -116,7 +116,6 @@ if bAproxTst
 	%-Approximate test :
 	% Build up random subset of all (within nSubj) permutations
 	%===============================================================
-	global TEST;
     if isempty(TEST) || ~TEST % When testing we need a fixed seed
         rand('seed',sum(100*clock))	%-Initialise random number generator
     end

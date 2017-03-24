@@ -36,65 +36,68 @@ switch buttonName,
     case 'yes',
         disp(sprintf('\nStart re-computation of ground truth\n'))
         
-        resultDir = fullfile(spm_str_manip(testDataDir, 'h'), 'results');
+        resultDir = fullfile(testDataDir, 'results');
+        dataDir = fullfile(testDataDir, 'data');
+        
         gtDirName = ['GT_' strrep(snpm('ver'), '.', '') '_' version('-release')];
         disp(sprintf(['\nfolder: ' gtDirName '\n']))
         
         cwd = pwd;
         
         testOneSample = {...
-%             'onesample_1', 'onesample_propscaling', 'onesample_approx', ...
-%             'onesample_var', 'onesample_cov3', 'onesample_cov'...
-%             'onesample_slice', 'onesample_ancova', ...
-%             'onesample_grandmean_50', 'onesample_grandmean_145', ...
-%             'onesample_propscaling_to_user', 'onesample_propscaling', ...
-%             'onesample_cluster', 'onesample_cluster_predefined', ...
-%             'onesample_mask' 'onesample_abs_thresh', 'onesample_1',...      
-%             'onesample_prop_thresh' 'onesample_ancova_with_neg',...
-%             'onesample_cluster_slow', 'onesample_cluster_slow_var'...
+            'onesample_1', 'onesample_propscaling', 'onesample_approx', ...
+            'onesample_var', 'onesample_cov3', 'onesample_cov'...
+            'onesample_slice', 'onesample_ancova', ...
+            'onesample_grandmean_50', 'onesample_grandmean_145', ...
+            'onesample_propscaling_to_user', 'onesample_propscaling', ...
+            'onesample_cluster', 'onesample_cluster_predefined', ...
+            'onesample_mask' 'onesample_abs_thresh', 'onesample_1',...      
+            'onesample_prop_thresh' 'onesample_ancova_with_neg',...
+            'onesample_cluster_slow', 'onesample_cluster_slow_var'...
                     } ;
         
-        testTwoSample = { 'twosample_approx_14scans'...
-%             'twosample_1', 'twosample_var', 'twosample_approx',...
-%             'twosample_approx_14scans',...  
-%             'twosample_cov', 'twosample_cov3',...
-%             'twosample_ancova', 'twosample_propscaling', 'twosample_propscaling_to_user',...
-%             'twosample_proportional_global_user',...
-%             'twosample_grandmean_145', 'twosample_grandmean_50',...
-%             'twosample_cluster_predefined','twosample_cluster_predef_stat',...
-%             'twosample_cluster', 'twosample_unbalanced'...
+        testTwoSample = { ...
+            'twosample_approx_14scans'...
+            'twosample_1', 'twosample_var', 'twosample_approx',...
+            'twosample_approx_14scans',...  
+            'twosample_cov', 'twosample_cov3',...
+            'twosample_ancova', 'twosample_propscaling', 'twosample_propscaling_to_user',...
+            'twosample_proportional_global_user',...
+            'twosample_grandmean_145', 'twosample_grandmean_50',...
+            'twosample_cluster_predefined','twosample_cluster_predef_stat',...
+            'twosample_cluster', 'twosample_unbalanced'...
             };
         testOneSubTwoSample = { ...
-%             'onesub_twocondrepl_1','onesub_twocondrepl_1_other_design', ...
-%             'onesub_twocondrepl_var' ...
+            'onesub_twocondrepl_1','onesub_twocondrepl_1_other_design', ...
+            'onesub_twocondrepl_var' ...
             };
         
         testANOVAbetw = { ...
-%             'ANOVAbetween_1', 'ANOVAbetween_var',...
-%             'ANOVAbetween_approx', 'ANOVAbetween_allzero'...
+            'ANOVAbetween_1', 'ANOVAbetween_var',...
+            'ANOVAbetween_approx', 'ANOVAbetween_allzero'...
             };
         testANOVAwithin = { ...
-%             'multisub_withinsubanova_1', 'multisub_withinsubanova_var', ...
-%             'multisub_withinsubanova_approx' ...
+            'multisub_withinsubanova_1', 'multisub_withinsubanova_var', ...
+            'multisub_withinsubanova_approx' ...
             };
         testPaired2cond = { ...
-%             'multisubpaired2cond_1', 'multisubpaired2cond_chgorder',...
-%             'multisubpaired2cond_var', 'multisubpaired2cond_approx'...
+            'multisubpaired2cond_1', 'multisubpaired2cond_chgorder',...
+            'multisubpaired2cond_var', 'multisubpaired2cond_approx'...
             };
         testMultiSubSimpleReg = { ...
-%             'multisubsimpleregression_1', 'multisubsimpleregression_var',...
-%             'multisubsimpleregression_approx'...
+            'multisubsimpleregression_1', 'multisubsimpleregression_var',...
+            'multisubsimpleregression_approx'...
             };
         testOneSubRegression = { ...
-%             'onesub_regression_1', 'onesub_regression_var',...
-%             'onesub_regression_approx'...
+            'onesub_regression_1', 'onesub_regression_var',...
+            'onesub_regression_approx'...
             };
         testTwoSampTwoCond = { ...
-%             'twosample_twocond_unbalanced'...
-%             'twosample_twocond_1', 'twosample_twocond_chgorder',...
-%             'twosample_twocond_var',...
-%             'twosample_twocond_cov','twosample_twocond_cov3',...
-%             'twosample_twocond_approx'...
+            'twosample_twocond_unbalanced'...
+            'twosample_twocond_1', 'twosample_twocond_chgorder',...
+            'twosample_twocond_var',...
+            'twosample_twocond_cov','twosample_twocond_cov3',...
+            'twosample_twocond_approx'...
             };
         allTests = [testOneSample testTwoSample testOneSubTwoSample ...
             testANOVAbetw testANOVAwithin testPaired2cond ...
@@ -118,51 +121,51 @@ switch buttonName,
                 % *** One-sample test ***
                 case {'onesample_1'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, '0', {}, '0')
+                        design_one_sample_test(dataDir, resDir, '0', {}, '0')
                     end
                 case {'onesample_cluster_slow_var'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, ...
+                        design_one_sample_test(dataDir, resDir, ...
                             '0', {}, '6', 5, '', '', '', '', '', '', '', '', true)
                     end
                 case {'onesample_cluster_slow'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, ...
+                        design_one_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 5, '', '', '', '', '', '', '', '', true)
                     end
                     
                 case {'onesample_mask'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, ...
+                        design_one_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 5, '', '', '', '', '', '', '', 'mask.nii')
                     end
                     
                 case {'onesample_prop_thresh'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, ...
+                        design_one_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 5, '', '', '', '', '', '0.75')
                     end
                     
                 case {'onesample_abs_thresh'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, ...
+                        design_one_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 5, '', '', '', '', '', '', '0.1')
                     end
                     
                 case {'onesample_cov'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, '1', {'1 5 2 21 0'}, '0')
+                        design_one_sample_test(dataDir, resDir, '1', {'1 5 2 21 0'}, '0')
                     end
                     
                 case {'onesample_cov3'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, '3', ...
+                        design_one_sample_test(dataDir, resDir, '3', ...
                             {'1 1 2 3 1', '0 21 15 18 3', '-1 -0.5 -1 1 0'}, '0')
                     end
                     
                 case {'onesample_var'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, '0', {}, '6')
+                        design_one_sample_test(dataDir, resDir, '0', {}, '6')
                     end
                     
                 case {'onesample_approx'}
@@ -172,42 +175,42 @@ switch buttonName,
                         catch
                             rand('seed',200);
                         end
-                        design_one_sample_test(testDataDir, resDir, '0', {}, '0', 5, '15')
+                        design_one_sample_test(dataDir, resDir, '0', {}, '0', 5, '15')
                     end
                     
                 case {'onesample_propscaling'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, ...
+                        design_one_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 5, '', 'proportional scaling')
                     end
                     
                 case {'onesample_propscaling_to_user'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, ...
+                        design_one_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 5, '', 'proportional scaling', '145')
                     end
                     
                 case {'onesample_grandmean_145'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, ...
+                        design_one_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 5, '', '', '', 'scaling to overall grand mean', '145')
                     end
                     
                 case {'onesample_grandmean_50'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, ...
+                        design_one_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 5, '', '', '', 'scaling to overall grand mean', '50')
                     end
                     
                 case {'onesample_ancova'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, ...
+                        design_one_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 5, '', 'AnCova', '')
                     end
                     
                 case {'onesample_ancova_with_neg'}
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, ...
+                        design_one_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 6, '', 'AnCova', '')
                     end
                     
@@ -218,7 +221,7 @@ switch buttonName,
                         rand('seed',200);
                     end
                     if isempty(cfgFile) || redo
-                        design_one_sample_test(testDataDir, resDir, ...
+                        design_one_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 17, '15')
                     end
                     
@@ -244,11 +247,11 @@ switch buttonName,
                     % *** Two-sample test ***
                 case {'twosample_1'}
                     if isempty(cfgFile) || redo
-                        design_two_sample_test(testDataDir, resDir, '0', {}, '0')
+                        design_two_sample_test(dataDir, resDir, '0', {}, '0')
                     end
                 case {'twosample_unbalanced'}
                     if isempty(cfgFile) || redo
-                        design_two_sample_test(testDataDir, resDir, '0', {}, '0', -1)
+                        design_two_sample_test(dataDir, resDir, '0', {}, '0', -1)
                     end
                     
                 case {'twosample_cluster', 'twosample_cluster_predefined', ...
@@ -276,18 +279,18 @@ switch buttonName,
                     
                 case {'twosample_cov'}
                     if isempty(cfgFile) || redo
-                        design_two_sample_test(testDataDir, resDir, '1', {'1 5 2 21 0 3'}, '0')
+                        design_two_sample_test(dataDir, resDir, '1', {'1 5 2 21 0 3'}, '0')
                     end
                     
                 case {'twosample_cov3'}
                     if isempty(cfgFile) || redo
-                        design_two_sample_test(testDataDir, resDir, '3', ...
+                        design_two_sample_test(dataDir, resDir, '3', ...
                             {'1 5 2 21 0 3', '1 3 5 7 3 5', '-1 0.5 0.6 -0.1 2 1'}, '0')
                     end
                     
                 case {'twosample_var'}
                     if isempty(cfgFile) || redo
-                        design_two_sample_test(testDataDir, resDir, '0', {}, '6')
+                        design_two_sample_test(dataDir, resDir, '0', {}, '6')
                     end
                     
                 case {'twosample_approx'}
@@ -297,7 +300,7 @@ switch buttonName,
                         catch
                             rand('seed',200);
                         end
-                        design_two_sample_test(testDataDir, resDir, '0', {}, '0', 6, '15')
+                        design_two_sample_test(dataDir, resDir, '0', {}, '0', 6, '15')
                     end
                     
                 case {'twosample_approx_14scans'}
@@ -307,17 +310,17 @@ switch buttonName,
                         catch
                             rand('seed',200);
                         end
-                        design_two_sample_test(testDataDir, resDir, '0', {}, '0', 14, '15')
+                        design_two_sample_test(dataDir, resDir, '0', {}, '0', 14, '15')
                     end
                     
                 case {'twosample_propscaling'}
                     if isempty(cfgFile) || redo
-                        design_two_sample_test(testDataDir, resDir, ...
+                        design_two_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 6, '', 'proportional scaling')
                     end
                 case {'twosample_proportional_global_user'}
                     if isempty(cfgFile) || redo
-                        design_two_sample_test(testDataDir, resDir, ...
+                        design_two_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 6, '', 'proportional scaling', '50', '', '50', '1 3 2 2 3 1');
                     end
 %                             function test_twosample_proportional_user(testCase)
@@ -331,56 +334,56 @@ switch buttonName,
                     
                 case {'twosample_propscaling_to_user'}
                     if isempty(cfgFile) || redo
-                        design_two_sample_test(testDataDir, resDir, ...
+                        design_two_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 6, '', 'proportional scaling', '145')
                     end
                     
                 case {'twosample_grandmean_145'}
                     if isempty(cfgFile) || redo
-                        design_two_sample_test(testDataDir, resDir, ...
+                        design_two_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 6, '', '', '', 'scaling to overall grand mean', '145')
                     end
                     
                 case {'twosample_grandmean_50'}
                     if isempty(cfgFile) || redo
-                        design_two_sample_test(testDataDir, resDir, ...
+                        design_two_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 6, '', '', '', 'scaling to overall grand mean', '50')
                     end
                     
                 case {'twosample_ancova'}
                     if isempty(cfgFile) || redo
-                        design_two_sample_test(testDataDir, resDir, ...
+                        design_two_sample_test(dataDir, resDir, ...
                             '0', {}, '0', 6, '', 'AnCova', '')
                     end
                     
                     % *** One-subject two-sample test ***
                 case {'onesub_twocondrepl_1'}
                     if isempty(cfgFile) || redo
-                        design_one_sub_two_sample_test(testDataDir, resDir, '0')
+                        design_one_sub_two_sample_test(dataDir, resDir, '0')
                     end
                     
                 case {'onesub_twocondrepl_1_other_design'}
                     if isempty(cfgFile) || redo
-                        design_one_sub_two_sample_test(testDataDir, resDir, '0', 10)
+                        design_one_sub_two_sample_test(dataDir, resDir, '0', 10)
                     end
                     
                 case {'onesub_twocondrepl_var'}
                     if isempty(cfgFile) || redo
-                        design_one_sub_two_sample_test(testDataDir, resDir, '12')
+                        design_one_sub_two_sample_test(dataDir, resDir, '12')
                     end
                     
                     % ANOVA between
                 case {'ANOVAbetween_1'}
                     if isempty(cfgFile) || redo
-                        design_anova_between_test(testDataDir, resDir, '0')
+                        design_anova_between_test(dataDir, resDir, '0')
                     end
                 case {'ANOVAbetween_allzero'}
                     if isempty(cfgFile) || redo
-                        design_anova_between_test(testDataDir, resDir, '0', '', 'all zero');
+                        design_anova_between_test(dataDir, resDir, '0', '', 'all zero');
                     end   
                 case {'ANOVAbetween_var'}
                     if isempty(cfgFile) || redo
-                        design_anova_between_test(testDataDir, resDir, '8', '', 'all zero')
+                        design_anova_between_test(dataDir, resDir, '8', '', 'all zero')
                     end
                 case {'ANOVAbetween_approx'}
                     if isempty(cfgFile) || redo
@@ -389,17 +392,17 @@ switch buttonName,
                         catch
                             rand('seed',200);
                         end
-                        design_anova_between_test(testDataDir, resDir, '0', '15', '')
+                        design_anova_between_test(dataDir, resDir, '0', '15', '')
                     end
                     
                 case {'multisub_withinsubanova_1'}
                     if isempty(cfgFile) || redo
-                        design_anova_within_test(testDataDir, resDir, '0')
+                        design_anova_within_test(dataDir, resDir, '0')
                     end
 
                 case {'multisub_withinsubanova_var'}
                     if isempty(cfgFile) || redo
-                        design_anova_within_test(testDataDir, resDir, '8', '')
+                        design_anova_within_test(dataDir, resDir, '8', '')
                     end
                 case {'multisub_withinsubanova_approx'}
                     if isempty(cfgFile) || redo
@@ -408,22 +411,22 @@ switch buttonName,
                         catch
                             rand('seed',200);
                         end
-                        design_anova_within_test(testDataDir, resDir, '0', '13')
+                        design_anova_within_test(dataDir, resDir, '0', '13')
                     end
                     
                 case {'multisubpaired2cond_1'}
                     if isempty(cfgFile) || redo
-                        design_paired2cond_test(testDataDir, resDir, '0')
+                        design_paired2cond_test(dataDir, resDir, '0')
                     end
                     
                 case {'multisubpaired2cond_chgorder'}
                     if isempty(cfgFile) || redo
-                        design_paired2cond_test(testDataDir, resDir, '0', '', true)
+                        design_paired2cond_test(dataDir, resDir, '0', '', true)
                     end
 
                 case {'multisubpaired2cond_var'}
                     if isempty(cfgFile) || redo
-                        design_paired2cond_test(testDataDir, resDir, '8', '')
+                        design_paired2cond_test(dataDir, resDir, '8', '')
                     end
                 case {'multisubpaired2cond_approx'}
                     if isempty(cfgFile) || redo
@@ -432,18 +435,18 @@ switch buttonName,
                         catch
                             rand('seed',200);
                         end
-                        design_paired2cond_test(testDataDir, resDir, '0', '14')
+                        design_paired2cond_test(dataDir, resDir, '0', '14')
                     end
                 
                     % Multi-subject simple regression
                 case {'multisubsimpleregression_1'}
                     if isempty(cfgFile) || redo
-                        design_msub_regression_test(testDataDir, resDir, '0')
+                        design_msub_regression_test(dataDir, resDir, '0')
                     end
 
                 case {'multisubsimpleregression_var'}
                     if isempty(cfgFile) || redo
-                        design_msub_regression_test(testDataDir, resDir, '8', '')
+                        design_msub_regression_test(dataDir, resDir, '8', '')
                     end
                 case {'multisubsimpleregression_approx'}
                     if isempty(cfgFile) || redo
@@ -452,18 +455,18 @@ switch buttonName,
                         catch
                             rand('seed',200);
                         end
-                        design_msub_regression_test(testDataDir, resDir, '0', '14')
+                        design_msub_regression_test(dataDir, resDir, '0', '14')
                     end
                     
                     % One-subject simple regression
                 case {'onesub_regression_1'}
                     if isempty(cfgFile) || redo
-                        design_1sub_regression_test(testDataDir, resDir, '0')
+                        design_1sub_regression_test(dataDir, resDir, '0')
                     end
 
                 case {'onesub_regression_var'}
                     if isempty(cfgFile) || redo
-                        design_1sub_regression_test(testDataDir, resDir, '8.5', '')
+                        design_1sub_regression_test(dataDir, resDir, '8.5', '')
                     end
                 case {'onesub_regression_approx'}
                     if isempty(cfgFile) || redo
@@ -472,18 +475,18 @@ switch buttonName,
                         catch
                             rand('seed',200);
                         end
-                        design_1sub_regression_test(testDataDir, resDir, '0', '25')
+                        design_1sub_regression_test(dataDir, resDir, '0', '25')
                     end
                     
                 % Two-sample two conditions
                 case {'twosample_twocond_1'}
                     if isempty(cfgFile) || redo
-                        design_twosamptwocond_test(testDataDir, resDir, '0')
+                        design_twosamptwocond_test(dataDir, resDir, '0')
                     end
 
                 case {'twosample_twocond_var'}
                     if isempty(cfgFile) || redo
-                        design_twosamptwocond_test(testDataDir, resDir, '8.5', '')
+                        design_twosamptwocond_test(dataDir, resDir, '8.5', '')
                     end
                 case {'twosample_twocond_approx'}
                     if isempty(cfgFile) || redo
@@ -492,15 +495,15 @@ switch buttonName,
                         catch
                             rand('seed',200);
                         end
-                        design_twosamptwocond_test(testDataDir, resDir, '0', '15')
+                        design_twosamptwocond_test(dataDir, resDir, '0', '15')
                     end    
                 case {'twosample_twocond_chgorder'}
                     if isempty(cfgFile) || redo
-                        design_twosamptwocond_test(testDataDir, resDir, '0', '', true)
+                        design_twosamptwocond_test(dataDir, resDir, '0', '', true)
                     end  
                 case {'twosample_twocond_cov'}
                     if isempty(cfgFile) || redo
-                        design_twosamptwocond_test(testDataDir, resDir, ...
+                        design_twosamptwocond_test(dataDir, resDir, ...
                             '0', '', false,...
                             '1', ...
                             {'1 5 2 21 0 5 4 8 7 1 1 5'})
@@ -508,7 +511,7 @@ switch buttonName,
                     
                 case {'twosample_twocond_cov3'}
                     if isempty(cfgFile) || redo
-                        design_twosamptwocond_test(testDataDir, resDir, ...
+                        design_twosamptwocond_test(dataDir, resDir, ...
                             '0', '', false,...
                             '3', ...
                             {'1 1 2 3 1 5 4 6 3 1 1 2 ', ...
@@ -519,7 +522,7 @@ switch buttonName,
                 case {'twosample_twocond_unbalanced'}
                     if isempty(cfgFile) || redo
                         balanced = false;
-                        design_twosamptwocond_test(testDataDir, resDir, ...
+                        design_twosamptwocond_test(dataDir, resDir, ...
                             '0', '', false,...
                             '0', ...
                             {}, balanced)
@@ -592,7 +595,7 @@ interactive_results(resDir, 'SnPMt_filtered_clus_5_fwe_p50', 'T', 'FWE', '0.5', 
 end
 
 % Instructions for 2-sample 2-conditions
-function design_twosamptwocond_test(testDataDir, resDir, varSmoothing, ...
+function design_twosamptwocond_test(dataDir, resDir, varSmoothing, ...
     nPerms, chgorder, numCovariates, valueCov, balanced)
 if nargin < 4
     nPerms = '';
@@ -611,7 +614,7 @@ nSubjectsPerGroup = 3;
 nScansPerSub = 2;
 
 cwd = pwd;
-cd(testDataDir)
+cd(dataDir)
 % There is no snpmcfg.mat start snpm_ui and create it
 % interactively (with instructions for user)
 disp('* Select design type: 2 Groups: Test diff of response; 2 conditions, 1 scan/condition');
@@ -625,7 +628,7 @@ disp(['* # subjects in group ' num2str(g) ': ' num2str(nSubjects(g))]);
     for s = 1:nSubjects(g)
         disp(['* Select scans, group ' num2str(g), ', subj' num2str(s) ':'])
         for i = (nScansPerSub)*(s-1)+[1:nScansPerSub]
-            disp(sprintf(['\t' fullfile(testDataDir, ['test_data_' num2str((g-1)*nSubjects(1)*2+i, '%02.0f') '.nii'])]));
+            disp(sprintf(['\t' fullfile(dataDir, ['test_data_' num2str((g-1)*nSubjects(1)*2+i, '%02.0f') '.nii'])]));
         end
         if ~chgorder || g~=1 || s>2
             disp(['Enter conditions index (A/B) [' num2str(nScansPerSub) ']: ' repmat('AB', 1, nScansPerSub/2)])
@@ -653,7 +656,7 @@ snpm_ui_and_copy_config(cwd, resDir);
 end
 
 % Instructions for multi-sub simple regression
-function design_1sub_regression_test(testDataDir, resDir, varSmoothing, ...
+function design_1sub_regression_test(dataDir, resDir, varSmoothing, ...
     nPerms)
 if nargin < 4
     nPerms = '';
@@ -662,13 +665,13 @@ end
 nScans = 10;
 
 cwd = pwd;
-cd(testDataDir)
+cd(dataDir)
 % There is no snpmcfg.mat start snpm_ui and create it
 % interactively (with instructions for user)
 disp('* Select design type: SingleSub: Simple Regression; 1 covariate of interest');
 disp('* Select scans in time order: ' );
 for s = 1:nScans
-    disp(sprintf(['\t' fullfile(testDataDir, ['test_data_' num2str(s, '%02.0f') '.nii'])]));
+    disp(sprintf(['\t' fullfile(dataDir, ['test_data_' num2str(s, '%02.0f') '.nii'])]));
 end
 disp(['* Enter covariate value[' num2str(nScans) ']: 1 2 0 -1 5 4 3 3 1 -2']) 
 disp('* Size of exchangeability block: 2');
@@ -687,7 +690,7 @@ snpm_ui_and_copy_config(cwd, resDir);
 end
 
 % Instructions for multi-sub simple regression
-function design_msub_regression_test(testDataDir, resDir, varSmoothing, ...
+function design_msub_regression_test(dataDir, resDir, varSmoothing, ...
     nPerms)
 if nargin < 4
     nPerms = '';
@@ -696,13 +699,13 @@ end
 nSubjects = 4;
 
 cwd = pwd;
-cd(testDataDir)
+cd(dataDir)
 % There is no snpmcfg.mat start snpm_ui and create it
 % interactively (with instructions for user)
 disp('* Select design type: MultiSub: Simple Regression; 1 covariate of interest');
 disp('* Select scans, 1 per subj.: ' );
 for s = 1:nSubjects
-    disp(sprintf(['\t' fullfile(testDataDir, ['test_data_' num2str(s, '%02.0f') '.nii'])]));
+    disp(sprintf(['\t' fullfile(dataDir, ['test_data_' num2str(s, '%02.0f') '.nii'])]));
 end
 disp(['Enter covariate value[' num2str(nSubjects) ']: 1 3 5 0']) 
 if isempty(nPerms)
@@ -720,7 +723,7 @@ snpm_ui_and_copy_config(cwd, resDir);
 end
 
 % Instructions for multi-sub paired 2 conditions
-function design_paired2cond_test(testDataDir, resDir, varSmoothing, ...
+function design_paired2cond_test(dataDir, resDir, varSmoothing, ...
     nPerms, chgorder)
 if nargin < 4
     nPerms = '';
@@ -733,7 +736,7 @@ nSubjects = 5;
 nScansPerSub = 2;
 
 cwd = pwd;
-cd(testDataDir)
+cd(dataDir)
 % There is no snpmcfg.mat start snpm_ui and create it
 % interactively (with instructions for user)
 disp('* Select design type: MultiSub: Paired T test; 2 conditions, 1 scan/condition');
@@ -741,7 +744,7 @@ disp(['* # subjects: ' num2str(nSubjects)]);
 for s = 1:nSubjects
     disp(['* Subject ' num2str(s) ': Select scans in time order:'])
     for i = (nScansPerSub)*(s-1)+[1:nScansPerSub]
-        disp(sprintf(['\t' fullfile(testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
+        disp(sprintf(['\t' fullfile(dataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
     end
     if s>2 || ~chgorder
         disp(['Enter conditions index (A/B) [' num2str(nScansPerSub) ']: ' repmat('AB', 1, nScansPerSub/2)])
@@ -764,7 +767,7 @@ snpm_ui_and_copy_config(cwd, resDir);
 end
 
 % Instructions for ANOVA within groups
-function design_anova_within_test(testDataDir, resDir, varSmoothing, ...
+function design_anova_within_test(dataDir, resDir, varSmoothing, ...
     nPerms)
 if nargin < 4
     nPerms = '';
@@ -774,7 +777,7 @@ nSubjects = 5;
 nScansPerSub = 2;
 
 cwd = pwd;
-cd(testDataDir)
+cd(dataDir)
 % There is no snpmcfg.mat start snpm_ui and create it
 % interactively (with instructions for user)
 disp('* Select design type: MultiSub: Within Subject ANOVA; multiple scans/subject');
@@ -783,7 +786,7 @@ disp(['* # of scans/subjects: ' num2str(nScansPerSub)]);
 for s = 1:nSubjects
     disp(['* Subject ' num2str(s) ': Select scans in time order:'])
     for i = (nScansPerSub)*(s-1)+[1:nScansPerSub]
-        disp(sprintf(['\t' fullfile(testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
+        disp(sprintf(['\t' fullfile(dataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
     end
 end
 if isempty(nPerms)
@@ -801,7 +804,7 @@ snpm_ui_and_copy_config(cwd, resDir);
 end
 
 % Instructions for ANOVA between groups
-function design_anova_between_test(testDataDir, resDir, varSmoothing, ...
+function design_anova_between_test(dataDir, resDir, varSmoothing, ...
     nPerms, nullhyp)
 if nargin < 4
     nPerms = '';
@@ -813,13 +816,13 @@ end
 nSubjects = 6;
 
 cwd = pwd;
-cd(testDataDir)
+cd(dataDir)
 % There is no snpmcfg.mat start snpm_ui and create it
 % interactively (with instructions for user)
 disp('* Select design type: >2 Groups: Between Group ANOVA; 1 scan/subject');
 disp('* Select all scans:')
 for i = 1:nSubjects
-    disp(sprintf(['\t' fullfile(testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
+    disp(sprintf(['\t' fullfile(dataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
 end
 disp('* Number of groups k=: 3')
 disp(['* Enter subject index: (A/B/...)[' num2str(nSubjects) ']: AABBCC']);
@@ -843,13 +846,13 @@ snpm_ui_and_copy_config(cwd, resDir);
 end
 
 % Instructions for interactive one-subject two-sample test
-function design_one_sub_two_sample_test(testDataDir, resDir, varSmoothing, nSubjects)
+function design_one_sub_two_sample_test(dataDir, resDir, varSmoothing, nSubjects)
 if nargin < 4
     nSubjects = 12;
 end
 
 cwd = pwd;
-cd(testDataDir)
+cd(dataDir)
 % There is no snpmcfg.mat start snpm_ui and create it
 % interactively (with instructions for user)
 disp('* Select design type: SingleSub: Two Sample T test; 2 conditions');
@@ -861,7 +864,7 @@ else
 end
 disp('* Select scans in time order:')
 for i = 1:nSubjects
-    disp(sprintf(['\t' fullfile(testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
+    disp(sprintf(['\t' fullfile(dataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
 end
 disp(['* Enter conditions index (B/A) [' num2str(nSubjects) ']: ' repmat('AB', 1, nSubjects/2)]);
 common_choices(1, varSmoothing, '', '', '', '', '', '', '', ...
@@ -870,7 +873,7 @@ snpm_ui_and_copy_config(cwd, resDir);
 end
 
 % Instructions for interactive two-sample tests
-function design_two_sample_test(testDataDir, resDir, numCovariates, ...
+function design_two_sample_test(dataDir, resDir, numCovariates, ...
     valueCov, varSmoothing, nSubjects, nPerm, propScaling, ...
     userPropScaling, grandMeanScaling, userGrandMean, userGlobal)
 if nargin < 12
@@ -906,27 +909,27 @@ else
 end
 
 cwd = pwd;
-cd(testDataDir)
+cd(dataDir)
 % There is no snpmcfg.mat start snpm_ui and create it
 % interactively (with instructions for user)
 disp('* Select design type: 2 Groups: Two Sample T test; 1 scan/subject');
 disp('* Select all scans:');
 for i = 1:(nSubjects/2)
     disp(sprintf(['\t' ...
-        fullfile(testDataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
+        fullfile(dataDir, ['test_data_' num2str(i, '%02.0f') '.nii'])]));
 end
 if ~unbalanced
     for i = 18:(18-1+(nSubjects/2))
         disp(sprintf(['\t' ...
-            fullfile(testDataDir, ['test_data_gr2_' num2str(i, '%02.0f') '.nii'])]));
+            fullfile(dataDir, ['test_data_gr2_' num2str(i, '%02.0f') '.nii'])]));
     end
     disp(['Enter subject index (A/B) [' num2str(nSubjects) ']: ' repmat('A',1,nSubjects/2) repmat('B',1,nSubjects/2)])
 else
     disp(sprintf(['\t' ...
-        fullfile(testDataDir, ['test_data_04.nii'])]));
+        fullfile(dataDir, ['test_data_04.nii'])]));
     for i = 18:19
         disp(sprintf(['\t' ...
-            fullfile(testDataDir, ['test_data_gr2_' num2str(i, '%02.0f') '.nii'])]));
+            fullfile(dataDir, ['test_data_gr2_' num2str(i, '%02.0f') '.nii'])]));
     end
     disp(['Enter subject index (A/B) [6]: AAAABB'])
 end
@@ -951,7 +954,7 @@ snpm_ui_and_copy_config(cwd, resDir)
 end
 
 % Instructions for interactive one-sample tests
-function design_one_sample_test(testDataDir, resDir, numCovariates, ...
+function design_one_sample_test(dataDir, resDir, numCovariates, ...
     valueCov, varSmoothing, nSubjects, nPerm, propScaling, ...
     userPropScaling, grandMeanScaling, userGrandMean, ...
     propThresh, absThresh, fileToMaskWith, supraThreshStat)
@@ -988,7 +991,7 @@ if nargin < 14
 end
 
 cwd = pwd;
-cd(testDataDir)
+cd(dataDir)
 % There is no snpmcfg.mat start snpm_ui and create it
 % interactively (with instructions for user)
 disp('* Select design type: MultiSub: One Sample T test on differences; 1 condition');
@@ -996,9 +999,9 @@ disp('* Select all scans:');
 for i = 1:nSubjects
     if nSubjects == 6 && i==6
         % Used in negative ANCOVA only         
-        disp(sprintf(['\t' fullfile(testDataDir, 'test_data_gr3_21.nii')]))
+        disp(sprintf(['\t' fullfile(dataDir, 'test_data_gr3_21.nii')]))
     else
-        disp(sprintf(['\t' fullfile(testDataDir, ['test_data' num2str(i, '%02.0f') '.nii'])]))
+        disp(sprintf(['\t' fullfile(dataDir, ['test_data' num2str(i, '%02.0f') '.nii'])]))
     end
 end
 disp(['* # of confounding covariates: ' numCovariates])
@@ -1015,7 +1018,7 @@ if ~isempty(nPerm)
     disp(['* # perms. to use? (Max ' num2str(2^nSubjects) '): ' nPerm])
 end
 if ~isempty(fileToMaskWith)
-    fileToMaskWith = fullfile(testDataDir, fileToMaskWith);
+    fileToMaskWith = fullfile(dataDir, fileToMaskWith);
 end
 common_choices(nSubjects, varSmoothing, propScaling, grandMeanScaling, ...
     userGrandMean, userPropScaling, '', propThresh, absThresh, ...
