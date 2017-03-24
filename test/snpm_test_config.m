@@ -8,6 +8,6 @@
 % Camille Maumet
 
 global testDataDir;
-testDataDir = '/Users/cmaumet/Desktop/SnPM_test_data'; % Specify directory containing test data
+testDataDir = ''; % Specify directory containing test data
 global SnPMrefVersion
 SnPMrefVersion = 'SnPM8';
