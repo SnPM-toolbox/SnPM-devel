@@ -89,6 +89,7 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
     maxnullBins = -9:binRes:9; %% bin resolution in maxnull histogram computation
     subV = CheckSamplingRate(N, V, sub); %% number of samples used per permutation
     maxTStatistics = zeros(1, numPermutations); %% estimated max statistics for all permutations
+    minTStatistics = zeros(1, numPermutations); %% estimated max statistics for all permutations
 
 %% Training for low rank subsapace and residual priors
 
@@ -140,7 +141,7 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
     end
 
     [muFit,~] = normfit(diffForNormal(:));
-
+    
     tTraining = toc(tTraining);
     timings.tTraining = tTraining;
 
@@ -165,6 +166,7 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
         TRec = UHat*w;
         TRec(inds) = TRec(inds) + s;
         maxTStatistics(1,i) = max(TRec) + muFit;
+        minTStatistics(1,i) = min(TRec) - muFit;
         fprintf('Completion done on trial %d/%d  \n',i,numPermutations);  
     end
     
@@ -173,6 +175,7 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
     
     outputs.MaxNull = gen_hist(maxTStatistics,maxnullBins); 
     outputs.MaxT = maxTStatistics;
+    outputs.MinT = minTStatistics;
 
     if write == 1 
         outputs.U = UHat; 
