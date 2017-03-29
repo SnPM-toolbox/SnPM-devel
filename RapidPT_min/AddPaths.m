@@ -6,7 +6,6 @@ function [] = AddPaths(RapidPTPath)
     addpath(PATH);
     addpath(strcat(PATH, '/util'));
     addpath(strcat(PATH, '/include/grasta.1.2.0'));
-    addpath(strcat(PATH, '/include/grasta.1.2.0/mex'));
 
 end
 
