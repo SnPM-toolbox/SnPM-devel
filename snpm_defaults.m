@@ -58,5 +58,5 @@ SnPMdefs.shuffle_seed = true;
 
 % Use matrix completion acceleration?
 %------------------------------------------------------------------------
-SnPMdefs.RapidPT = 2; % 0 = Always off; 1 = On if nPerm>=10000; 2 = Always on.
+SnPMdefs.RapidPT = false; % true - Try to use RapidPT; false - Don't use RapidPT
 

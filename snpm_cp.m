@@ -292,18 +292,6 @@ r       = rank([H C B G]);		%-Model degrees of freedom
 df      = q - r;			%-Residual degrees of freedom
 nPerm   = size(PiCond,1);		%-# permutations
 
-% Check if we are using RapidPT
-s_SnPM_save = [s_SnPM_save ' UseRapidPT'];  % Save actual RaptidPT usage (0 or 1)
-UseRapidPT = 0;
-
-if(snpm_get_defaults('RapidPT') == 2 && strcmp('snpm_pi_TwoSampT',sDesFile))
-    UseRapidPT = 2;
-elseif(snpm_get_defaults('RapidPT') == 1 && nPerm  >= 10000 && strcmp('snpm_pi_TwoSampT',sDesFile))
-    UseRapidPT = 1;
-else
-    UseRapidPT = 0;
-end
-
 %-Get ORIGIN, etc
 %-----------------------------------------------------------------------
 DIM    = [V(1).dim(1)   V(1).dim(2)   V(1).dim(3)];
@@ -799,7 +787,7 @@ tic %-Start the clock: Timing code is commented with "clock" symbol: (>)
 %-----------------------------------------------------------------------
 nP = [];
 
-if(UseRapidPT >= 1)
+if (spm >= 1)
     
     params.N = size(X,1);
     params.V = size(X,2);
@@ -823,20 +811,26 @@ if(UseRapidPT >= 1)
     addpath(RapidPT_path);
 
     write = 0;
-    [outputs, timings] = TwoSampleRapidPT(X, nPerm, params.nGroup1, write, RapidPT_path);
-    MaxT = outputs.MaxT;
-    save(strcat('timings',runInfo),'timings');
 
+    [~, SnPMucp, ~, stats] = ttest2(X(1:params.nGroup1, :), X(params.nGroup1+1:end, :), 0.05, 'both', 'unequal');
+    MaxT11 = max(stats.tstat);
+    MaxT12 = -1*min(stats.tstat);
+    
+    % Do one less permutation b.c the first MaxT is for the original labels
+    [outputs, timings] = TwoSampleRapidPT(X, nPerm-1, params.nGroup1, write, RapidPT_path);
+    MaxT = outputs.MaxT;
+    MinT = outputs.MinT;
+    save(strcat('timings',runInfo),'timings');
     % Save variables for snpm_pp
-    MaxT = [MaxT;-MaxT];
-    % Calculate uncorrected p-vals
-    [~, SnPMucp, ~, ~] = ttest2(X(1:params.nGroup1, :), X(params.nGroup1+1:end, :), 0.05, 'both', 'unequal');
+    MaxT = [MaxT11, MaxT12;...
+            MaxT', -MinT'];
+    % Uncorrected p-vals
     save('SnPMucp.mat','SnPMucp')
     save('XYZ.mat','XYZ');
     eval(['save SnPM ',s_SnPM_save]);
     save('SnPMt.mat','SnPMt'); % Real t-statistic for each voxel.
     
-else % Run regular permutation testing
+else % UseRapidPT == 0
 for i = 1:zdim
     
   PlStart=toc;SmTime=0; %-Timestamp (>) 
@@ -1230,7 +1224,7 @@ clear X
 %=======================================================================
 eval(['save SnPM ',s_SnPM_save])
 
-%-Print quick summary info (allowing for STOPing)
+%-Print quick summary info
 %=======================================================================
 if bhPerms
     Rank = sum([MaxT(1:perm,1);MaxT(1:perm,2)] >= MaxT(1,1));
@@ -1241,7 +1235,7 @@ fprintf(['\nCorrect Perm has max t %g & rank %d out of %d ', ...
 	'completed permutations\n'],MaxT(1,1),Rank,perm*(bhPerms+1));
 fprintf('\n\tRun snpm_pp for full results\n\n');
 
-end % End else
+end % End else (when UseRapidPT == 0)
 
 
 
