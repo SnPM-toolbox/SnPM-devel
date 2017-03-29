@@ -15,6 +15,8 @@ toolboxDir = spm_str_manip(mfilename('fullpath'), 'h');
 
 addpath(toolboxDir);
 addpath(fullfile(toolboxDir, 'config'));
+addpath(fullfile(toolboxDir, 'test'));
+addpath(fullfile(toolboxDir, 'test', 'common'));
 
 snpmBatch = snpm_cfg_master;
 end
