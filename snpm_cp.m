@@ -787,7 +787,7 @@ tic %-Start the clock: Timing code is commented with "clock" symbol: (>)
 %-----------------------------------------------------------------------
 nP = [];
 
-if (spm >= 1)
+if (UseRapidPT >= 1)
     
     params.N = size(X,1);
     params.V = size(X,2);
