@@ -193,7 +193,7 @@ else
   cd(job.dir{1})
 end
 
-nidm_json = struct();
+nidm_json = containers.Map();
 
 %-Definitions & Design parameters
 %=======================================================================
@@ -372,7 +372,7 @@ else % No global normalisation or ANCOVA
 end
 
 if (iGMsca==2) % CHANGED from 1 to 2 as should not ask for a value if grand mean scaling is not required.
-  nidm_json.('nidm_Data__nidm_grandMeanScaling') = true;
+  nidm_json('nidm_Data/nidm_grandMeanScaling') = true;
   if (iGloNorm==2) % Proportional scaling
     str = 'PropSca global mean to';
   else
@@ -386,10 +386,10 @@ if (iGMsca==2) % CHANGED from 1 to 2 as should not ask for a value if grand mean
       case 'gmsca_no',
           GM = 50;
   end
-  nidm_json.('nidm_Data__nidm_targetIntensity') = GM;
+  nidm_json('nidm_Data/nidm_targetIntensity') = GM;
 elseif (iGMsca==1) % No grand mean scaling
   GM = 0;
-  nidm_json.('nidm_Data__nidm_grandMeanScaling') = false;
+  nidm_json('nidm_Data/nidm_grandMeanScaling') = false;
 end
 
 
@@ -579,17 +579,16 @@ CONT  = [CONT, zeros(size(CONT,1),size([B G],2))];
 %-Construct full design matrix and name matrices for display
 %-----------------------------------------------------------------------
 [nHCBG,HCBGnames] = spm_DesMtx('Sca',H,Hnames,C,Cnames,B,Bnames,G,Gnames);
-nidm_json.('nidm_DesignMatrix__prov_value') = nHCBG;
+nidm_json('nidm_DesignMatrix/prov_value') = nHCBG;
 
 %-Setup is complete - save SnPMcfg Mat file
 %-----------------------------------------------------------------------
 s_SnPMcfg_save = ['s_SnPMcfg_save H C B G HCBGnames P PiCond ',...
 	'sPiCond bhPerms sHCform iGloNorm sGloNorm GM rg GX GMscale CONT ',...
 	'THRESH MASK ImMASK TH bVarSm vFWHM sVarSm bVolm bST sDesFile sDesign ',...
-        'V pU_ST_Ut df1 nidm_json nPiCond_mx ', ...
+        'V pU_ST_Ut df1 nidm_json nPiCond_mx nidm_json ', ...
 	'sDesSave ',sDesSave];
 eval(['save SnPMcfg ',s_SnPMcfg_save])
-spm_jsonwrite('snpm_nidm.json',nidm_json)
 
 
 if ~spm_get_defaults('cmdline')

@@ -369,7 +369,6 @@ end
 load(fullfile(CWD,'SnPMcfg'))
 load(fullfile(CWD,'SnPM'))
 load(fullfile(CWD,'SnPMucp'))
-nidm_json = spm_jsonread(fullfile(CWD,'snpm_nidm.json'));
 
 %-Ask whether positive or negative effects be analysed
 %-----------------------------------------------------------------------
@@ -931,7 +930,9 @@ if bSpatEx
                 %-Save perm 1 stats for use later - [X;Y;Z;T;perm;STCno]
                 tmp = spm_clusters(Locs_vox(1:3,:));
                 
-                nidm_json.('Inferences').('nidm_ClusterDefinitionCriteria__nidm_hasConnectivityCriterion') = 'nidm_voxel18connected';
+                nidm_inferences = nidm_json.('Inferences');
+                nidm_inferences('nidm_ClusterDefinitionCriteria/nidm_hasConnectivityCriterion') = 'nidm_voxel18connected';
+                nidm_json.('Inferences') = nidm_inferences;
                 if isPos==1
                     STCstats_Pos = [ SnPM_ST(:,tQ); tmp];
                     if bNeg==0
@@ -1348,11 +1349,11 @@ if length(strmatch('MIPtable',Report))>0
   %-----------------------------------------------------------------------
   r = 1;
   bUsed = zeros(size(STC_SnPMt));
-  nidm_clusters = struct();
+  nidm_clusters = containers.Map();
   
   while max(STC_SnPMt.*(~bUsed)) & (y > 3)
-    nidm_cluster = struct();
-    nidm_peaks = struct();
+    nidm_cluster = containers.Map();
+    nidm_peaks = containers.Map();
     
     [null, i] = max(STC_SnPMt.*(~bUsed));	% Largest t value
     j         = find(STC_r == STC_r(i));	% Maxima in same region
@@ -1383,18 +1384,25 @@ if length(strmatch('MIPtable',Report))>0
     text(tCol(9),y,sprintf(Fmtst{9},STC_XYZ(2,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
     text(tCol(10),y,sprintf(Fmtst{10},STC_XYZ(3,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
     
-    nidm_cluster.('nidm_SupraThresholdCluster__nidm_clusterSizeInVoxels') = STC_N(i);
-    nidm_peaks.('Peak_1').('nidm_Peak__nidm_pValueFWER') = Pt(i);
-    nidm_peaks.('Peak_1').('nidm_Peak__nidm_qValueFDR') = Pfdr(i);
-    nidm_peaks.('Peak_1').('nidm_Peak__prov_value') = STC_SnPMt(i);
-    nidm_peaks.('Peak_1').('nidm_Peak__nidm_pValueUncorrected') = Pu(i);
-    nidm_peaks.('Peak_1').('nidm_Coordinate__nidm_coordinateVector') = STC_XYZ(1:3,i);    
+    nidm_cluster('nidm_SupraThresholdCluster/nidm_clusterSizeInVoxels') = STC_N(i);
+    nidm_peaks('Peak_1') = containers.Map(...
+        { ...
+        'nidm_Peak/nidm_pValueFWER', ...
+        'nidm_Peak/nidm_qValueFDR', ...
+        'nidm_Peak/prov:value', ...
+        'nidm_Peak/nidm_pValueUncorrected', ...
+        'nidm_Coordinate/nidm_coordinateVector', ...
+        }, ...
+        {Pt(i), Pfdr(i), STC_SnPMt(i), Pu(i), STC_XYZ(1:3,i)});
     
     y = y -1;
     
     %-Print up to 3 secondary maxima (>8mm apart)
-    %-------------------------------------------------------------------
-    nidm_json.('Inferences').('nidm_PeakDefinitionCriteria__nidm_minDistanceBetweenPeaks') = 8;
+    %-------------------------------------------------------------------   
+    nidm_inferences = nidm_json('Inferences');
+    nidm_inferences('nidm_PeakDefinitionCriteria/nidm_minDistanceBetweenPeaks') = 8;
+    nidm_json('Inferences') = nidm_inferences;
+    
     [null, k] = sort(-STC_SnPMt(j));	% Sort on t value
     D         = i;
     for i = 1:length(k)
@@ -1415,23 +1423,33 @@ if length(strmatch('MIPtable',Report))>0
 	  y = y -1;
 	end
       end
-      nidm_peaks.(['Peak_' num2str(i)]).('nidm_Peak__nidm_pValueFWER') = Pt(d);
-      nidm_peaks.(['Peak_' num2str(i)]).('nidm_Peak__nidm_qValueFDR') = Pfdr(d);
-      nidm_peaks.(['Peak_' num2str(i)]).('nidm_Peak__prov_value') = STC_SnPMt(d);
-      nidm_peaks.(['Peak_' num2str(i)]).('nidm_Peak__nidm_pValueUncorrected') = Pu(d);
-      nidm_peaks.(['Peak_' num2str(i)]).('nidm_Coordinate__nidm_coordinateVector') = STC_XYZ(1:3,d);
+      
+      nidm_peaks(['Peak_' num2str(i)]) = containers.Map(...
+        { ...
+        'nidm_Peak/nidm_pValueFWER', ...
+        'nidm_Peak/nidm_qValueFDR', ...
+        'nidm_Peak/prov:value', ...
+        'nidm_Peak/nidm_pValueUncorrected', ...
+        'nidm_Coordinate/nidm_coordinateVector', ...
+        }, ...
+        {Pt(d), Pfdr(d), STC_SnPMt(d), Pu(d), STC_XYZ(1:3,d)});
+      
     end
     
-    nidm_cluster.('Peaks') = nidm_peaks;
-    nidm_clusters.(['Cluster_' num2str(r)]) = nidm_cluster;
+    nidm_cluster('Peaks') = nidm_peaks;
+    nidm_clusters(['Cluster_' num2str(r)]) = nidm_cluster;
     
     bUsed(j) = (bUsed(j) | 1 );		%-Mark maxima as "used"
     r = r + 1;				% Next region
   end
-  nidm_inference.('Clusters') = nidm_clusters;
-  clear i j k D d r
   
-  nidm_json.('Inferences').(contrast_id) = nidm_inference;
+  nidm_inferences = nidm_json('Inferences');
+  nidm_inference = containers.Map();
+  nidm_inference('Clusters') = nidm_clusters;
+  nidm_inferences(contrast_id) = nidm_inference;
+  nidm_json('Inferences') = nidm_inferences;
+  
+  clear i j k D d r
   
   %-Footnote with SnPM parameters
   %=======================================================================
@@ -1551,9 +1569,16 @@ if WrtFlt || nidm
   Vs =  sf_close_vol(Vs);
   clear t
   
-  nidm_json.('Inferences').(contrast_id).(...
-      'nidm_ExcursionSetMap__prov_atLocation') = Fname;
-  spm_jsonwrite('snpm_nidm_thresh.json', nidm_json)
+  
+  nidm_inferences = nidm_json('Inferences');
+  nidm_inference = nidm_inferences(contrast_id);
+  nidm_inference('nidm_ExcursionSetMap/prov:atLocation') = Fname;
+  nidm_inferences(contrast_id) = nidm_inference;
+  nidm_json('Inferences') = nidm_inferences;
+  
+  % TODO: This temp file should only be produced if NIDM export is requested
+  jsonwrite('snpm_nidm_thresh.json', nidm_json, ...
+            struct('indent','    ', 'escape', false));
 end
 
 %-Reset Interactive Window
