@@ -490,8 +490,8 @@ C_STCS    = NaN;   % Cluster size threshold (set directly by uncorrected
 alph_FWE  = NaN;   % FWE rate of a specified u threshold
 alph_FDR  = NaN;   % FDR rate of a specified alpha_ucp
   
-nidm_inference = struct(); % NIDM structre storing information about inference
-nidm_inference.('nidm_Inference__nidm_hasAlternativeHypothesis') = 'nidm_OneTailedTest';
+nidm_inference = containers.Map(); % Map storing information about inference
+nidm_inference('nidm_Inference/nidm_hasAlternativeHypothesis') = 'nidm_OneTailedTest';
 if BATCH
     bSpatEx = isfield(job.Thr,'Clus');
     if ~bSpatEx
@@ -501,18 +501,18 @@ if BATCH
         case 'Pth'
             alpha_ucp = BoundCheck(job.Thr.Vox.VoxSig.Pth,[0 1],'Invalid Uncorrected P');
             alph_FDR  = snpm_P_FDR(alpha_ucp,[],'P',[],sSnPMucp');
-            nidm_inference.('nidm_HeightThreshold__prov_type') = 'nidm_PValueUncorrected';
-            nidm_inference.('nidm_HeightThreshold__prov_value') = alpha_ucp;
+            nidm_inference('nidm_HeightThreshold/prov:type') = 'nidm_PValueUncorrected';
+            nidm_inference('nidm_HeightThreshold/prov:value') = alpha_ucp;
         case 'TFth'
             u         = BoundCheck(job.Thr.Vox.VoxSig.TFth,[0 Inf],'Negative Threshold!');
             alph_FWE  = sum(MaxT > u -tol) / nPermReal;
-            nidm_inference.('nidm_HeightThreshold__prov_type') = 'obo_statistic';
-            nidm_inference.('nidm_HeightThreshold__prov_value') = u;
+            nidm_inference('nidm_HeightThreshold/prov:type') = 'obo_statistic';
+            nidm_inference('nidm_HeightThreshold/prov:value') = u;
         case 'FDRth'
             alph_FDR  = BoundCheck(job.Thr.Vox.VoxSig.FDRth,[0 1],'Invalid FDR level');
             alpha_ucp = snpm_uc_FDR(alph_FDR,[],'P',[],sSnPMucp');
-            nidm_inference.('nidm_HeightThreshold__prov_type') = 'obo_qvalue';
-            nidm_inference.('nidm_HeightThreshold__prov_value') = alph_FDR;
+            nidm_inference('nidm_HeightThreshold/prov:type') = 'obo_qvalue';
+            nidm_inference('nidm_HeightThreshold/prov:value') = alph_FDR;
         case 'FWEth'
             alph_FWE  = BoundCheck(job.Thr.Vox.VoxSig.FWEth,[0 1],'Invalid FWE level');
             iFWE      = ceil((1-alph_FWE)*nPermReal);
@@ -522,12 +522,12 @@ if BATCH
                 C_MaxT = 0;
             end
             u = C_MaxT;
-            nidm_inference.('nidm_HeightThreshold__prov_type') = 'obo_FWERadjustedpvalue';
-            nidm_inference.('nidm_HeightThreshold__prov_value') = alph_FWE;
+            nidm_inference('nidm_HeightThreshold/prov:type') = 'obo_FWERadjustedpvalue';
+            nidm_inference('nidm_HeightThreshold/prov:value') = alph_FWE;
         end
         % No extent thresholding when voxelwise threshold is requested
-        nidm_inference.('nidm_ExtentThreshold__prov_type') = 'obo_statistic';
-        nidm_inference.('nidm_ExtentThreshold__prov_value') = 0;
+        nidm_inference('nidm_ExtentThreshold/prov:type') = 'obo_statistic';
+        nidm_inference('nidm_ExtentThreshold/prov:value') = 0;
     else
         % Cluster-wise inference
         if exist(fullfile(CWD,'SnPM_ST.mat'))~=2 & exist(fullfile(CWD,'STCS.mat'))~=2
@@ -543,11 +543,11 @@ if BATCH
             ST_Ut_0 = ST_Ut;
             CFth=job.Thr.Clus.ClusSize.CFth;
             if (CFth<1)
-                nidm_inference.('nidm_ExtentThreshold__prov_type') = 'nidm_PValueUncorrected';
-                nidm_inference.('nidm_ExtentThreshold__prov_value') = CFth;
+                nidm_inference('nidm_ExtentThreshold/prov:type') = 'nidm_PValueUncorrected';
+                nidm_inference('nidm_ExtentThreshold/prov:value') = CFth;
             else
-                nidm_inference.('nidm_ExtentThreshold__prov_type') = 'obo_statistic';
-                nidm_inference.('nidm_ExtentThreshold__prov_value') = CFth;
+                nidm_inference('nidm_ExtentThreshold/prov:type') = 'obo_statistic';
+                nidm_inference('nidm_ExtentThreshold/prov:value') = CFth;
             end
             
             if (CFth<=0)
@@ -612,17 +612,17 @@ if BATCH
         switch tmp{1}
             case 'Cth'
                 C_STCS = job.Thr.Clus.ClusSize.ClusSig.Cth;
-                nidm_inference.('nidm_ExtentThreshold__prov_type') = 'obo_statistic';
-                nidm_inference.('nidm_ExtentThreshold__prov_value') = C_STCS;
+                nidm_inference('nidm_ExtentThreshold/prov:type') = 'obo_statistic';
+                nidm_inference('nidm_ExtentThreshold/prov:value') = C_STCS;
             case 'PthC'
                 alpha_ucp = BoundCheck(job.Thr.Clus.ClusSize.ClusSig.PthC,[0 1],'Invalid uncorrected P(k)');
-                nidm_inference.('nidm_ExtentThreshold__prov_type') = 'nidm_PValueUncorrected';
-                nidm_inference.('nidm_ExtentThreshold__prov_value') = alpha_ucp;
+                nidm_inference('nidm_ExtentThreshold/prov:type') = 'nidm_PValueUncorrected';
+                nidm_inference('nidm_ExtentThreshold/prov:value') = alpha_ucp;
             case 'FWEthC'
                 alph_FWE  = BoundCheck(job.Thr.Clus.ClusSize.ClusSig.FWEthC,[0 1],'Invalid FWE level (cluster-level inference)');
                 iFWE      = ceil((1-alph_FWE)*nPermReal);
-                nidm_inference.('nidm_ExtentThreshold__prov_type') = 'obo_FWERadjustedpvalue';
-                nidm_inference.('nidm_ExtentThreshold__prov_value') = alph_FWE;
+                nidm_inference('nidm_ExtentThreshold/prov:type') = 'obo_FWERadjustedpvalue';
+                nidm_inference('nidm_ExtentThreshold/prov:value') = alph_FWE;
         end
     end % END: Cluster-wise inference
 
@@ -930,9 +930,9 @@ if bSpatEx
                 %-Save perm 1 stats for use later - [X;Y;Z;T;perm;STCno]
                 tmp = spm_clusters(Locs_vox(1:3,:));
                 
-                nidm_inferences = nidm_json.('Inferences');
+                nidm_inferences = nidm_json('Inferences');
                 nidm_inferences('nidm_ClusterDefinitionCriteria/nidm_hasConnectivityCriterion') = 'nidm_voxel18connected';
-                nidm_json.('Inferences') = nidm_inferences;
+                nidm_json('Inferences') = nidm_inferences;
                 if isPos==1
                     STCstats_Pos = [ SnPM_ST(:,tQ); tmp];
                     if bNeg==0

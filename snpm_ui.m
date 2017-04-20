@@ -579,7 +579,7 @@ CONT  = [CONT, zeros(size(CONT,1),size([B G],2))];
 %-Construct full design matrix and name matrices for display
 %-----------------------------------------------------------------------
 [nHCBG,HCBGnames] = spm_DesMtx('Sca',H,Hnames,C,Cnames,B,Bnames,G,Gnames);
-nidm_json('nidm_DesignMatrix/prov_value') = nHCBG;
+nidm_json('nidm_DesignMatrix/prov:value') = nHCBG;
 nidm_json('nidm_DesignMatrix/nidm_regressorNames') = HCBGnames;
 
 %-Setup is complete - save SnPMcfg Mat file
