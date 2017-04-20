@@ -529,7 +529,7 @@ if BATCH
         end
         % No extent thresholding when voxelwise threshold is requested
         nidm_inference('nidm_ExtentThreshold/prov:type') = 'obo_statistic';
-        nidm_inference('nidm_ExtentThreshold/prov:value') = 0;
+        nidm_inference('nidm_ExtentThreshold/nidm_clusterSizeInVoxels') = 0;
     else
         % Cluster-wise inference
         if exist(fullfile(CWD,'SnPM_ST.mat'))~=2 & exist(fullfile(CWD,'STCS.mat'))~=2
@@ -604,9 +604,19 @@ if BATCH
             end
                 ST_Ut = CFth;
         else % Threshold *was* set in snpm_ui.
+            
+%             TODO check why job.Thr.Clus.ClusSize.CFth is not stored in CFth
             if ~isnan(job.Thr.Clus.ClusSize.CFth)
                 error('SnPM:InvalidClusterFormingThresh', sprintf('ERROR: Cluster-forming threshold of T=%0.2f was already set during analysis configuration; hence, in results, cluster-forming threshold must be left as "NaN".\nRe-run results with cluster-forming threshold set to NaN.\n',ST_Ut))
             end
+            if (job.Thr.Clus.ClusSize.CFth<1)
+                nidm_inference('nidm_HeightThreshold/prov:type') = 'nidm_PValueUncorrected';
+                nidm_inference('nidm_HeightThreshold/prov:value') = job.Thr.Clus.ClusSize.CFth;
+            else
+                nidm_inference('nidm_HeightThreshold/prov:type') = 'obo_statistic';
+                nidm_inference('nidm_HeightThreshold/prov:value') = job.Thr.Clus.ClusSize.CFth;
+            end
+
         end
         u=ST_Ut; % Flag use of a statistic-value threshold
         % Inference details...
@@ -807,6 +817,10 @@ set(Finter,'Pointer','Watch')
 %-Calculate distribution of Maximum Suprathreshold Cluster size
 %-Calculate critical Suprathreshold Cluster Size
 %=======================================================================
+
+% TODO: check this is always true
+nidm_json('nidm_ClusterDefinitionCriteria/nidm_hasConnectivityCriterion') = 'nidm_voxel18connected';
+
 if bSpatEx
 	fprintf('Working on spatial extent...\n');
 	%-Compute suprathreshold voxels - check there are some
@@ -932,9 +946,6 @@ if bSpatEx
                 %-Save perm 1 stats for use later - [X;Y;Z;T;perm;STCno]
                 tmp = spm_clusters(Locs_vox(1:3,:));
                 
-                nidm_inferences = nidm_json('Inferences');
-                nidm_inferences('nidm_ClusterDefinitionCriteria/nidm_hasConnectivityCriterion') = 'nidm_voxel18connected';
-                nidm_json('Inferences') = nidm_inferences;
                 if isPos==1
                     STCstats_Pos = [ SnPM_ST(:,tQ); tmp];
                     if bNeg==0
@@ -1393,17 +1404,17 @@ if length(strmatch('MIPtable',Report))>0
         'nidm_Peak/nidm_qValueFDR', ...
         'nidm_Peak/prov:value', ...
         'nidm_Peak/nidm_pValueUncorrected', ...
+        'nidm_Peak/nidm_equivalentZStatistic',...
         'nidm_Coordinate/nidm_coordinateVector', ...
         }, ...
-        {Pt(i), Pfdr(i), STC_SnPMt(i), Pu(i), STC_XYZ(1:3,i)});
+        {Pt(i), Pfdr(i), STC_SnPMt(i), Pu(i), norminv(1-Pu(i)), STC_XYZ(1:3,i)});
     
     y = y -1;
     
     %-Print up to 3 secondary maxima (>8mm apart)
     %-------------------------------------------------------------------   
-    nidm_inferences = nidm_json('Inferences');
-    nidm_inferences('nidm_PeakDefinitionCriteria/nidm_minDistanceBetweenPeaks') = 8;
-    nidm_json('Inferences') = nidm_inferences;
+    nidm_json('nidm_PeakDefinitionCriteria/nidm_minDistanceBetweenPeaks') = 8;
+    nidm_json('nidm_PeakDefinitionCriteria/nidm_maxNumberOfPeaksPerCluster') = 3;
     
     [null, k] = sort(-STC_SnPMt(j));	% Sort on t value
     D         = i;
@@ -1432,9 +1443,10 @@ if length(strmatch('MIPtable',Report))>0
         'nidm_Peak/nidm_qValueFDR', ...
         'nidm_Peak/prov:value', ...
         'nidm_Peak/nidm_pValueUncorrected', ...
+        'nidm_Peak/nidm_equivalentZStatistic',...
         'nidm_Coordinate/nidm_coordinateVector', ...
         }, ...
-        {Pt(d), Pfdr(d), STC_SnPMt(d), Pu(d), STC_XYZ(1:3,d)});
+        {Pt(d), Pfdr(d), STC_SnPMt(d), Pu(d), norminv(1-Pu(d)), STC_XYZ(1:3,d)});
       
     end
     
@@ -1445,12 +1457,8 @@ if length(strmatch('MIPtable',Report))>0
     r = r + 1;				% Next region
   end
   
-  nidm_inferences = nidm_json('Inferences');
-  nidm_inference = containers.Map();
   nidm_inference('Clusters') = nidm_clusters;
-  nidm_inferences(contrast_id) = nidm_inference;
-  nidm_json('Inferences') = nidm_inferences;
-  
+ 
   clear i j k D d r
   
   %-Footnote with SnPM parameters
@@ -1496,7 +1504,14 @@ if length(strmatch('MIPtable',Report))>0
   y=y-0.8;
   text(0,y,sprintf('Design: %s',sDesign),'FontSize',8);
   y=y-0.8;
-  text(0,y,sprintf('Search vol: %d cmm, %d voxels',S*abs(prod(VOX)),S), 'FontSize',8)
+  search_vol_cmm = S*abs(prod(VOX));
+  search_vol_vox = S;
+  text(0,y,sprintf('Search vol: %d cmm, %d voxels',search_vol_cmm,search_vol_vox), 'FontSize',8)
+  nidm_inference('nidm_SearchSpaceMaskMap/nidm_searchVolumeInVoxels') = search_vol_vox;
+  
+%   TODO convert back to units
+  nidm_inference('nidm_SearchSpaceMaskMap/nidm_searchVolumeInUnits') = search_vol_cmm;
+  
   y=y-0.8;
   text(0.7,y,sprintf('Voxel size: [%5.2f, %5.2f, %5.2f] mm',abs(VOX)), ...
        'FontSize', 8)
@@ -1571,16 +1586,36 @@ if WrtFlt || nidm
   Vs =  sf_close_vol(Vs);
   clear t
   
+  % TODO SearchSpaceMaskMap can be different from analysis mask
+  nidm_inference('nidm_SearchSpaceMaskMap/prov:atLocation') = 'mask.img';
   
-  nidm_inferences = nidm_json('Inferences');
-  nidm_inference = nidm_inferences(contrast_id);
+  % TODO: always stationary??
+  nidm_inference('nidm_SearchSpaceMaskMap/nidm_randomFieldStationarity') = true;
+  
   nidm_inference('nidm_ExcursionSetMap/prov:atLocation') = Fname;
+  
+  nidm_inferences = containers.Map();
   nidm_inferences(contrast_id) = nidm_inference;
   nidm_json('Inferences') = nidm_inferences;
+
+  nidm_json('nidm_NIDMResultsExporter/nidm_softwareVersion') = snpm('ver');
+  nidm_json('nidm_NeuroimagingAnalysisSoftware/nidm_softwareVersion') = snpm('ver');
+  
+  %   TODO: are other units possible in SnPM??
+  nidm_json('nidm_CoordinateSpace/units') = {'mm', 'mm', 'mm'};
+  
+  % TODO: these should be filled in by the user ---
+  nidm_json('nidm_CoordinateSpace/nidm_inWorldCoordinateSystem') = 'nidm_StandardizedCoordinateSystem';
+  nidm_json('nlx_Imaginginstrument/prov:type') = 'nlx_Magneticresonanceimagingscanner';
+  % ---
+  
+  nidm_json('nidm_NeuroimagingAnalysisSoftware/prov:type') = 'src_SnPM';
+  nidm_json('nidm_NeuroimagingAnalysisSoftware/prov:label') = 'SnPM';
   
   % TODO: This temp file should only be produced if NIDM export is requested
   jsonwrite('snpm_nidm_thresh.json', nidm_json, ...
             struct('indent','    ', 'escape', false));
+  spm_nidmresults(nidm_json, CWD)
 end
 
 %-Reset Interactive Window

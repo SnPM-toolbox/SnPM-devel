@@ -231,6 +231,8 @@ else
     nidm_json('nidm_ErrorModel/nidm_dependenceMapWiseDependence') = 'nidm_IndependentParameter';
 end
 
+% TODO: check this is correct
+nidm_json('nidm_ModelParameterEstimation/nidm_withEstimationMethod') = 'obo_ordinaryleastsquaresestimation';
 
 if isempty([H C])
   error('SnPM:NoModel', 'No model specified; [H C] empty'); 
@@ -341,12 +343,10 @@ r       = rank([H C B G]);		%-Model degrees of freedom
 df      = q - r;			%-Residual degrees of freedom
 nPerm   = size(PiCond,1);		%-# permutations
 
-nidm_json('Inferences') = containers.Map(...
-    {'nidm_NonParametricNullDistribution/nidm_numberOfPermutations',...
-     'nidm_NonParametricNullDistribution/nidm_hasResamplingScheme',...
-     'nidm_NonParametricNullDistribution/nidm_hasApproximationMethod',...
-     'nidm_NonParametricNullDistribution/nidm_maximumNumberOfPermutations'},...
-    { nPerm, 'nidm_Permutation', 'nidm_MonteCarlo', nPiCond_mx});
+nidm_json('nidm_NonParametricNullDistribution/nidm_numberOfPermutations') = nPerm;
+nidm_json('nidm_NonParametricNullDistribution/nidm_hasResamplingScheme') = 'nidm_Permutation';
+nidm_json('nidm_NonParametricNullDistribution/nidm_hasApproximationMethod') = 'nidm_MonteCarlo';
+nidm_json('nidm_NonParametricNullDistribution/nidm_maximumNumberOfPermutations') = nPiCond_mx;
 
 con_names = nidm_json('Contrasts').keys;
 for i = 1:numel(con_names)
@@ -456,6 +456,17 @@ else
 		  [rank(CONT) df],vFWHM);
   end
 end
+
+Vmask=snpm_clone_vol(Vt,'mask.img',str);
+Vmask=spm_create_vol(Vmask);
+nidm_json('nidm_MaskMap/prov:atLocation') = 'mask.img';
+
+% TODO: grand mean needs to be computed
+warning('Grand mean is not computed')
+Vgm=snpm_clone_vol(Vt,'gm.img',str);
+Vgm=spm_create_vol(Vgm);
+nidm_json('nidm_GrandMeanMap/prov:atLocation') = 'gm.img';
+
 if STAT=='T'
   VT_pos=snpm_clone_vol(Vt,'snpmT+.img',[str,' (+ve)']);
   VT_pos=spm_create_vol(VT_pos);
@@ -614,6 +625,7 @@ for i = 1:zdim
   else
     Q = find(all(X>TH) & any(diff(X)) & Wt);
   end
+  
 
   if length(Q)
    
@@ -761,6 +773,13 @@ for i = 1:zdim
     
     ResSS_vol=reshape(ResSS_image,DIM(1),DIM(2),DIM(3));
     spm_write_vol(VResMS, ResSS_vol);
+    
+    % Analysis mask
+    mask_vol=reshape(Q,DIM(1),DIM(2),DIM(3));
+    spm_write_vol(Vmask,mask_vol);
+    
+    % TODO: replace mask volume by computed grand mean    
+    spm_write_vol(Vgm,mask_vol);
     
     if STAT=='T'
       T_pos_vol=reshape(T_pos_image,DIM(1),DIM(2),DIM(3));
