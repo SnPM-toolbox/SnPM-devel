@@ -459,17 +459,27 @@ end
 if STAT=='T'
   VT_pos=snpm_clone_vol(Vt,'snpmT+.img',[str,' (+ve)']);
   VT_pos=spm_create_vol(VT_pos);
+  
+  VCON_pos=snpm_clone_vol(Vt,'con+.img',[str,' (+ve)']);
+  VCON_pos=spm_create_vol(VCON_pos);
+  
   nidm_contrasts = nidm_json('Contrasts');
   nidm_contrast = nidm_contrasts(con_name);
+  
+  nidm_contrast('nidm_ContrastMap/prov:atLocation') = 'con+.img';
   nidm_contrast('nidm_StatisticMap/prov:atLocation') = 'snpmT+.img';
   nidm_contrasts(con_name) = nidm_contrast;
   
 %   nidm_json('Contrasts').(con_name).('nidm_StatisticMap/prov:atLocation') = 'snpmT+.img';
   VT_neg=snpm_clone_vol(Vt,'snpmT-.img',[str,' (-ve)']);
   VT_neg=spm_create_vol(VT_neg);
+  
+  VCON_neg=snpm_clone_vol(Vt,'con-.img',[str,' (+ve)']);
+  VCON_neg=spm_create_vol(VCON_neg);
 %   nidm_json('Contrasts').(con_neg_name).('nidm_StatisticMap__prov_atLocation') = 'snpmT-.img';
   nidm_neg_contrast = nidm_contrasts(con_neg_name);
   nidm_neg_contrast('nidm_StatisticMap/prov:atLocation') = 'snpmT-.img';
+  nidm_neg_contrast('nidm_ContrastMap/prov:atLocation') = 'con-.img';
   nidm_contrasts(con_neg_name) = nidm_neg_contrast;
   
   nidm_json('Contrasts') = nidm_contrasts;
@@ -537,6 +547,8 @@ for i = 1:zdim
   if STAT=='T'
     T_pos_image=repmat(NaN,1,WorkDim);
     T_neg_image=repmat(NaN,1,WorkDim);
+    CON_pos_image=repmat(NaN,1,WorkDim);
+    CON_neg_image=repmat(NaN,1,WorkDim);
   elseif STAT=='F'
     F_image=repmat(NaN,1,WorkDim);
   end
@@ -656,9 +668,11 @@ for i = 1:zdim
     %-Compute t-statistics for specified compounds of parameters
     %-----------------------------------------------------------
     T      = zeros(1,size(BETA,2));
+    CON    = zeros(1,size(BETA,2));
     Co     = CONT;
     if STAT=='T'
       % t, as usual
+      CON(1,:) = Co*BETA;
       T(1,:) = Co*BETA./sqrt((ResSS*(Co*pinv([H C B G]'*[H C B G])*Co'))/df);
     else
       % F!
@@ -699,6 +713,9 @@ for i = 1:zdim
     if STAT=='T'
       T_pos_image(:,Q)=T;
       T_neg_image(:,Q)=-T;
+      
+      CON_pos_image(:,Q)=CON;
+      CON_neg_image(:,Q)=-CON;
     elseif STAT=='F'
       F_image(:,Q)=T;
     end
@@ -739,6 +756,12 @@ for i = 1:zdim
       
       T_neg_vol=reshape(T_neg_image,DIM(1),DIM(2),DIM(3));
       spm_write_vol(VT_neg,T_neg_vol);
+
+      CON_pos_vol=reshape(CON_pos_image,DIM(1),DIM(2),DIM(3));
+      spm_write_vol(VCON_pos,CON_pos_vol);
+      
+      CON_neg_vol=reshape(CON_neg_image,DIM(1),DIM(2),DIM(3));
+      spm_write_vol(VCON_neg,CON_neg_vol);
       
     elseif STAT=='F'
       F_vol=reshape(F_image,DIM(1),DIM(2),DIM(3));
