@@ -524,6 +524,8 @@ if BATCH
             u = C_MaxT;
             nidm_inference('nidm_HeightThreshold/prov:type') = 'obo_FWERadjustedpvalue';
             nidm_inference('nidm_HeightThreshold/prov:value') = alph_FWE;
+        otherwise
+            error('Unknown threshold')
         end
         % No extent thresholding when voxelwise threshold is requested
         nidm_inference('nidm_ExtentThreshold/prov:type') = 'obo_statistic';
@@ -543,11 +545,11 @@ if BATCH
             ST_Ut_0 = ST_Ut;
             CFth=job.Thr.Clus.ClusSize.CFth;
             if (CFth<1)
-                nidm_inference('nidm_ExtentThreshold/prov:type') = 'nidm_PValueUncorrected';
-                nidm_inference('nidm_ExtentThreshold/prov:value') = CFth;
+                nidm_inference('nidm_HeightThreshold/prov:type') = 'nidm_PValueUncorrected';
+                nidm_inference('nidm_HeightThreshold/prov:value') = CFth;
             else
-                nidm_inference('nidm_ExtentThreshold/prov:type') = 'obo_statistic';
-                nidm_inference('nidm_ExtentThreshold/prov:value') = CFth;
+                nidm_inference('nidm_HeightThreshold/prov:type') = 'obo_statistic';
+                nidm_inference('nidm_HeightThreshold/prov:value') = CFth;
             end
             
             if (CFth<=0)
@@ -625,7 +627,7 @@ if BATCH
                 nidm_inference('nidm_ExtentThreshold/prov:value') = alph_FWE;
         end
     end % END: Cluster-wise inference
-
+    
 else  % GUI, interative inference specification
 
   str_img =[STAT,'|P'];
