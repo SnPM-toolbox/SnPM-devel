@@ -463,8 +463,13 @@ if STAT=='T'
   VCON_pos=snpm_clone_vol(Vt,'con+.img',[str,' (+ve)']);
   VCON_pos=spm_create_vol(VCON_pos);
   
+  VCONSE=snpm_clone_vol(Vt,'conse.img', str);
+  VCONSE=spm_create_vol(VCONSE);
+  
   nidm_contrasts = nidm_json('Contrasts');
   nidm_contrast = nidm_contrasts(con_name);
+  
+  nidm_contrast('nidm_ContrastStandardErrorMap/prov:atLocation') = 'conse.img';
   
   nidm_contrast('nidm_ContrastMap/prov:atLocation') = 'con+.img';
   nidm_contrast('nidm_StatisticMap/prov:atLocation') = 'snpmT+.img';
@@ -480,6 +485,10 @@ if STAT=='T'
   nidm_neg_contrast = nidm_contrasts(con_neg_name);
   nidm_neg_contrast('nidm_StatisticMap/prov:atLocation') = 'snpmT-.img';
   nidm_neg_contrast('nidm_ContrastMap/prov:atLocation') = 'con-.img';
+  
+  % TODO: check it's fine to use same conse image for pos and neg contrasts  
+  nidm_neg_contrast('nidm_ContrastStandardErrorMap/prov:atLocation') = 'conse.img';
+  
   nidm_contrasts(con_neg_name) = nidm_neg_contrast;
   
   nidm_json('Contrasts') = nidm_contrasts;
@@ -671,8 +680,9 @@ for i = 1:zdim
     CON    = zeros(1,size(BETA,2));
     Co     = CONT;
     if STAT=='T'
-      % t, as usual
       CON(1,:) = Co*BETA;
+      CONSE(1,:) = sqrt((ResSS*(Co*pinv([H C B G]'*[H C B G])*Co'))/df);
+      % t, as usual
       T(1,:) = Co*BETA./sqrt((ResSS*(Co*pinv([H C B G]'*[H C B G])*Co'))/df);
     else
       % F!
@@ -716,6 +726,8 @@ for i = 1:zdim
       
       CON_pos_image(:,Q)=CON;
       CON_neg_image(:,Q)=-CON;
+      
+      CONSE_image(:,Q)=CONSE;
     elseif STAT=='F'
       F_image(:,Q)=T;
     end
@@ -762,6 +774,9 @@ for i = 1:zdim
       
       CON_neg_vol=reshape(CON_neg_image,DIM(1),DIM(2),DIM(3));
       spm_write_vol(VCON_neg,CON_neg_vol);
+      
+      CONSE_vol=reshape(CONSE_image,DIM(1),DIM(2),DIM(3));
+      spm_write_vol(VCONSE,CONSE_vol);
       
     elseif STAT=='F'
       F_vol=reshape(F_image,DIM(1),DIM(2),DIM(3));
