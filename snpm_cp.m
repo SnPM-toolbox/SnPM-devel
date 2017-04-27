@@ -436,7 +436,6 @@ Vt=V(1);
 %
 %-Initialize image structures.
 %
-Vgmean=snpm_clone_vol(Vt,'GrandMean.img','GrandMean');
 for ii=1:p
   fname{ii}= sprintf('beta_%04d.img',ii);
   descrip{ii}=sprintf('beta_%04d hats',ii);
@@ -465,11 +464,9 @@ Vmask=snpm_clone_vol(Vt,'mask.img',str);
 Vmask=spm_create_vol(Vmask);
 nidm_json('nidm_MaskMap/prov:atLocation') = 'mask.img';
 
-% TODO: grand mean needs to be computed
-warning('Grand mean is not computed')
-Vgm=snpm_clone_vol(Vt,'gm.img',str);
-Vgm=spm_create_vol(Vgm);
-nidm_json('nidm_GrandMeanMap/prov:atLocation') = 'gm.img';
+Vgmean=snpm_clone_vol(Vt,'GrandMean.img','GrandMean');
+Vgmean=spm_create_vol(Vgmean);
+nidm_json('nidm_GrandMeanMap/prov:atLocation') = 'GrandMean.img';
 
 if STAT=='T'
   VT_pos=snpm_clone_vol(Vt,'snpmT+.img',[str,' (+ve)']);
@@ -773,9 +770,6 @@ for i = 1:zdim
   %-The image of the volume or the slice should be written out no matter length(Q)=1
   %or 0. 
   if bVolm
-    gmean_vol = reshape(gmean_image,DIM(1),DIM(2),DIM(3));
-    spm_write_vol(gmean,gmean_vol);
-
     for ii=1:p
       BETA_vol=reshape(BETA_image(ii,:),DIM(1),DIM(2),DIM(3));
       spm_write_vol(Vbeta(ii),BETA_vol);
@@ -787,9 +781,10 @@ for i = 1:zdim
     % Analysis mask
     mask_vol=reshape(Q,DIM(1),DIM(2),DIM(3));
     spm_write_vol(Vmask,mask_vol);
-    
-    % TODO: replace mask volume by computed grand mean    
-    spm_write_vol(Vgm,mask_vol);
+
+    % Grand mean
+    gmean_vol = reshape(gmean_image,DIM(1),DIM(2),DIM(3));
+    spm_write_vol(Vgmean,gmean_vol);
     
     if STAT=='T'
       T_pos_vol=reshape(T_pos_image,DIM(1),DIM(2),DIM(3));
@@ -817,8 +812,12 @@ for i = 1:zdim
       spm_write_vol(VlwP, lwP_vol);
     end
 	  
-  else  
-
+  else
+    % Analysis mask
+    mask_plate=reshape(Q,DIM(1),DIM(2));
+    spm_write_plane(Vmask,mask_plate);  
+      
+    % Grand mean
     gmean_plate=reshape(gmean_image, DIM(1), DIM(2));
     spm_write_plane(Vgmean,gmean_plate,i);
 
@@ -836,6 +835,15 @@ for i = 1:zdim
       
       T_neg_plate=reshape(T_neg_image, DIM(1), DIM(2));
       spm_write_plane(VT_neg,T_neg_plate,i);
+      
+      CON_pos_plate=reshape(CON_pos_image,DIM(1),DIM(2));
+      spm_write_plane(VCON_pos,CON_pos_plate);
+      
+      CON_neg_plate=reshape(CON_neg_image,DIM(1),DIM(2));
+      spm_write_plane(VCON_neg,CON_neg_plate);
+      
+      CONSE_plate=reshape(CONSE_image,DIM(1),DIM(2));
+      spm_write_plane(VCONSE,CONSE_plate);
 	  
     elseif STAT=='F'
       F_plate=reshape(F_image, DIM(1), DIM(2));
