@@ -311,7 +311,10 @@ end
 
 %-Delete files from previous analyses, if they exist
 %-----------------------------------------------------------------------
-files = {	'^ResMS\..{3}$','^beta_.{4}\..{3}','^GrandMean', '^lP_.{4}\..{3}',...
+files = {	'^ResMS\..{3}$','^beta_.{4}\..{3}','^GrandMean\..{3}', ...
+        '^mask\..{3}', '^conse\..{3}',...
+        '^con.{2}\..{3}','^con.{1}\..{3}',...
+        '^lP_.{4}\..{3}',...
 		'^lP.{1}\..{3}','^snpm.{2}\..{3}','^snpm.{1}\..{3}'};
 
 for i=1:length(files)
@@ -433,7 +436,7 @@ Vt=V(1);
 %
 %-Initialize image structures.
 %
-Vgmean=snpm_clone_vol(Vt,'GrandMean','GrandMean');
+Vgmean=snpm_clone_vol(Vt,'GrandMean.img','GrandMean');
 for ii=1:p
   fname{ii}= sprintf('beta_%04d.img',ii);
   descrip{ii}=sprintf('beta_%04d hats',ii);
