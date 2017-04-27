@@ -311,7 +311,7 @@ end
 
 %-Delete files from previous analyses, if they exist
 %-----------------------------------------------------------------------
-files = {	'^ResMS\..{3}$','^beta_.{4}\..{3}', '^lP_.{4}\..{3}',...
+files = {	'^ResMS\..{3}$','^beta_.{4}\..{3}','^GrandMean', '^lP_.{4}\..{3}',...
 		'^lP.{1}\..{3}','^snpm.{2}\..{3}','^snpm.{1}\..{3}'};
 
 for i=1:length(files)
@@ -433,6 +433,7 @@ Vt=V(1);
 %
 %-Initialize image structures.
 %
+Vgmean=snpm_clone_vol(Vt,'GrandMean','GrandMean');
 for ii=1:p
   fname{ii}= sprintf('beta_%04d.img',ii);
   descrip{ii}=sprintf('beta_%04d hats',ii);
@@ -562,6 +563,7 @@ for i = 1:zdim
   
   %-Initialize the image data for this slice/volume
   %---------------------------------------------------------------------
+  gmean_image=repmat(NaN,1,WorkDim);
   BETA_image=repmat(NaN,p,WorkDim);
   ResSS_image=repmat(NaN,1,WorkDim);
   if STAT=='T'
@@ -654,6 +656,7 @@ for i = 1:zdim
     % Use pseudo inverse rather than BETA=inv(D'*D)*D'*X for 
     % D = DesMtx, to allow for non-unique designs. See matlab help.
     %-----------------------------------------------------------------
+    gmean = mean(X);
     BETA  = pinv([H C B G])*X;
     ResSS = sum((X - [H C B G]*BETA).^2);
     
@@ -730,6 +733,7 @@ for i = 1:zdim
     %
     %- New! Write out data images.
     %- Input image data.
+    gmean_image(:,Q)=gmean;
     BETA_image(:,Q)=BETA;
     ResSS_image(:,Q)=ResSS;
     if STAT=='T'
@@ -766,6 +770,9 @@ for i = 1:zdim
   %-The image of the volume or the slice should be written out no matter length(Q)=1
   %or 0. 
   if bVolm
+    gmean_vol = reshape(gmean_image,DIM(1),DIM(2),DIM(3));
+    spm_write_vol(gmean,gmean_vol);
+
     for ii=1:p
       BETA_vol=reshape(BETA_image(ii,:),DIM(1),DIM(2),DIM(3));
       spm_write_vol(Vbeta(ii),BETA_vol);
@@ -808,6 +815,10 @@ for i = 1:zdim
     end
 	  
   else  
+
+    gmean_plate=reshape(gmean_image, DIM(1), DIM(2));
+    spm_write_plane(Vgmean,gmean_plate,i);
+
     for ii=1:p
       BETA_plate=reshape(BETA_image(ii,:), DIM(1), DIM(2));
       spm_write_plane(Vbeta(ii),BETA_plate,i);
