@@ -350,7 +350,7 @@ nPerm   = size(PiCond,1);		%-# permutations
 nidm_json('nidm_NonParametricNullDistribution/nidm_numberOfPermutations') = nPerm;
 nidm_json('nidm_NonParametricNullDistribution/nidm_hasResamplingScheme') = 'nidm_Permutation';
 nidm_json('nidm_NonParametricNullDistribution/nidm_hasApproximationMethod') = 'nidm_MonteCarlo';
-nidm_json('nidm_NonParametricNullDistribution/nidm_maximumNumberOfPermutations') = nPiCond_mx;
+nidm_json('nidm_NonParametricNullDistribution/nidm_maximumNumberOfPermutations') = nPerm_max;
 
 con_names = nidm_json('Contrasts').keys;
 for i = 1:numel(con_names)

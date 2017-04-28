@@ -303,6 +303,17 @@ eval(sDesFile);
 %-Total #observations
 nScan = size(P,1);
 
+%-Max number of possible permutations
+if exist('nPiCond_mx', 'var')
+    nPerm_max = nPiCond_mx;
+elseif exist('nPiStud_mx', 'var')
+    nPerm_max = nPiStud_mx;
+elseif exist('nPiSubj_mx', 'var')
+    nPerm_max = nPiSubj_mx;
+else
+    error('snpm:MissingMaxPerm', 'Maximum number of permutations not found')
+end
+
 %-Get general analysis & data parameters
 %=======================================================================
 
@@ -587,7 +598,7 @@ nidm_json('nidm_DesignMatrix/nidm_regressorNames') = HCBGnames;
 s_SnPMcfg_save = ['s_SnPMcfg_save H C B G HCBGnames P PiCond ',...
 	'sPiCond bhPerms sHCform iGloNorm sGloNorm GM rg GX GMscale CONT ',...
 	'THRESH MASK ImMASK TH bVarSm vFWHM sVarSm bVolm bST sDesFile sDesign ',...
-        'V pU_ST_Ut df1 nidm_json nPiCond_mx nidm_json ', ...
+        'V pU_ST_Ut df1 nidm_json nPerm_max nidm_json ', ...
 	'sDesSave ',sDesSave];
 eval(['save SnPMcfg ',s_SnPMcfg_save])
 
