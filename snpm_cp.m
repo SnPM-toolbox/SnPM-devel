@@ -257,6 +257,7 @@ if size(CONT,1) > 1
   con_name = 'Positive';
   
   nidm_json('Contrasts') = containers.Map({con_name}, {contrastMap});
+  con_neg_name = '';
 else
   contrast_pos = containers.Map();
   contrast_neg = containers.Map(); % There is no deep copy of 
@@ -513,6 +514,10 @@ elseif STAT=='F'
   nidm_contrast('nidm_StatisticMap/prov:atLocation') = 'snpmF.img';
   nidm_contrasts(con_name) = nidm_contrast;
   nidm_json('Contrasts') = nidm_contrasts;
+
+  VFnum=snpm_clone_vol(Vt,'snpmFnum.img',str);
+  VFnum=spm_create_vol(VFnum);
+  nidm_contrast('nidm_ContrastExplainedMeanSquareMap/prov:atLocation') = 'snpmFnum.img';
 end
 
 VlP_pos=snpm_clone_vol(Vt, 'lP+.img', '-log10(uncor. non-para. P, +ve)');
@@ -692,6 +697,7 @@ for i = 1:zdim
     %-Compute t-statistics for specified compounds of parameters
     %-----------------------------------------------------------
     T      = zeros(1,size(BETA,2));
+    Fnum   = zeros(1,size(BETA,2));
     CON    = zeros(1,size(BETA,2));
     Co     = CONT;
     if STAT=='T'
@@ -704,6 +710,8 @@ for i = 1:zdim
       pX   = pinv([H C B G]);
       T(1,:) = (sum(((Co*BETA)'*inv(Co*pinv([H C B G]'*[H C B G])*Co'))' .* ...
 		    (Co*BETA),1)/rank(Co)) ./ (ResSS/df);
+      Fnum(1,:) = (sum(((Co*BETA)'*inv(Co*pinv([H C B G]'*[H C B G])*Co'))' .* ...
+		    (Co*BETA),1)/rank(Co));
     end	
     
     %-Save Max T statistic
@@ -746,6 +754,7 @@ for i = 1:zdim
       CONSE_image(:,Q)=CONSE;
     elseif STAT=='F'
       F_image(:,Q)=T;
+      Fnum_image(:,Q)=Fnum;
     end
 	
     if bVarAlph
@@ -805,6 +814,9 @@ for i = 1:zdim
     elseif STAT=='F'
       F_vol=reshape(F_image,DIM(1),DIM(2),DIM(3));
       spm_write_vol(VF,F_vol);
+      
+      Fnum_vol=reshape(Fnum_image,DIM(1),DIM(2),DIM(3));
+      spm_write_vol(VFnum,Fnum_vol);
     end
 	  
     if bVarAlph
@@ -848,6 +860,9 @@ for i = 1:zdim
     elseif STAT=='F'
       F_plate=reshape(F_image, DIM(1), DIM(2));
       spm_write_plane(VF,F_plate,i);
+      
+      Fnum_plate=reshape(Fnum_image, DIM(1), DIM(2));
+      spm_write_plane(VFnum,Fnum_plate,i);
     end  
 	    
     if bVarAlph
