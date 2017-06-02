@@ -1,19 +1,17 @@
 %% Efficient permutation testing using Matrix completion
-% % the following function computes the max Null statistic distribution 
+% % the following function computes the max and min null statistic distribution 
 % % in its current format, the code only uses t-statistics
 
 %%% Original Library:
 % % RapidPT: https://github.com/felipegb94/RapidPT
 
 %%% Corresponding papers :
+% % Accelerating Permutation Testing in Neuroimaging through Subspace Tracking
+% % F Gutierrez-Barragan VK Ithapu, C Hinrichs, T Nichols, SC Johnson, V Singh
+% % Under Review
 % % Speeding up Permutation Testing in Neuroimaging 
 % % C Hinrichs, VK Ithapu, Q Sun, SC Johnson, V Singh
 % % NIPS 2013
-% % Accelerating Permutation Testing in Neuroimaging through Subspace Tracking
-% % F Gutierrez-Barragan VK Ithapu, C Hinrichs, T Nichols, SC Johnson, V Singh
-% % Under Preparation
-
-
 
 %%% Arguments    
 % % 
@@ -46,17 +44,11 @@
 % % Codes already included in the package
 
 %%% Usage 
-% %     inputs.data = '/home/user/mydata/pt_data.mat';
-% %     inputs.maxrank = 30; input.T = 1000; input.traintime = 50; 
-% %     inputs.display = 1;
-% %     outputs = RapidPT(inputs);
+% %     See https://github.com/felipegb94/RapidPT
 
-function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
-% RapidPermutationTesting 
-%   Modified permutation testing algorithm described in the following paper
-%   Speeding up Permutation Testing in Neuroimaging  C Hinrichs, VK Ithapu, Q Sun, SC Johnson, V Singh, NIPS 2013
-    
-    fprintf('Starting RapidPermutationTesting...\n');
+function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath, T0 )
+
+    fprintf('Starting RapidPT...\n');
     tTotal = tic;
     fprintf('Adding Paths...\n');
     AddPaths(rapidPTLibraryPath);
@@ -87,7 +79,8 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
    
     binRes = 0.05; 
     maxnullBins = -9:binRes:9; %% bin resolution in maxnull histogram computation
-    subV = CheckSamplingRate(N, V, sub); %% number of samples used per permutation
+%     subV = CheckSamplingRate(N, V, sub); %% number of samples used per permutation
+    subV = round(V*sub);
     maxTStatistics = zeros(1, numPermutations); %% estimated max statistics for all permutations
     minTStatistics = zeros(1, numPermutations); %% estimated max statistics for all permutations
 
@@ -95,6 +88,8 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
 
     fprintf('\nStarting RapidPT core...\n');
     fprintf('Training for low rank subspace and residual priors \n');
+    
+    clear inputs; % Clear some memory
     tTraining = tic;
 
     permutationMatrix1Current = permutationMatrix1(1:trainNum,:);
@@ -120,6 +115,7 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
     end 
     
     diffForNormal = zeros(trainNum,maxCycles);
+
     for m = 1:1:maxCycles
         Ts_ac = zeros(V,trainNum); 
         Ts_tr = zeros(V,trainNum);
@@ -141,18 +137,31 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
     end
 
     [muFit,~] = normfit(diffForNormal(:));
-    
+
     tTraining = toc(tTraining);
     timings.tTraining = tTraining;
 
+%% Max Memory Check + Max Number of parallel workers
+    clear TCurrent; clear Ts_ac; clear Ts_tr;
+    c = parcluster('local'); 
+    numCoresAvail = c.NumWorkers;
+    maxBytes = 8*1024*1024*1024; % let maxMemory be 8GB
+    % Get variables with large memory footprint
+    UHatInfo = whos('UHat'); dataInfo = whos('data'); permMatrixInfo = whos('permutationMatrix1'); 
+    bytesPerWorker = UHatInfo.bytes + 2*dataInfo.bytes + 2*permMatrixInfo.bytes; % There is 2 data matrices and 2 perm matrices
+     
+    maxNumWorkers = floor(maxBytes / bytesPerWorker); % If zero parfor will run serially
+    if maxNumWorkers == 1
+        maxNumWorkers = 0;
+    end
+    numWorkers = min(maxNumWorkers,numCoresAvail);
+
 %% Recovery : Filling in W and residuals for all numPermutations
     fprintf('\n Recovering the subspace coefficients and residuals for all permutations \n');
-    tRecovery = tic;    
-    
-    
-    %W = cell(numPermutations,1); 
-    % Calculate small portion of the permutation matrix
-    parfor i = 1:numPermutations
+    tRecovery = tic;  
+    nPtmp = ones(V,1); T0 = T0'; % Initialize to ones because the first statistic is equal to T0
+%     parfor (i = 1:numPermutations, numWorkers)
+    for i = 1:numPermutations
         inds = randperm(V,subV)'; 
         [TCurrent] = TwoSamplePermTest(data(:,inds),...
                                        dataSquared(:,inds),...
@@ -167,6 +176,7 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
         TRec(inds) = TRec(inds) + s;
         maxTStatistics(1,i) = max(TRec) + muFit;
         minTStatistics(1,i) = min(TRec) - muFit;
+        nPtmp = nPtmp + ((TRec)>=T0); % Used by SnPM to write lP images
         fprintf('Completion done on trial %d/%d  \n',i,numPermutations);  
     end
     
@@ -176,11 +186,12 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
     outputs.MaxNull = gen_hist(maxTStatistics,maxnullBins); 
     outputs.MaxT = maxTStatistics;
     outputs.MinT = minTStatistics;
+    outputs.nP = nPtmp';
 
-    if write == 1 
-        outputs.U = UHat; 
-        %outputs.W = W; 
-    end
+%     if write == 1 
+%         outputs.U = UHat; 
+%         %outputs.W = W; 
+%     end
     
     fprintf('TwoSampleRapidPT Done...\n');
     timings.tTotal = toc(tTotal);
