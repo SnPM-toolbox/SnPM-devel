@@ -56,13 +56,14 @@ function [ outputs, timings ] = TwoSampleRapidPT(Data, numPermutations, nGroup1,
 % The following parameters have been extensively tested and have produced
 % good results, independent of the dataset size and number of permutations
 
-    
-%     if(numPermutations < 10000)      
-%         subVal = {0.005};
-%     else
-%         subVal = {0.0035};
-%     end
-    subVal = 0.005;
+    % Set the sub-sampling rate to low values. Inside the RapidPT function
+    % these values will be checked and IF they are too low they will be set
+    % to the correct value.
+    if(numPermutations < 10000)      
+        subVal = {0.005};
+    else
+        subVal = {0.0035};
+    end
     
     maxCyclesVal = {3}; % Number of cycles for training.
     iterVal = {30}; % Number of iterations for matrix completion.

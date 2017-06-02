@@ -79,8 +79,8 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath, T0 )
    
     binRes = 0.05; 
     maxnullBins = -9:binRes:9; %% bin resolution in maxnull histogram computation
-%     subV = CheckSamplingRate(N, V, sub); %% number of samples used per permutation
-    subV = round(V*sub);
+    subV = CheckSamplingRate(N, V, sub); %% number of samples used per permutation
+%     subV = round(V*sub);
     maxTStatistics = zeros(1, numPermutations); %% estimated max statistics for all permutations
     minTStatistics = zeros(1, numPermutations); %% estimated max statistics for all permutations
 
@@ -160,8 +160,8 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath, T0 )
     fprintf('\n Recovering the subspace coefficients and residuals for all permutations \n');
     tRecovery = tic;  
     nPtmp = ones(V,1); T0 = T0'; % Initialize to ones because the first statistic is equal to T0
-%     parfor (i = 1:numPermutations, numWorkers)
-    for i = 1:numPermutations
+    % If numWorkers==1 the following loop will simply run serially
+    parfor (i = 1:numPermutations, numWorkers)
         inds = randperm(V,subV)'; 
         [TCurrent] = TwoSamplePermTest(data(:,inds),...
                                        dataSquared(:,inds),...
