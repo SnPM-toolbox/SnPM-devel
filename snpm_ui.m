@@ -128,6 +128,7 @@ function snpm_ui(varargin)
 % sDesSave      String of PlugIn variables to save to cfg file
 %               String itself and variables listed within it are saved.
 % s_SnPMcfg_save string matrix of all variables saved in SnPMcfg
+% UseRapidPT    Use accelerated permutation computations by subspace tracking
 %
 % PlugIn Must Supply the following:
 %-----------------------------------------------------------------------
@@ -301,6 +302,20 @@ nScan = size(P,1);
 
 %-Get general analysis & data parameters
 %=======================================================================
+
+%-RapidPT
+%-----------------------------------------------------------------------
+nPerm   = size(PiCond,1);
+UseRapidPT=job.RapidPT;
+if ~UseRapidPT && strcmp('snpm_pi_TwoSampT',sDesFile) && nPerm >= 10000 
+  warning('SnPM:TryRapidPT', ...
+    sprintf('Requesting many permutations (%d), consider activating RapidPT option for faster, approximate results.\n',nPerm));
+end
+if UseRapidPT && ~strcmp('snpm_pi_TwoSampT',sDesFile)
+  warning('SnPM:RapidPTNoDesign',...
+	'RapidPT requested by not used (presently only two-sample T design available).')
+  UseRapidPT=0;
+end
 
 %-Ask about variance smoothing & volumetric computation
 %-----------------------------------------------------------------------
@@ -578,7 +593,7 @@ CONT  = [CONT, zeros(size(CONT,1),size([B G],2))];
 s_SnPMcfg_save = ['s_SnPMcfg_save H C B G HCBGnames P PiCond ',...
 	'sPiCond bhPerms sHCform iGloNorm sGloNorm GM rg GX GMscale CONT ',...
 	'THRESH MASK ImMASK TH bVarSm vFWHM sVarSm bVolm bST sDesFile sDesign ',...
-        'V pU_ST_Ut df1 ', ...
+        'V pU_ST_Ut df1 UseRapidPT ', ...
 	'sDesSave ',sDesSave];
 eval(['save SnPMcfg ',s_SnPMcfg_save])
 

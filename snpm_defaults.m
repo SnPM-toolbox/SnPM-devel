@@ -56,3 +56,7 @@ SnPMdefs.CovVals = {
 %------------------------------------------------------------------------
 SnPMdefs.shuffle_seed = true; 
 
+% Use matrix completion acceleration?
+%------------------------------------------------------------------------
+SnPMdefs.RapidPT = false; % true - Try to use RapidPT; false - Don't use RapidPT
+

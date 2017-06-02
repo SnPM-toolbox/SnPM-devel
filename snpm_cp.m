@@ -427,6 +427,8 @@ if STAT=='T'
   lP_FDR_neg_image=repmat(NaN,1, VolDim);	
 end
 
+snpmPermTime = tic;
+
 %=======================================================================
 % - C O R R E C T   P E R M U T A T I O N
 %=======================================================================
@@ -435,6 +437,7 @@ end
 % allows determination of pseudo-t threshold when saving supratheshold
 % statistics.
 disp('Working on correct permutation...');
+
 
 SnPMt=[]; %Initialzie SnPMt,which will store the t's from correct permutation.
 
@@ -762,6 +765,7 @@ end
 %=======================================================================
 % - C O M P U T E   F O R   P E R M U T A T I O N S
 %=======================================================================
+
 %-Cycle over planes (or just once for volumetric mode)
 
 %-If working plane by plane, preallocate Q & XYZ for speed/mem. efficiency
@@ -782,6 +786,58 @@ tic %-Start the clock: Timing code is commented with "clock" symbol: (>)
 %-Loop over planes (breaks out after first loop if bVolm)
 %-----------------------------------------------------------------------
 nP = [];
+
+if (UseRapidPT >= 1)
+    
+    bhPerm = 0; % We don't want to assume distributional symmetry, plus we are not doing exhaustive permutation tests.
+    
+    params.N = size(X,1);
+    params.V = size(X,2);
+    params.nPerm = nPerm;
+    params.xdim = xdim; 
+    params.ydim = ydim; 
+    params.zdim = zdim; 
+    params.origin = ORIGIN; 
+    params.nGroup1 = size(find(iCond == 1),2); 
+    params.nGroup2 = params.N - params.nGroup1; 
+
+%     datasetInfo = strcat(num2str(params.N),'_',num2str(params.nGroup1),'_',num2str(params.nGroup2));
+%     runInfo = strcat(datasetInfo,'_',num2str(nPerm),'.mat');
+%     save(strcat('RapidPTParams.mat'),'params');
+    save('RapidPTParams.mat','params');
+    
+    fullpath = mfilename('fullpath');
+    % We only need the directory of snpm_cp so we remove the 7 chars
+    % associated to 'snpm_cp' in fullpath.
+    RapidPT_path = strcat(fullpath(1:end-7),'RapidPT_min');
+    addpath(RapidPT_path);
+
+    write = 0;
+
+    [~, SnPMucp, ~, stats] = ttest2(X(1:params.nGroup1, :), X(params.nGroup1+1:end, :), 0.05, 'both', 'unequal');
+    T0 = stats.tstat;
+    MaxT11 = max(stats.tstat);
+    MaxT12 = -1*min(stats.tstat);
+    
+    
+    % Do one less permutation b.c the first MaxT is for the original labels
+    [outputs, timings] = TwoSampleRapidPT(X, nPerm-1, params.nGroup1, write, RapidPT_path, T0);
+    MaxT = outputs.MaxT;
+    MinT = outputs.MinT;
+    nP = outputs.nP;
+%     save(strcat('timings',runInfo),'timings');
+    save('RapidPTTimings.mat','timings');
+
+    % Save variables for snpm_pp
+    MaxT = [MaxT11, MaxT12;...
+            MaxT', -MinT'];
+
+%     save('SnPMucp.mat','SnPMucp')
+%     save('XYZ.mat','XYZ');
+%     eval(['save SnPM ',s_SnPM_save]);
+%     save('SnPMt.mat','SnPMt'); % Real t-statistic for each voxel.
+    
+else % UseRapidPT == 0
 for i = 1:zdim
     
   PlStart=toc;SmTime=0; %-Timestamp (>) 
@@ -840,9 +896,10 @@ for i = 1:zdim
       STCS = snpm_STcalc('init',nPerm); 
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	
-	
-    %-Loop over permutations
+   
+    disp('Starting Permutation Testing...');
+
+    % Loop over permutations
     %-----------------------------------------------------------------
     for perm = StartPerm:nPerm
       PmStart = toc;			%-Timestamp (>)
@@ -898,7 +955,7 @@ for i = 1:zdim
       %-Save Max T statistic
       %-----------------------------------------------------------
       MaxT(perm,:) = max([ max(T(1,:)), -min(T(1,:));      ...
-		    MaxT(perm,1), MaxT(perm,2) ]);
+                           MaxT(perm,1), MaxT(perm,2) ]);
 	    
       %-Update nonparametric P-value
       %-----------------------------------------------------------
@@ -1020,7 +1077,7 @@ for i = 1:zdim
       end % (if bVolm)
 
     end 	% (for perm = StartPerm:nPerm) - Perm loop
-    
+
     %- save STCS
     if bST & pU_ST_Ut>=0
       if bhPerms %Double the STCS variables.
@@ -1047,6 +1104,9 @@ for i = 1:zdim
 	  round(100*SmTime/(toc-PlStart)))
   
 end		% (for i = 1:zdim) - loop over planes
+
+end % End else (when UseRapidPT == 0)
+
 
 fprintf('\n\nPermutations are done. Writing out images.\n')
 
@@ -1163,7 +1223,9 @@ end
 
 if bWin, spm_progress_bar('Clear'), end
 %-Printout final timing information (>)
-fprintf('\n\nThe run took %0.02f minutes\n', toc/60);
+snpmTiming = toc;
+fprintf('\n\nThe run took %0.02f minutes\n', snpmTiming/60);
+save('snpmTiming.mat','snpmTiming');
 
 %-Cleanup
 clear X
@@ -1172,7 +1234,7 @@ clear X
 %=======================================================================
 eval(['save SnPM ',s_SnPM_save])
 
-%-Print quick summary info (allowing for STOPing)
+%-Print quick summary info
 %=======================================================================
 if bhPerms
     Rank = sum([MaxT(1:perm,1);MaxT(1:perm,2)] >= MaxT(1,1));
@@ -1185,8 +1247,5 @@ fprintf('\n\tRun snpm_pp for full results\n\n');
 
 
 
-function Vs = sf_close_vol(Vs)
-% Don't need to close images in SPM5
-return
 
 

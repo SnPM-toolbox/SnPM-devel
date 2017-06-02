@@ -75,6 +75,17 @@ nPerm.help       = {'',...
 		    'Thus, if the true P-value is 0.05 and only, say, 100 permutations are computed, the Monte Carlo standard deviation is 0.0218 and the 95% CI is approximately +/- 0.0436, almost equal to the true P-value itself.  To reduce the Monte Carlo confidence interval to one tenth of P=0.05, 7,500 permutations are required; 0,000 gives a 95% CI of +/- 0.0044.',...
 		    'The use of a tiny number of permutations (e.g. 50 or 100) is recommended for testing large anlayses and to get an idea of how long an analysis will take to run.  Just realize the results will likely change with more permutations.'};
 
+% Use RapidPT?
+RapidPT            = cfg_menu;
+RapidPT.name       = 'Use RapidPT';
+RapidPT.tag        = 'RapidPT';
+RapidPT.help       = {'',...
+		    'RapidPT is a method to accelerate the computation of the maximum permutation distribution through low-rank matrix completion methods.  Specify the desired number of permutations, e.g. 10,000, and then this approach will efficiently compute an approximate permutation distribution of that size but with much less computational burden than usual. See http://felipegb94.github.io/RapidPT/ for more.'...
+		    'Note, presently, RapidPT is only available for the two-sample t-test design.'};
+RapidPT.def        = @(val)snpm_get_defaults('RapidPT', val{:});
+RapidPT.labels     = {'Yes', 'No'};
+RapidPT.values     = {true false};
+
 % ---------------------------------------------------------------------
 % vFWHM - Variance FWHM smoothing
 % ---------------------------------------------------------------------
@@ -494,7 +505,7 @@ else
 end
 %snpmui_pre = {dir scans};
 snpmui_des = DesignItems; 
-snpmui_post = {nPerm vFWHM bVolm ST masking globalc globalm };
+snpmui_post = {nPerm RapidPT vFWHM bVolm ST masking globalc globalm };
 
 %% Executable Branch
 snpmui      = cfg_exbranch;  % This is the branch that has information about how to run this module
