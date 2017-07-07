@@ -234,10 +234,111 @@ Report.help  = {
     '"FDR report" shows the histogram of voxel-wise uncorrected P-values, and the log-log plot of observed P-values versus (null hypothesis) expected P-values. The latter is the basis of the voxel-wise FDR-corrected P-values.'
     };
 
+% ---- Export to NIDM, adapted from SPM's spm_cfg_esults
+%--------------------------------------------------------------------------
+% nsubj Number of subjects
+%--------------------------------------------------------------------------
+nsubj         = cfg_entry;
+nsubj.tag     = 'nsubj';
+nsubj.name    = 'Number of subjects';
+nsubj.help    = {'Number of subjects.'};
+nsubj.strtype = 'r';
+nsubj.num     = [1 1];
+
+%--------------------------------------------------------------------------
+% label Label
+%--------------------------------------------------------------------------
+grplabel         = cfg_entry;
+grplabel.tag     = 'label';
+grplabel.name    = 'Label';
+grplabel.help    = {'Group label.'};
+grplabel.strtype = 's';
+grplabel.num     = [0 Inf];
+
+%--------------------------------------------------------------------------
+% group 
+%--------------------------------------------------------------------------
+group      = cfg_branch;
+group.tag  = 'group';
+group.name = 'Group';
+group.val  = {nsubj grplabel};
+group.help = {['Number of subjects and labels per group. ', ...
+    'For a single subject analysis, enter "1" and "single subject".']};
+
+%--------------------------------------------------------------------------
+% groups
+%--------------------------------------------------------------------------
+groups        = cfg_repeat;
+groups.tag    = 'groups';
+groups.name   = 'Groups';
+groups.help   = {['Number of groups. ', ...
+    'For a single subject analysis, specify one group.']};
+groups.values = {group};
+groups.num    = [1 Inf];
+
+%--------------------------------------------------------------------------
+% modality Modality
+%--------------------------------------------------------------------------
+modality        = cfg_menu;
+modality.tag    = 'modality';
+modality.name   = 'Modality';
+modality.help   = {'Modality.'};
+modality.labels = {'Anatomical MRI',...
+                   'Functional MRI',...
+                   'Diffusion MRI',...
+                   'PET',...
+                   'SPECT',...
+                   'EEG',...
+                   'MEG'
+}';
+modality.values = {'AMRI','FMRI','DMRI','PET','SPECT','EEG','MEG'};
+
+%--------------------------------------------------------------------------
+% refspace Reference space
+%--------------------------------------------------------------------------
+refspace        = cfg_menu;
+refspace.tag    = 'refspace';
+refspace.name   = 'Reference space';
+refspace.help   = {['Reference space. For an experiment completed only ',...
+    'within SPM, choose one of the first four options.']};
+refspace.labels = {'Subject space (no normalisation)',...
+                   'Normalised space (using segment)',...
+                   'Normalised space (using old segment)',...
+                   'Customised space',...
+                   'Other normalised MNI space',...
+                   'Other normalised Talairach space',...
+}';
+refspace.values = {'subject','ixi','icbm','custom','mni','talairach'};
+
+%--------------------------------------------------------------------------
+% export Export results to NIDM
+%--------------------------------------------------------------------------
+export_no      = cfg_const;
+export_no.tag  = 'export_no';
+export_no.name = 'No';
+export_no.val  = {0};
+export_no.help = {'Do not export to NIDM.'};
+
+
+export_nidm    = cfg_branch;
+export_nidm.tag  = 'nidm';
+export_nidm.name = 'Export to NIDM';
+export_nidm.val  = {modality refspace groups};
+export_nidm.help = {'NIDM (Neuroimaging Data Model)'};
+
+export        = cfg_choice;
+export.tag    = 'export';
+export.name   = 'Export results to NIDM';
+export.help   = {['Export your results to NIDM and share them easily with your collaborators.']};
+export.values = {export_nidm, export_no};
+export.val  = {export_nidm};
+
+% ----
+
 snpmpp        = cfg_exbranch;
 snpmpp.name   = 'Inference';
 snpmpp.tag    = 'inference';
-snpmpp.val    = {snpmres ThrType posneg WrtFilt Report};
+snpmpp.val    = {snpmres ThrType posneg WrtFilt Report export};
 snpmpp.prog   = @snpm_run_pp;
 %snpmpp.vout
 snpmpp.help   = {'Examine the results of the SnPM computation.'};

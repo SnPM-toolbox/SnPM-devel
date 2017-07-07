@@ -1190,9 +1190,75 @@ if bSpatEx
 	end
 end
 
-% Display only if *not* in command line mode
-nidm_export=true;
+% NIDM export
+nidm_export=isfield(job.export, 'nidm');
+
+% Display only if *not* in command line mode or for NIDM export
 if ~spm_get_defaults('cmdline') || nidm_export
+    
+    if nidm_export
+        % ---- Code adapted from SPM's spm_results_nidm -----
+        %-NIDM Export
+        %----------------------------------------------------------------------
+        %-Reference space
+        %--------------------------------------------------------------------------
+        switch job.export.nidm.refspace
+            case 'subject'
+                coordsys = 'nidm_SubjectCoordinateSystem';
+            case 'ixi'
+                coordsys = 'nidm_Ixi549CoordinateSystem';
+            case 'icbm'
+                coordsys = 'nidm_IcbmMni152LinearCoordinateSystem';
+            case 'custom'
+                coordsys = 'nidm_CustomCoordinateSystem';        
+            case 'mni'
+                coordsys = 'nidm_MNICoordinateSystem';        
+            case 'talairach'
+                coordsys = 'nidm_TalairachCoordinateSystem';  
+            otherwise
+                error('Unknown reference space.');
+        end
+        nidm.CoordinateSpace_inWorldCoordinateSystem = coordsys;
+
+        %-Data modality
+        %--------------------------------------------------------------------------
+        MRIProtocol  = '';
+        switch job.export.nidm.modality
+            case 'AMRI'
+                ImagingInstrument = 'nlx_Magneticresonanceimagingscanner';
+                MRIProtocol       = 'nlx_AnatomicalMRIprotocol';    
+            case 'FMRI'
+                ImagingInstrument = 'nlx_Magneticresonanceimagingscanner';
+                MRIProtocol       = 'nlx_FunctionalMRIprotocol';
+            case 'DMRI'
+                ImagingInstrument = 'nlx_Magneticresonanceimagingscanner';
+                MRIProtocol       = 'nlx_DiffusionMRIprotocol';
+            case 'PET'
+                ImagingInstrument = 'nlx_Positronemissiontomographyscanner';
+            case 'SPECT'
+                ImagingInstrument = 'nlx_Singlephotonemissioncomputedtomographyscanner';
+            case 'EEG'
+                ImagingInstrument = 'nlx_Electroencephalographymachine';
+            case 'MEG'
+                ImagingInstrument = 'nlx_Magnetoencephalographymachine';
+            otherwise
+                error('Unknown modality.');
+        end
+        nidm.Imaginginstrument_type = ImagingInstrument;
+        if ~isempty(MRIProtocol)
+            nidm.Data_hasMRIProtocol = MRIProtocol;
+        end
+
+        %-Subject/Group(s)
+        %--------------------------------------------------------------------------
+        groups = job.export.nidm.group;
+        if ~isequal(groups.N,1)
+            for i=1:numel(groups.N)
+                nidm.Groups(i).studygrouppopulation_groupName = groups.name{i};
+                nidm.Groups(i).studygrouppopulation_numberOfSubjects = groups.N(i);
+            end
+        end        
+    end
     
 %=======================================================================
 %-D I S P L A Y :   Max report
