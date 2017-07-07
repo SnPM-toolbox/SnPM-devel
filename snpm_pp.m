@@ -1649,12 +1649,7 @@ if WrtFlt || nidm_export
   
   %   TODO: are other units possible in SnPM??
   nidm.CoordinateSpace_voxelUnits = {'mm', 'mm', 'mm'};
-  
-  % TODO: these should be filled in by the user ---
-  nidm.CoordinateSpace_inWorldCoordinateSystem = 'nidm_StandardizedCoordinateSystem';
-  nidm.Imaginginstrument_type = 'nlx_Magneticresonanceimagingscanner';
-  % ---
-  
+   
   nidm.NeuroimagingAnalysisSoftware_type = 'src_SnPM';
   nidm.NeuroimagingAnalysisSoftware_label = 'SnPM';
   
