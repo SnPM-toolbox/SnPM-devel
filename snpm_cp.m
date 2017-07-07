@@ -217,22 +217,22 @@ load(CfgFile);
 if strcmp(sDesFile, 'snpm_pi_OneSampT') || ...
         strcmp(sDesFile, 'snpm_pi_ANOVAwithinS')
     % Sign flipping
-    nidm.ErrorModel_hasErrorDistribution = {'obo_nonparametricdistribution', 'obo_symmetricdistribution'};
+    nidm.ErrorModel_hasErrorDistribution = {'obo_NonParametricDistribution', 'obo_SymmetricDistribution'};
     nidm.ErrorModel_errorVarianceHomogeneous = false;
     nidm.ErrorModel_varianceMapWiseDependence = 'nidm_IndependentParameter';
     nidm.ErrorModel_hasErrorDependence = 'nidm_IndependentError';
 else
     % Permutation
-    nidm.ErrorModel_hasErrorDistribution = 'obo_nonparametricdistribution';
+    nidm.ErrorModel_hasErrorDistribution = 'obo_NonParametricDistribution';
     nidm.ErrorModel_errorVarianceHomogeneous = true;
     nidm.ErrorModel_varianceMapWiseDependence = 'nidm_IndependentParameter';
     % TODO: the 'obo_exchangeable' term is not yet in STATO
-    nidm.ErrorModel_hasErrorDependence = 'obo_exchangeable';
+    nidm.ErrorModel_hasErrorDependence = 'obo_Exchangeable';
     nidm.ErrorModel_dependenceMapWiseDependence = 'nidm_IndependentParameter';
 end
 
 % TODO: check this is correct
-nidm.ModelParameterEstimation_withEstimationMethod = 'obo_ordinaryleastsquaresestimation';
+nidm.ModelParameterEstimation_withEstimationMethod = 'obo_OrdinaryLeastSquaresEstimation';
 
 if isempty([H C])
   error('SnPM:NoModel', 'No model specified; [H C] empty'); 
@@ -249,7 +249,7 @@ if size(CONT,1) > 1 % F-contrast
   warning('SnPM:FContrast', ...
           'F contrast!  F statistic images are being created.'); 
   STAT = 'F';
-  nidm.Contrasts(1).StatisticMap_statisticType = 'obo_Fstatistic';
+  nidm.Contrasts(1).StatisticMap_statisticType = 'obo_FStatistic';
   
   if (CONT(1,:) == -CONT(2,:))
     CONT = CONT(1,:);
@@ -269,8 +269,8 @@ else
     nidm.Contrasts(1).StatisticMap_statisticType = 'nidm_smoothedtstatistic';
     nidm.Contrasts(2).StatisticMap_statisticType = 'nidm_smoothedtstatistic';
   else
-    nidm.Contrasts(1).StatisticMap_statisticType = 'obo_tstatistic';
-    nidm.Contrasts(2).StatisticMap_statisticType = 'obo_tstatistic';
+    nidm.Contrasts(1).StatisticMap_statisticType = 'obo_TStatistic';
+    nidm.Contrasts(2).StatisticMap_statisticType = 'obo_TStatistic';
   end
   nidm.Contrasts(1).ContrastMap_contrastName = ['Positive T-Contrast: [' mat2str(CONT) ']'];
   nidm.Contrasts(1).contrastweightmatrix_value = CONT;

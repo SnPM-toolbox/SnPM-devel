@@ -505,12 +505,12 @@ if BATCH
         case 'TFth'
             u         = BoundCheck(job.Thr.Vox.VoxSig.TFth,[0 Inf],'Negative Threshold!');
             alph_FWE  = sum(MaxT > u -tol) / nPermReal;
-            nidm.Inferences(1).HeightThreshold_type = 'obo_statistic';
+            nidm.Inferences(1).HeightThreshold_type = 'obo_Statistic';
             nidm.Inferences(1).HeightThreshold_value = u;
         case 'FDRth'
             alph_FDR  = BoundCheck(job.Thr.Vox.VoxSig.FDRth,[0 1],'Invalid FDR level');
             alpha_ucp = snpm_uc_FDR(alph_FDR,[],'P',[],sSnPMucp');
-            nidm.Inferences(1).HeightThreshold_type = 'obo_qvalue';
+            nidm.Inferences(1).HeightThreshold_type = 'obo_QValue';
             nidm.Inferences(1).HeightThreshold_value = alph_FDR;
         case 'FWEth'
             alph_FWE  = BoundCheck(job.Thr.Vox.VoxSig.FWEth,[0 1],'Invalid FWE level');
@@ -521,13 +521,13 @@ if BATCH
                 C_MaxT = 0;
             end
             u = C_MaxT;
-            nidm.Inferences(1).HeightThreshold_type = 'obo_FWERadjustedpvalue';
+            nidm.Inferences(1).HeightThreshold_type = 'obo_FWERAdjustedPValue';
             nidm.Inferences(1).HeightThreshold_value = alph_FWE;
         otherwise
             error('Unknown threshold')
         end
         % No extent thresholding when voxelwise threshold is requested
-        nidm.Inferences(1).ExtentThreshold_type = 'obo_statistic';
+        nidm.Inferences(1).ExtentThreshold_type = 'obo_Statistic';
         nidm.Inferences(1).ExtentThreshold_clusterSizeInVoxels = 0;
     else
         % Cluster-wise inference
@@ -547,7 +547,7 @@ if BATCH
                 nidm.Inferences(1).HeightThreshold_type = 'nidm_PValueUncorrected';
                 nidm.Inferences(1).HeightThreshold_value = CFth;
             else
-                nidm.Inferences(1).HeightThreshold_type = 'obo_statistic';
+                nidm.Inferences(1).HeightThreshold_type = 'obo_Statistic';
                 nidm.Inferences(1).HeightThreshold_value = CFth;
             end
             
@@ -612,7 +612,7 @@ if BATCH
                 nidm.Inferences(1).HeightThreshold_type = 'nidm_PValueUncorrected';
                 nidm.Inferences(1).HeightThreshold_value = job.Thr.Clus.ClusSize.CFth;
             else
-                nidm.Inferences(1).HeightThreshold_type = 'obo_statistic';
+                nidm.Inferences(1).HeightThreshold_type = 'obo_Statistic';
                 nidm.Inferences(1).HeightThreshold_value = job.Thr.Clus.ClusSize.CFth;
             end
 
@@ -623,7 +623,7 @@ if BATCH
         switch tmp{1}
             case 'Cth'
                 C_STCS = job.Thr.Clus.ClusSize.ClusSig.Cth;
-                nidm.Inferences(1).ExtentThreshold_type = 'obo_statistic';
+                nidm.Inferences(1).ExtentThreshold_type = 'obo_Statistic';
                 nidm.Inferences(1).ExtentThreshold_clusterSizeInVoxels = C_STCS;
             case 'PthC'
                 alpha_ucp = BoundCheck(job.Thr.Clus.ClusSize.ClusSig.PthC,[0 1],'Invalid uncorrected P(k)');
@@ -632,7 +632,7 @@ if BATCH
             case 'FWEthC'
                 alph_FWE  = BoundCheck(job.Thr.Clus.ClusSize.ClusSig.FWEthC,[0 1],'Invalid FWE level (cluster-level inference)');
                 iFWE      = ceil((1-alph_FWE)*nPermReal);
-                nidm.Inferences(1).ExtentThreshold_type = 'obo_FWERadjustedpvalue';
+                nidm.Inferences(1).ExtentThreshold_type = 'obo_FWERAdjustedPValue';
                 nidm.Inferences(1).ExtentThreshold_value = alph_FWE;
         end
     end % END: Cluster-wise inference
@@ -1225,22 +1225,22 @@ if ~spm_get_defaults('cmdline') || nidm_export
         MRIProtocol  = '';
         switch job.export.nidm.modality
             case 'AMRI'
-                ImagingInstrument = 'nlx_Magneticresonanceimagingscanner';
-                MRIProtocol       = 'nlx_AnatomicalMRIprotocol';    
+                ImagingInstrument = 'nlx_MagneticResonanceImagingScanner';
+                MRIProtocol       = 'nlx_AnatomicalMRIProtocol';    
             case 'FMRI'
-                ImagingInstrument = 'nlx_Magneticresonanceimagingscanner';
-                MRIProtocol       = 'nlx_FunctionalMRIprotocol';
+                ImagingInstrument = 'nlx_MagneticResonanceImagingScanner';
+                MRIProtocol       = 'nlx_FunctionalMRIProtocol';
             case 'DMRI'
-                ImagingInstrument = 'nlx_Magneticresonanceimagingscanner';
-                MRIProtocol       = 'nlx_DiffusionMRIprotocol';
+                ImagingInstrument = 'nlx_MagneticResonanceImagingScanner';
+                MRIProtocol       = 'nlx_DiffusionWeightedImagingProtocol';
             case 'PET'
-                ImagingInstrument = 'nlx_Positronemissiontomographyscanner';
+                ImagingInstrument = 'nlx_PositronEmissionTomographyScanner';
             case 'SPECT'
-                ImagingInstrument = 'nlx_Singlephotonemissioncomputedtomographyscanner';
+                ImagingInstrument = 'nlx_SinglePhotonEmissionComputedTomographyScanner';
             case 'EEG'
-                ImagingInstrument = 'nlx_Electroencephalographymachine';
+                ImagingInstrument = 'nlx_ElectroencephalographyMachine';
             case 'MEG'
-                ImagingInstrument = 'nlx_Magnetoencephalographymachine';
+                ImagingInstrument = 'nlx_MagnetoencephalographyMachine';
             otherwise
                 error('Unknown modality.');
         end
