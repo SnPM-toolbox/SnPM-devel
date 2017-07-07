@@ -1244,7 +1244,7 @@ if ~spm_get_defaults('cmdline') || nidm_export
             otherwise
                 error('Unknown modality.');
         end
-        nidm.Imaginginstrument_type = ImagingInstrument;
+        nidm.ImagingInstrument_type = ImagingInstrument;
         if ~isempty(MRIProtocol)
             nidm.Data_hasMRIProtocol = MRIProtocol;
         end
@@ -1254,8 +1254,8 @@ if ~spm_get_defaults('cmdline') || nidm_export
         groups = job.export.nidm.group;
         if ~isequal(groups.nsubj,1)
             for i=1:numel(groups)
-                nidm.Groups(i).studygrouppopulation_groupName = groups(i).label;
-                nidm.Groups(i).studygrouppopulation_numberOfSubjects = groups(i).nsubj;
+                nidm.Groups(i).StudyGroupPopulation_groupName = groups(i).label;
+                nidm.Groups(i).StudyGroupPopulation_numberOfSubjects = groups(i).nsubj;
             end
         end        
     end

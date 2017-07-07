@@ -245,7 +245,7 @@ if size(CONT,2) ~= size([H C B G],2)
 end
 
 if size(CONT,1) > 1 % F-contrast
-  nidm.Contrasts(1).contrastweightmatrix_value = CONT;
+  nidm.Contrasts(1).ContrastWeightMatrix_value = CONT;
   warning('SnPM:FContrast', ...
           'F contrast!  F statistic images are being created.'); 
   STAT = 'F';
@@ -273,9 +273,9 @@ else
     nidm.Contrasts(2).StatisticMap_statisticType = 'obo_TStatistic';
   end
   nidm.Contrasts(1).ContrastMap_contrastName = ['Positive T-Contrast: [' mat2str(CONT) ']'];
-  nidm.Contrasts(1).contrastweightmatrix_value = CONT;
+  nidm.Contrasts(1).ContrastWeightMatrix_value = CONT;
   nidm.Contrasts(2).ContrastMap_contrastName = ['Negative T-Contrast: [' mat2str(-CONT) ']'];
-  nidm.Contrasts(2).contrastweightmatrix_value = -CONT;
+  nidm.Contrasts(2).ContrastWeightMatrix_value = -CONT;
 end
 
 if rank(CONT)<size(CONT,1)
