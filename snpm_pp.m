@@ -1252,10 +1252,10 @@ if ~spm_get_defaults('cmdline') || nidm_export
         %-Subject/Group(s)
         %--------------------------------------------------------------------------
         groups = job.export.nidm.group;
-        if ~isequal(groups.N,1)
-            for i=1:numel(groups.N)
-                nidm.Groups(i).studygrouppopulation_groupName = groups.name{i};
-                nidm.Groups(i).studygrouppopulation_numberOfSubjects = groups.N(i);
+        if ~isequal(groups.nsubj,1)
+            for i=1:numel(groups)
+                nidm.Groups(i).studygrouppopulation_groupName = groups(i).label;
+                nidm.Groups(i).studygrouppopulation_numberOfSubjects = groups(i).nsubj;
             end
         end        
     end
