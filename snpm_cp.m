@@ -217,22 +217,22 @@ load(CfgFile);
 if strcmp(sDesFile, 'snpm_pi_OneSampT') || ...
         strcmp(sDesFile, 'snpm_pi_ANOVAwithinS')
     % Sign flipping
-    nidm_json('nidm_ErrorModel/nidm_hasErrorDistribution') = {'obo_nonparametricdistribution', 'obo_symmetricdistribution'};
-    nidm_json('nidm_ErrorModel/nidm_errorVarianceHomogeneous') = false;
-    nidm_json('nidm_ErrorModel/nidm_varianceMapWiseDependence') = 'nidm_IndependentParameter';
-    nidm_json('nidm_ErrorModel/nidm_hasErrorDependence') = 'nidm_IndependentError';
+    nidm.ErrorModel_hasErrorDistribution = {'obo_nonparametricdistribution', 'obo_symmetricdistribution'};
+    nidm.ErrorModel_errorVarianceHomogeneous = false;
+    nidm.ErrorModel_varianceMapWiseDependence = 'nidm_IndependentParameter';
+    nidm.ErrorModel_hasErrorDependence = 'nidm_IndependentError';
 else
     % Permutation
-    nidm_json('nidm_ErrorModel/nidm_hasErrorDistribution') = 'obo_nonparametricdistribution';
-    nidm_json('nidm_ErrorModel/nidm_errorVarianceHomogeneous') = true;
-    nidm_json('nidm_ErrorModel/nidm_varianceMapWiseDependence') = 'nidm_IndependentParameter';
+    nidm.ErrorModel_hasErrorDistribution = 'obo_nonparametricdistribution';
+    nidm.ErrorModel_errorVarianceHomogeneous = true;
+    nidm.ErrorModel_varianceMapWiseDependence = 'nidm_IndependentParameter';
     % TODO: the 'obo_exchangeable' term is not yet in STATO
-    nidm_json('nidm_ErrorModel/nidm_hasErrorDependence') = 'obo_exchangeable';
-    nidm_json('nidm_ErrorModel/nidm_dependenceMapWiseDependence') = 'nidm_IndependentParameter';
+    nidm.ErrorModel_hasErrorDependence = 'obo_exchangeable';
+    nidm.ErrorModel_dependenceMapWiseDependence = 'nidm_IndependentParameter';
 end
 
 % TODO: check this is correct
-nidm_json('nidm_ModelParameterEstimation/nidm_withEstimationMethod') = 'obo_ordinaryleastsquaresestimation';
+nidm.ModelParameterEstimation_withEstimationMethod = 'obo_ordinaryleastsquaresestimation';
 
 if isempty([H C])
   error('SnPM:NoModel', 'No model specified; [H C] empty'); 
@@ -244,44 +244,38 @@ if size(CONT,2) ~= size([H C B G],2)
     error('SnPM:InvalidContrast','Contrast problem; wrong number of columns'); 
 end
 
-if size(CONT,1) > 1
-  contrastMap = containers.Map();
-  contrastMap('obo_contrastweightmatrix/prov:value') = CONT;
+if size(CONT,1) > 1 % F-contrast
+  nidm.Contrasts(1).contrastweightmatrix_value = CONT;
   warning('SnPM:FContrast', ...
           'F contrast!  F statistic images are being created.'); 
   STAT = 'F';
-  contrastMap('nidm_StatisticMap/nidm_statisticType') = 'obo_Fstatistic';
+  nidm.Contrasts(1).StatisticMap_statisticType = 'obo_Fstatistic';
+  
   if (CONT(1,:) == -CONT(2,:))
     CONT = CONT(1,:);
   end
   con_name = 'Positive';
-  
-  nidm_json('Contrasts') = containers.Map({con_name}, {contrastMap});
+  nidm.Contrasts(1).StatisticMap_contrastName = con_name;  
   con_neg_name = '';
 else
-  contrast_pos = containers.Map();
-  contrast_neg = containers.Map(); % There is no deep copy of 
-  % containers.Map so we need a separate object from the start
   con_name = 'Positive';  
+  nidm.Contrasts(1).StatisticMap_contrastName = con_name;  
+
   con_neg_name = 'Negative';
+  nidm.Contrasts(2).StatisticMap_contrastName = con_neg_name;  
+
   STAT = 'T';
   if bVarSm
-    contrast_pos('nidm_StatisticMap/nidm_statisticType') = 'nidm_smoothedtstatistic';
-    contrast_neg('nidm_StatisticMap/nidm_statisticType') = 'nidm_smoothedtstatistic';
+    nidm.Contrasts(1).StatisticMap_statisticType = 'nidm_smoothedtstatistic';
+    nidm.Contrasts(2).StatisticMap_statisticType = 'nidm_smoothedtstatistic';
   else
-    contrast_pos('nidm_StatisticMap/nidm_statisticType') = 'obo_tstatistic';
-    contrast_neg('nidm_StatisticMap/nidm_statisticType') = 'obo_tstatistic';
+    nidm.Contrasts(1).StatisticMap_statisticType = 'obo_tstatistic';
+    nidm.Contrasts(2).StatisticMap_statisticType = 'obo_tstatistic';
   end
-  contrast_pos('nidm_ContrastMap/nidm_contrastName') = ['Positive T-Contrast: [' mat2str(CONT) ']'];
-  contrast_pos('obo_contrastweightmatrix/prov:value') = CONT;
-  contrast_neg('nidm_ContrastMap/nidm_contrastName') = ['Negative T-Contrast: [' mat2str(-CONT) ']'];
-  contrast_neg('obo_contrastweightmatrix/prov:value') = -CONT;
-  
-%   nidm_json('Contrasts').(con_name) = contrast_pos;
-%   nidm_json('Contrasts').(con_neg_name) = contrast_neg;
-  
-  nidm_json('Contrasts') = containers.Map({con_name, con_neg_name}, ...
-      {contrast_pos, contrast_neg});
+  nidm.Contrasts(1).ContrastMap_contrastName = ['Positive T-Contrast: [' mat2str(CONT) ']'];
+  nidm.Contrasts(1).contrastweightmatrix_value = CONT;
+  nidm.Contrasts(2).ContrastMap_contrastName = ['Negative T-Contrast: [' mat2str(-CONT) ']'];
+  nidm.Contrasts(2).contrastweightmatrix_value = -CONT;
 end
 
 if rank(CONT)<size(CONT,1)
@@ -347,19 +341,13 @@ r       = rank([H C B G]);		%-Model degrees of freedom
 df      = q - r;			%-Residual degrees of freedom
 nPerm   = size(PiCond,1);		%-# permutations
 
-nidm_json('nidm_NonParametricNullDistribution/nidm_numberOfPermutations') = nPerm;
-nidm_json('nidm_NonParametricNullDistribution/nidm_hasResamplingScheme') = 'nidm_Permutation';
-nidm_json('nidm_NonParametricNullDistribution/nidm_hasApproximationMethod') = 'nidm_MonteCarlo';
-nidm_json('nidm_NonParametricNullDistribution/nidm_maximumNumberOfPermutations') = nPerm_max;
+nidm.NonParametricNullDistribution_numberOfPermutations = nPerm;
+nidm.NonParametricNullDistribution_hasResamplingScheme = 'nidm_Permutation';
+nidm.NonParametricNullDistribution_hasApproximationMethod = 'nidm_MonteCarlo';
+nidm.NonParametricNullDistribution_maximumNumberOfPermutations = nPerm_max;
 
-con_names = nidm_json('Contrasts').keys;
-for i = 1:numel(con_names)
-    contrast_map = nidm_json('Contrasts');
-    this_contrast = contrast_map(con_names{i});
-    this_contrast('nidm_StatisticMap/nidm_errorDegreesOfFreedom') = df;
-    
-    contrast_map(con_names{i}) = this_contrast;
-    nidm_json('Contrasts') = contrast_map;
+for i = 1:numel(nidm.Contrasts)
+    nidm.Contrasts(i).StatisticMap_errorDegreesOfFreedom = df;
 end
 
 %-Get ORIGIN, etc
@@ -389,8 +377,8 @@ elseif ~isempty(MASK)
   s_SnPM_save = [s_SnPM_save ' Vwt'];
   bMask = 1;
 end
-% Add updated nidm_json to the saved variables
-s_SnPM_save = [s_SnPM_save ' con_name con_neg_name nidm_json '];
+% Add updated nidm to the saved variables
+s_SnPM_save = [s_SnPM_save ' con_name con_neg_name nidm '];
 
 %-Useful quantities - handy for later
 %-----------------------------------------------------------------------
@@ -442,13 +430,14 @@ for ii=1:p
   descrip{ii}=sprintf('beta_%04d hats',ii);
   Vbeta(ii)=snpm_clone_vol(Vt,fname{ii},descrip{ii}); 
 end  
-nidm_json('ParameterEstimateMaps') = containers.Map(descrip, fname);
+nidm.DesignMatrix_regressorNames = descrip;
+nidm.ParameterEstimateMaps = fname;
 
 Vbeta = spm_create_vol(Vbeta);
 
 VResMS=snpm_clone_vol(Vt,'ResMS.img','Residual sum-of-squares');
 VResMS=spm_create_vol(VResMS);
-nidm_json('nidm_ResidualMeanSquaresMap/prov:atLocation') = 'ResMS.img';
+nidm.ResidualMeanSquaresMap_atLocation = 'ResMS.img';
 
 if bVarSm==0
   str = sprintf('%c_{%d} statistic',STAT,df);
@@ -463,11 +452,11 @@ end
 
 Vmask=snpm_clone_vol(Vt,'mask.img',str);
 Vmask=spm_create_vol(Vmask);
-nidm_json('nidm_MaskMap/prov:atLocation') = 'mask.img';
+nidm.MaskMap_atLocation = 'mask.img';
 
 Vgmean=snpm_clone_vol(Vt,'GrandMean.img','GrandMean');
 Vgmean=spm_create_vol(Vgmean);
-nidm_json('nidm_GrandMeanMap/prov:atLocation') = 'GrandMean.img';
+nidm.GrandMeanMap_atLocation = 'GrandMean.img';
 
 if STAT=='T'
   VT_pos=snpm_clone_vol(Vt,'snpmT+.img',[str,' (+ve)']);
@@ -479,45 +468,30 @@ if STAT=='T'
   VCONSE=snpm_clone_vol(Vt,'conse.img', str);
   VCONSE=spm_create_vol(VCONSE);
   
-  nidm_contrasts = nidm_json('Contrasts');
-  nidm_contrast = nidm_contrasts(con_name);
+  nidm.Contrasts(1).ContrastStandardErrorMap_atLocation = 'conse.img';
+  nidm.Contrasts(1).ContrastMap_atLocation = 'con+.img';
+  nidm.Contrasts(1).StatisticMap_atLocation = 'snpmT+.img';
   
-  nidm_contrast('nidm_ContrastStandardErrorMap/prov:atLocation') = 'conse.img';
-  
-  nidm_contrast('nidm_ContrastMap/prov:atLocation') = 'con+.img';
-  nidm_contrast('nidm_StatisticMap/prov:atLocation') = 'snpmT+.img';
-  nidm_contrasts(con_name) = nidm_contrast;
-  
-%   nidm_json('Contrasts').(con_name).('nidm_StatisticMap/prov:atLocation') = 'snpmT+.img';
   VT_neg=snpm_clone_vol(Vt,'snpmT-.img',[str,' (-ve)']);
   VT_neg=spm_create_vol(VT_neg);
   
   VCON_neg=snpm_clone_vol(Vt,'con-.img',[str,' (+ve)']);
   VCON_neg=spm_create_vol(VCON_neg);
-%   nidm_json('Contrasts').(con_neg_name).('nidm_StatisticMap__prov_atLocation') = 'snpmT-.img';
-  nidm_neg_contrast = nidm_contrasts(con_neg_name);
-  nidm_neg_contrast('nidm_StatisticMap/prov:atLocation') = 'snpmT-.img';
-  nidm_neg_contrast('nidm_ContrastMap/prov:atLocation') = 'con-.img';
   
   % TODO: check it's fine to use same conse image for pos and neg contrasts  
-  nidm_neg_contrast('nidm_ContrastStandardErrorMap/prov:atLocation') = 'conse.img';
-  
-  nidm_contrasts(con_neg_name) = nidm_neg_contrast;
-  
-  nidm_json('Contrasts') = nidm_contrasts;
+  nidm.Contrasts(2).ContrastStandardErrorMap_atLocation = 'conse.img';
+  nidm.Contrasts(2).ContrastMap_atLocation = 'con-.img';
+  nidm.Contrasts(2).StatisticMap_atLocation = 'snpmT-.img';
 elseif STAT=='F'
   VF=snpm_clone_vol(Vt,'snpmF.img',str);
   VF=spm_create_vol(VF);
   
-  nidm_contrasts = nidm_json('Contrasts');
-  nidm_contrast = nidm_contrasts(con_name);
-  nidm_contrast('nidm_StatisticMap/prov:atLocation') = 'snpmF.img';
-  nidm_contrasts(con_name) = nidm_contrast;
-  nidm_json('Contrasts') = nidm_contrasts;
+  nidm.Contrasts(1).StatisticMap_atLocation = 'snpmF.img';
 
   VFnum=snpm_clone_vol(Vt,'snpmFnum.img',str);
   VFnum=spm_create_vol(VFnum);
-  nidm_contrast('nidm_ContrastExplainedMeanSquareMap/prov:atLocation') = 'snpmFnum.img';
+  
+  nidm.Contrasts(1).ContrastExplainedMeanSquareMap_atLocation = 'snpmFnum.img';
 end
 
 VlP_pos=snpm_clone_vol(Vt, 'lP+.img', '-log10(uncor. non-para. P, +ve)');

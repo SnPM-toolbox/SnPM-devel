@@ -490,8 +490,7 @@ C_STCS    = NaN;   % Cluster size threshold (set directly by uncorrected
 alph_FWE  = NaN;   % FWE rate of a specified u threshold
 alph_FDR  = NaN;   % FDR rate of a specified alpha_ucp
   
-nidm_inference = containers.Map(); % Map storing information about inference
-nidm_inference('nidm_Inference/nidm_hasAlternativeHypothesis') = 'nidm_OneTailedTest';
+nidm.Inferences(1).Inference_hasAlternativeHypothesis = 'nidm_OneTailedTest';
 if BATCH
     bSpatEx = isfield(job.Thr,'Clus');
     if ~bSpatEx
@@ -501,18 +500,18 @@ if BATCH
         case 'Pth'
             alpha_ucp = BoundCheck(job.Thr.Vox.VoxSig.Pth,[0 1],'Invalid Uncorrected P');
             alph_FDR  = snpm_P_FDR(alpha_ucp,[],'P',[],sSnPMucp');
-            nidm_inference('nidm_HeightThreshold/prov:type') = 'nidm_PValueUncorrected';
-            nidm_inference('nidm_HeightThreshold/prov:value') = alpha_ucp;
+            nidm.Inferences(1).HeightThreshold_type = 'nidm_PValueUncorrected';
+            nidm.Inferences(1).HeightThreshold_value = alpha_ucp;
         case 'TFth'
             u         = BoundCheck(job.Thr.Vox.VoxSig.TFth,[0 Inf],'Negative Threshold!');
             alph_FWE  = sum(MaxT > u -tol) / nPermReal;
-            nidm_inference('nidm_HeightThreshold/prov:type') = 'obo_statistic';
-            nidm_inference('nidm_HeightThreshold/prov:value') = u;
+            nidm.Inferences(1).HeightThreshold_type = 'obo_statistic';
+            nidm.Inferences(1).HeightThreshold_value = u;
         case 'FDRth'
             alph_FDR  = BoundCheck(job.Thr.Vox.VoxSig.FDRth,[0 1],'Invalid FDR level');
             alpha_ucp = snpm_uc_FDR(alph_FDR,[],'P',[],sSnPMucp');
-            nidm_inference('nidm_HeightThreshold/prov:type') = 'obo_qvalue';
-            nidm_inference('nidm_HeightThreshold/prov:value') = alph_FDR;
+            nidm.Inferences(1).HeightThreshold_type = 'obo_qvalue';
+            nidm.Inferences(1).HeightThreshold_value = alph_FDR;
         case 'FWEth'
             alph_FWE  = BoundCheck(job.Thr.Vox.VoxSig.FWEth,[0 1],'Invalid FWE level');
             iFWE      = ceil((1-alph_FWE)*nPermReal);
@@ -522,14 +521,14 @@ if BATCH
                 C_MaxT = 0;
             end
             u = C_MaxT;
-            nidm_inference('nidm_HeightThreshold/prov:type') = 'obo_FWERadjustedpvalue';
-            nidm_inference('nidm_HeightThreshold/prov:value') = alph_FWE;
+            nidm.Inferences(1).HeightThreshold_type = 'obo_FWERadjustedpvalue';
+            nidm.Inferences(1).HeightThreshold_value = alph_FWE;
         otherwise
             error('Unknown threshold')
         end
         % No extent thresholding when voxelwise threshold is requested
-        nidm_inference('nidm_ExtentThreshold/prov:type') = 'obo_statistic';
-        nidm_inference('nidm_ExtentThreshold/nidm_clusterSizeInVoxels') = 0;
+        nidm.Inferences(1).ExtentThreshold_type = 'obo_statistic';
+        nidm.Inferences(1).ExtentThreshold_clusterSizeInVoxels = 0;
     else
         % Cluster-wise inference
         if exist(fullfile(CWD,'SnPM_ST.mat'))~=2 & exist(fullfile(CWD,'STCS.mat'))~=2
@@ -545,11 +544,11 @@ if BATCH
             ST_Ut_0 = ST_Ut;
             CFth=job.Thr.Clus.ClusSize.CFth;
             if (CFth<1)
-                nidm_inference('nidm_HeightThreshold/prov:type') = 'nidm_PValueUncorrected';
-                nidm_inference('nidm_HeightThreshold/prov:value') = CFth;
+                nidm.Inferences(1).HeightThreshold_type = 'nidm_PValueUncorrected';
+                nidm.Inferences(1).HeightThreshold_value = CFth;
             else
-                nidm_inference('nidm_HeightThreshold/prov:type') = 'obo_statistic';
-                nidm_inference('nidm_HeightThreshold/prov:value') = CFth;
+                nidm.Inferences(1).HeightThreshold_type = 'obo_statistic';
+                nidm.Inferences(1).HeightThreshold_value = CFth;
             end
             
             if (CFth<=0)
@@ -610,11 +609,11 @@ if BATCH
                 error('SnPM:InvalidClusterFormingThresh', sprintf('ERROR: Cluster-forming threshold of T=%0.2f was already set during analysis configuration; hence, in results, cluster-forming threshold must be left as "NaN".\nRe-run results with cluster-forming threshold set to NaN.\n',ST_Ut))
             end
             if (job.Thr.Clus.ClusSize.CFth<1)
-                nidm_inference('nidm_HeightThreshold/prov:type') = 'nidm_PValueUncorrected';
-                nidm_inference('nidm_HeightThreshold/prov:value') = job.Thr.Clus.ClusSize.CFth;
+                nidm.Inferences(1).HeightThreshold_type = 'nidm_PValueUncorrected';
+                nidm.Inferences(1).HeightThreshold_value = job.Thr.Clus.ClusSize.CFth;
             else
-                nidm_inference('nidm_HeightThreshold/prov:type') = 'obo_statistic';
-                nidm_inference('nidm_HeightThreshold/prov:value') = job.Thr.Clus.ClusSize.CFth;
+                nidm.Inferences(1).HeightThreshold_type = 'obo_statistic';
+                nidm.Inferences(1).HeightThreshold_value = job.Thr.Clus.ClusSize.CFth;
             end
 
         end
@@ -624,17 +623,17 @@ if BATCH
         switch tmp{1}
             case 'Cth'
                 C_STCS = job.Thr.Clus.ClusSize.ClusSig.Cth;
-                nidm_inference('nidm_ExtentThreshold/prov:type') = 'obo_statistic';
-                nidm_inference('nidm_ExtentThreshold/prov:value') = C_STCS;
+                nidm.Inferences(1).ExtentThreshold_type = 'obo_statistic';
+                nidm.Inferences(1).ExtentThreshold_value = C_STCS;
             case 'PthC'
                 alpha_ucp = BoundCheck(job.Thr.Clus.ClusSize.ClusSig.PthC,[0 1],'Invalid uncorrected P(k)');
-                nidm_inference('nidm_ExtentThreshold/prov:type') = 'nidm_PValueUncorrected';
-                nidm_inference('nidm_ExtentThreshold/prov:value') = alpha_ucp;
+                nidm.Inferences(1).ExtentThreshold_type = 'nidm_PValueUncorrected';
+                nidm.Inferences(1).ExtentThreshold_value = alpha_ucp;
             case 'FWEthC'
                 alph_FWE  = BoundCheck(job.Thr.Clus.ClusSize.ClusSig.FWEthC,[0 1],'Invalid FWE level (cluster-level inference)');
                 iFWE      = ceil((1-alph_FWE)*nPermReal);
-                nidm_inference('nidm_ExtentThreshold/prov:type') = 'obo_FWERadjustedpvalue';
-                nidm_inference('nidm_ExtentThreshold/prov:value') = alph_FWE;
+                nidm.Inferences(1).ExtentThreshold_type = 'obo_FWERadjustedpvalue';
+                nidm.Inferences(1).ExtentThreshold_value = alph_FWE;
         end
     end % END: Cluster-wise inference
     
@@ -819,7 +818,7 @@ set(Finter,'Pointer','Watch')
 %=======================================================================
 
 % TODO: check this is always true
-nidm_json('nidm_ClusterDefinitionCriteria/nidm_hasConnectivityCriterion') = 'nidm_voxel18connected';
+nidm.ClusterDefinitionCriteria_hasConnectivityCriterion = 'nidm_voxel18connected';
 
 if bSpatEx
 	fprintf('Working on spatial extent...\n');
@@ -1192,8 +1191,8 @@ if bSpatEx
 end
 
 % Display only if *not* in command line mode
-nidm=true;
-if ~spm_get_defaults('cmdline') || nidm
+nidm_export=true;
+if ~spm_get_defaults('cmdline') || nidm_export
     
 %=======================================================================
 %-D I S P L A Y :   Max report
@@ -1362,11 +1361,8 @@ if length(strmatch('MIPtable',Report))>0
   %-----------------------------------------------------------------------
   r = 1;
   bUsed = zeros(size(STC_SnPMt));
-  nidm_clusters = containers.Map();
   
   while max(STC_SnPMt.*(~bUsed)) & (y > 3)
-    nidm_cluster = containers.Map();
-    nidm_peaks = containers.Map();
     
     [null, i] = max(STC_SnPMt.*(~bUsed));	% Largest t value
     j         = find(STC_r == STC_r(i));	% Maxima in same region
@@ -1397,24 +1393,21 @@ if length(strmatch('MIPtable',Report))>0
     text(tCol(9),y,sprintf(Fmtst{9},STC_XYZ(2,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
     text(tCol(10),y,sprintf(Fmtst{10},STC_XYZ(3,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
     
-    nidm_cluster('nidm_SupraThresholdCluster/nidm_clusterSizeInVoxels') = STC_N(i);
-    nidm_peaks('Peak_1') = containers.Map(...
-        { ...
-        'nidm_Peak/nidm_pValueFWER', ...
-        'nidm_Peak/nidm_qValueFDR', ...
-        'nidm_Peak/prov:value', ...
-        'nidm_Peak/nidm_pValueUncorrected', ...
-        'nidm_Peak/nidm_equivalentZStatistic',...
-        'nidm_Coordinate/nidm_coordinateVector', ...
-        }, ...
-        {Pt(i), Pfdr(i), STC_SnPMt(i), Pu(i), norminv(1-Pu(i)), STC_XYZ(1:3,i)});
+    % TODO: this is overwritten by 1st peak i below    
+    nidm.Inferences(1).Clusters(r).SupraThresholdCluster_clusterSizeInVoxels = STC_N(i);
+    nidm.Inferences(1).Clusters(r).Peaks(1).Peak_pValueFWER = Pt(i);
+    nidm.Inferences(1).Clusters(r).Peaks(1).Peak_pValueFDR = Pfdr(i);
+    nidm.Inferences(1).Clusters(r).Peaks(1).Peak_value = STC_SnPMt(i);
+    nidm.Inferences(1).Clusters(r).Peaks(1).Peak_pValueUncorrected = Pu(i);
+    nidm.Inferences(1).Clusters(r).Peaks(1).Peak_equivalentZStatistic = norminv(1-Pu(i));
+    nidm.Inferences(1).Clusters(r).Peaks(1).Coordinate_coordinateVector = STC_XYZ(1:3,i);
     
     y = y -1;
     
     %-Print up to 3 secondary maxima (>8mm apart)
     %-------------------------------------------------------------------   
-    nidm_json('nidm_PeakDefinitionCriteria/nidm_minDistanceBetweenPeaks') = 8;
-    nidm_json('nidm_PeakDefinitionCriteria/nidm_maxNumberOfPeaksPerCluster') = 3;
+    nidm.PeakDefinitionCriteria_minDistanceBetweenPeaks = 8;
+    nidm.PeakDefinitionCriteria_maxNumberOfPeaksPerCluster = 3;
     
     [null, k] = sort(-STC_SnPMt(j));	% Sort on t value
     D         = i;
@@ -1436,28 +1429,19 @@ if length(strmatch('MIPtable',Report))>0
 	  y = y -1;
 	end
       end
+
       
-      nidm_peaks(['Peak_' num2str(i)]) = containers.Map(...
-        { ...
-        'nidm_Peak/nidm_pValueFWER', ...
-        'nidm_Peak/nidm_qValueFDR', ...
-        'nidm_Peak/prov:value', ...
-        'nidm_Peak/nidm_pValueUncorrected', ...
-        'nidm_Peak/nidm_equivalentZStatistic',...
-        'nidm_Coordinate/nidm_coordinateVector', ...
-        }, ...
-        {Pt(d), Pfdr(d), STC_SnPMt(d), Pu(d), norminv(1-Pu(d)), STC_XYZ(1:3,d)});
-      
+        nidm.Inferences(1).Clusters(r).Peaks(i).Peak_pValueFWER = Pt(d);
+        nidm.Inferences(1).Clusters(r).Peaks(i).Peak_pValueFDR = Pfdr(d);
+        nidm.Inferences(1).Clusters(r).Peaks(i).Peak_value = STC_SnPMt(d);
+        nidm.Inferences(1).Clusters(r).Peaks(i).Peak_pValueUncorrected = Pu(d);
+        nidm.Inferences(1).Clusters(r).Peaks(i).Peak_equivalentZStatistic = norminv(1-Pu(d));
+        nidm.Inferences(1).Clusters(r).Peaks(i).Coordinate_coordinateVector = STC_XYZ(1:3,d);      
     end
-    
-    nidm_cluster('Peaks') = nidm_peaks;
-    nidm_clusters(['Cluster_' num2str(r)]) = nidm_cluster;
-    
+       
     bUsed(j) = (bUsed(j) | 1 );		%-Mark maxima as "used"
     r = r + 1;				% Next region
   end
-  
-  nidm_inference('Clusters') = nidm_clusters;
  
   clear i j k D d r
   
@@ -1507,10 +1491,10 @@ if length(strmatch('MIPtable',Report))>0
   search_vol_cmm = S*abs(prod(VOX));
   search_vol_vox = S;
   text(0,y,sprintf('Search vol: %d cmm, %d voxels',search_vol_cmm,search_vol_vox), 'FontSize',8)
-  nidm_inference('nidm_SearchSpaceMaskMap/nidm_searchVolumeInVoxels') = search_vol_vox;
+  nidm.SearchSpaceMaskMap_searchVolumeInVoxels = search_vol_vox;
   
 %   TODO convert back to units
-  nidm_inference('nidm_SearchSpaceMaskMap/nidm_searchVolumeInUnits') = search_vol_cmm;
+  nidm.SearchSpaceMaskMap_searchVolumeInUnits = search_vol_cmm;
   
   y=y-0.8;
   text(0.7,y,sprintf('Voxel size: [%5.2f, %5.2f, %5.2f] mm',abs(VOX)), ...
@@ -1540,7 +1524,7 @@ end
 %- Image output?
 %=======================================================================
 %-Write out filtered SnPMt?
-if WrtFlt || nidm
+if WrtFlt || nidm_export
 	
   Fname = WrtFltFn;
   
@@ -1587,30 +1571,26 @@ if WrtFlt || nidm
   clear t
   
   % TODO SearchSpaceMaskMap can be different from analysis mask
-  nidm_inference('nidm_SearchSpaceMaskMap/prov:atLocation') = 'mask.img';
+  nidm.SearchSpaceMaskMap_atLocation = 'mask.img';
   
   % TODO: always stationary??
-  nidm_inference('nidm_SearchSpaceMaskMap/nidm_randomFieldStationarity') = true;
+  nidm.SearchSpaceMaskMap_randomFieldStationarity = true;
   
-  nidm_inference('nidm_ExcursionSetMap/prov:atLocation') = Fname;
-  
-  nidm_inferences = containers.Map();
-  nidm_inferences(contrast_id) = nidm_inference;
-  nidm_json('Inferences') = nidm_inferences;
+  nidm.Inferences(1).ExcursionSetMap_atLocation = Fname;
 
-  nidm_json('nidm_NIDMResultsExporter/nidm_softwareVersion') = snpm('ver');
-  nidm_json('nidm_NeuroimagingAnalysisSoftware/nidm_softwareVersion') = snpm('ver');
+  nidm.NIDMResultsExporter_softwareVersion = snpm('ver');
+  nidm.NeuroimagingAnalysisSoftware_softwareVersion = snpm('ver');
   
   %   TODO: are other units possible in SnPM??
-  nidm_json('nidm_CoordinateSpace/units') = {'mm', 'mm', 'mm'};
+  nidm.CoordinateSpace_units = {'mm', 'mm', 'mm'};
   
   % TODO: these should be filled in by the user ---
-  nidm_json('nidm_CoordinateSpace/nidm_inWorldCoordinateSystem') = 'nidm_StandardizedCoordinateSystem';
-  nidm_json('nlx_Imaginginstrument/prov:type') = 'nlx_Magneticresonanceimagingscanner';
+  nidm.CoordinateSpace_inWorldCoordinateSystem = 'nidm_StandardizedCoordinateSystem';
+  nidm.Imaginginstrument_type = 'nlx_Magneticresonanceimagingscanner';
   % ---
   
-  nidm_json('nidm_NeuroimagingAnalysisSoftware/prov:type') = 'src_SnPM';
-  nidm_json('nidm_NeuroimagingAnalysisSoftware/prov:label') = 'SnPM';
+  nidm.NeuroimagingAnalysisSoftware_type = 'src_SnPM';
+  nidm.NeuroimagingAnalysisSoftware_label = 'SnPM';
   
   % TODO: This temp file should only be produced if NIDM export is requested
   jsonwrite('snpm_nidm_thresh.json', nidm_json, ...
