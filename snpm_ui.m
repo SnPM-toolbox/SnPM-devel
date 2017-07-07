@@ -123,6 +123,8 @@ function snpm_ui(varargin)
 % V             Memory mapping handles
 % MASK          Filename of explicit mask image
 % ImMASK        Implicit masking; 0=none; 1=zeros are equivalent to NaN
+% nidm          json structure storing minimal information required for a
+%               NIDM-Results export
 % 
 % df            degrees of freedom due to error
 % sDesSave      String of PlugIn variables to save to cfg file
@@ -190,7 +192,9 @@ else
   end
   cd(job.dir{1})
 end
-  
+
+nidm = struct();
+
 %-Definitions & Design parameters
 %=======================================================================
 sDesigns=str2mat(...
@@ -299,6 +303,19 @@ eval(sDesFile);
 %-Total #observations
 nScan = size(P,1);
 
+%-Max number of possible permutations
+if exist('nPiCond_mx', 'var')
+    nPerm_max = nPiCond_mx;
+elseif exist('nPiStud_mx', 'var')
+    nPerm_max = nPiStud_mx;
+elseif exist('nPiSubj_mx', 'var')
+    nPerm_max = nPiSubj_mx;
+elseif exist('nOfPerm', 'var')
+    nPerm_max = nOfPerm;
+else
+    error('snpm:MissingMaxPerm', 'Maximum number of permutations not found')
+end
+
 %-Get general analysis & data parameters
 %=======================================================================
 
@@ -368,6 +385,7 @@ else % No global normalisation or ANCOVA
 end
 
 if (iGMsca==2) % CHANGED from 1 to 2 as should not ask for a value if grand mean scaling is not required.
+  nidm.Data_grandMeanScaling = true;
   if (iGloNorm==2) % Proportional scaling
     str = 'PropSca global mean to';
   else
@@ -381,8 +399,10 @@ if (iGMsca==2) % CHANGED from 1 to 2 as should not ask for a value if grand mean
       case 'gmsca_no',
           GM = 50;
   end
+  nidm.Data_targetIntensity = GM;
 elseif (iGMsca==1) % No grand mean scaling
   GM = 0;
+  nidm.Data_grandMeanScaling = false;
 end
 
 
@@ -572,16 +592,17 @@ CONT  = [CONT, zeros(size(CONT,1),size([B G],2))];
 %-Construct full design matrix and name matrices for display
 %-----------------------------------------------------------------------
 [nHCBG,HCBGnames] = spm_DesMtx('Sca',H,Hnames,C,Cnames,B,Bnames,G,Gnames);
+nidm.DesignMatrix_value = nHCBG;
+nidm.DesignMatrix_regressorNames = HCBGnames;
 
 %-Setup is complete - save SnPMcfg Mat file
 %-----------------------------------------------------------------------
 s_SnPMcfg_save = ['s_SnPMcfg_save H C B G HCBGnames P PiCond ',...
 	'sPiCond bhPerms sHCform iGloNorm sGloNorm GM rg GX GMscale CONT ',...
 	'THRESH MASK ImMASK TH bVarSm vFWHM sVarSm bVolm bST sDesFile sDesign ',...
-        'V pU_ST_Ut df1 ', ...
+        'V pU_ST_Ut df1 nidm nPerm_max nidm ', ...
 	'sDesSave ',sDesSave];
 eval(['save SnPMcfg ',s_SnPMcfg_save])
-
 
 
 if ~spm_get_defaults('cmdline')

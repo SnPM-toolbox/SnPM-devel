@@ -81,6 +81,8 @@ classdef test_snpm_pp < matlab.unittest.TestCase
             testCase.matlabbatch{1}.spm.tools.snpm.inference.Thr.Clus.ClusSize.CFth = 4;
             testCase.matlabbatch{1}.spm.tools.snpm.inference.Thr.Clus.ClusSize.ClusSig.PthC = 0.1;
             testCase.matlabbatch{1}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPMt_filtered_clus_4_unc_p10.nii';
+            testCase.matlabbatch{1}.spm.tools.snpm.inference.export.export_no = 0;
+            
             
             testCase.warningId = 'SnPM:SnPMSTFileNotLOaded';
         end

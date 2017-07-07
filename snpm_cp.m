@@ -213,6 +213,27 @@ CfgFile = fullfile(CWD,'SnPMcfg.mat');
 %-Load config file & catch all problem cases now
 %-----------------------------------------------------------------------
 load(CfgFile);
+
+if strcmp(sDesFile, 'snpm_pi_OneSampT') || ...
+        strcmp(sDesFile, 'snpm_pi_ANOVAwithinS')
+    % Sign flipping
+    nidm.ErrorModel_hasErrorDistribution = {'obo_NonParametricDistribution', 'obo_SymmetricDistribution'};
+    nidm.ErrorModel_errorVarianceHomogeneous = false;
+    nidm.ErrorModel_varianceMapWiseDependence = 'nidm_IndependentParameter';
+    nidm.ErrorModel_hasErrorDependence = 'nidm_IndependentError';
+else
+    % Permutation
+    nidm.ErrorModel_hasErrorDistribution = 'obo_NonParametricDistribution';
+    nidm.ErrorModel_errorVarianceHomogeneous = true;
+    nidm.ErrorModel_varianceMapWiseDependence = 'nidm_IndependentParameter';
+    % TODO: the 'obo_exchangeable' term is not yet in STATO
+    nidm.ErrorModel_hasErrorDependence = 'obo_Exchangeable';
+    nidm.ErrorModel_dependenceMapWiseDependence = 'nidm_IndependentParameter';
+end
+
+% TODO: check this is correct
+nidm.ModelParameterEstimation_withEstimationMethod = 'obo_OrdinaryLeastSquaresEstimation';
+
 if isempty([H C])
   error('SnPM:NoModel', 'No model specified; [H C] empty'); 
 end
@@ -222,16 +243,41 @@ end
 if size(CONT,2) ~= size([H C B G],2)
     error('SnPM:InvalidContrast','Contrast problem; wrong number of columns'); 
 end
-if size(CONT,1) > 1
+
+if size(CONT,1) > 1 % F-contrast
+  nidm.Contrasts(1).ContrastWeightMatrix_value = CONT;
   warning('SnPM:FContrast', ...
           'F contrast!  F statistic images are being created.'); 
   STAT = 'F';
+  nidm.Contrasts(1).StatisticMap_statisticType = 'obo_FStatistic';
+  
   if (CONT(1,:) == -CONT(2,:))
     CONT = CONT(1,:);
   end
+  con_name = 'Positive';
+  nidm.Contrasts(1).StatisticMap_contrastName = con_name;  
+  con_neg_name = '';
 else
+  con_name = 'Positive';  
+  nidm.Contrasts(1).StatisticMap_contrastName = con_name;  
+
+  con_neg_name = 'Negative';
+  nidm.Contrasts(2).StatisticMap_contrastName = con_neg_name;  
+
   STAT = 'T';
+  if bVarSm
+    nidm.Contrasts(1).StatisticMap_statisticType = 'nidm_smoothedtstatistic';
+    nidm.Contrasts(2).StatisticMap_statisticType = 'nidm_smoothedtstatistic';
+  else
+    nidm.Contrasts(1).StatisticMap_statisticType = 'obo_TStatistic';
+    nidm.Contrasts(2).StatisticMap_statisticType = 'obo_TStatistic';
+  end
+  nidm.Contrasts(1).ContrastMap_contrastName = ['Positive T-Contrast: [' mat2str(CONT) ']'];
+  nidm.Contrasts(1).ContrastWeightMatrix_value = CONT;
+  nidm.Contrasts(2).ContrastMap_contrastName = ['Negative T-Contrast: [' mat2str(-CONT) ']'];
+  nidm.Contrasts(2).ContrastWeightMatrix_value = -CONT;
 end
+
 if rank(CONT)<size(CONT,1)
   [u s] = spm_svd(CONT'); % Kill zero-rank components
   CONT = full(u*sqrt(s))';
@@ -260,7 +306,10 @@ end
 
 %-Delete files from previous analyses, if they exist
 %-----------------------------------------------------------------------
-files = {	'^ResMS\..{3}$','^beta_.{4}\..{3}', '^lP_.{4}\..{3}',...
+files = {	'^ResMS\..{3}$','^beta_.{4}\..{3}','^GrandMean\..{3}', ...
+        '^mask\..{3}', '^conse\..{3}',...
+        '^con.{2}\..{3}','^con.{1}\..{3}',...
+        '^lP_.{4}\..{3}',...
 		'^lP.{1}\..{3}','^snpm.{2}\..{3}','^snpm.{1}\..{3}'};
 
 for i=1:length(files)
@@ -292,6 +341,15 @@ r       = rank([H C B G]);		%-Model degrees of freedom
 df      = q - r;			%-Residual degrees of freedom
 nPerm   = size(PiCond,1);		%-# permutations
 
+nidm.NonParametricNullDistribution_numberOfPermutations = nPerm;
+nidm.NonParametricNullDistribution_hasResamplingScheme = 'nidm_Permutation';
+nidm.NonParametricNullDistribution_hasApproximationMethod = 'nidm_MonteCarlo';
+nidm.NonParametricNullDistribution_maximumNumberOfPermutations = nPerm_max;
+
+for i = 1:numel(nidm.Contrasts)
+    nidm.Contrasts(i).StatisticMap_errorDegreesOfFreedom = df;
+end
+
 %-Get ORIGIN, etc
 %-----------------------------------------------------------------------
 DIM    = [V(1).dim(1)   V(1).dim(2)   V(1).dim(3)];
@@ -319,6 +377,8 @@ elseif ~isempty(MASK)
   s_SnPM_save = [s_SnPM_save ' Vwt'];
   bMask = 1;
 end
+% Add updated nidm to the saved variables
+s_SnPM_save = [s_SnPM_save ' con_name con_neg_name nidm '];
 
 %-Useful quantities - handy for later
 %-----------------------------------------------------------------------
@@ -366,14 +426,19 @@ Vt=V(1);
 %-Initialize image structures.
 %
 for ii=1:p
-  fname= sprintf('beta_%04d.img',ii);
-  descrip=sprintf('beta_%04d hats',ii);
-  Vbeta(ii)=snpm_clone_vol(Vt,fname,descrip);
+  fname{ii}= sprintf('beta_%04d.img',ii);
+  descrip{ii}=sprintf('beta_%04d hats',ii);
+  Vbeta(ii)=snpm_clone_vol(Vt,fname{ii},descrip{ii}); 
 end  
+nidm.DesignMatrix_regressorNames = descrip;
+nidm.ParameterEstimateMaps = fname;
+
 Vbeta = spm_create_vol(Vbeta);
 
 VResMS=snpm_clone_vol(Vt,'ResMS.img','Residual sum-of-squares');
 VResMS=spm_create_vol(VResMS);
+nidm.ResidualMeanSquaresMap_atLocation = 'ResMS.img';
+
 if bVarSm==0
   str = sprintf('%c_{%d} statistic',STAT,df);
 else
@@ -384,14 +449,49 @@ else
 		  [rank(CONT) df],vFWHM);
   end
 end
+
+Vmask=snpm_clone_vol(Vt,'mask.img',str);
+Vmask=spm_create_vol(Vmask);
+nidm.MaskMap_atLocation = 'mask.img';
+
+Vgmean=snpm_clone_vol(Vt,'GrandMean.img','GrandMean');
+Vgmean=spm_create_vol(Vgmean);
+nidm.GrandMeanMap_atLocation = 'GrandMean.img';
+
 if STAT=='T'
   VT_pos=snpm_clone_vol(Vt,'snpmT+.img',[str,' (+ve)']);
   VT_pos=spm_create_vol(VT_pos);
+  
+  VCON_pos=snpm_clone_vol(Vt,'con+.img',[str,' (+ve)']);
+  VCON_pos=spm_create_vol(VCON_pos);
+  
+  VCONSE=snpm_clone_vol(Vt,'conse.img', str);
+  VCONSE=spm_create_vol(VCONSE);
+  
+  nidm.Contrasts(1).ContrastStandardErrorMap_atLocation = 'conse.img';
+  nidm.Contrasts(1).ContrastMap_atLocation = 'con+.img';
+  nidm.Contrasts(1).StatisticMap_atLocation = 'snpmT+.img';
+  
   VT_neg=snpm_clone_vol(Vt,'snpmT-.img',[str,' (-ve)']);
   VT_neg=spm_create_vol(VT_neg);
+  
+  VCON_neg=snpm_clone_vol(Vt,'con-.img',[str,' (+ve)']);
+  VCON_neg=spm_create_vol(VCON_neg);
+  
+  % TODO: check it's fine to use same conse image for pos and neg contrasts  
+  nidm.Contrasts(2).ContrastStandardErrorMap_atLocation = 'conse.img';
+  nidm.Contrasts(2).ContrastMap_atLocation = 'con-.img';
+  nidm.Contrasts(2).StatisticMap_atLocation = 'snpmT-.img';
 elseif STAT=='F'
   VF=snpm_clone_vol(Vt,'snpmF.img',str);
   VF=spm_create_vol(VF);
+  
+  nidm.Contrasts(1).StatisticMap_atLocation = 'snpmF.img';
+
+  VFnum=snpm_clone_vol(Vt,'snpmFnum.img',str);
+  VFnum=spm_create_vol(VFnum);
+  
+  nidm.Contrasts(1).ContrastExplainedMeanSquareMap_atLocation = 'snpmFnum.img';
 end
 
 VlP_pos=snpm_clone_vol(Vt, 'lP+.img', '-log10(uncor. non-para. P, +ve)');
@@ -442,11 +542,16 @@ for i = 1:zdim
   
   %-Initialize the image data for this slice/volume
   %---------------------------------------------------------------------
+  gmean_image=repmat(NaN,1,WorkDim);
   BETA_image=repmat(NaN,p,WorkDim);
   ResSS_image=repmat(NaN,1,WorkDim);
+  mask_image=repmat(NaN,1,WorkDim);
+  CONSE_image=repmat(NaN,1,WorkDim);
   if STAT=='T'
     T_pos_image=repmat(NaN,1,WorkDim);
     T_neg_image=repmat(NaN,1,WorkDim);
+    CON_pos_image=repmat(NaN,1,WorkDim);
+    CON_neg_image=repmat(NaN,1,WorkDim);
   elseif STAT=='F'
     F_image=repmat(NaN,1,WorkDim);
   end
@@ -503,6 +608,7 @@ for i = 1:zdim
   else
     Q = find(all(X>TH) & any(diff(X)) & Wt);
   end
+  
 
   if length(Q)
    
@@ -531,6 +637,7 @@ for i = 1:zdim
     % Use pseudo inverse rather than BETA=inv(D'*D)*D'*X for 
     % D = DesMtx, to allow for non-unique designs. See matlab help.
     %-----------------------------------------------------------------
+    gmean = mean(X);
     BETA  = pinv([H C B G])*X;
     ResSS = sum((X - [H C B G]*BETA).^2);
     
@@ -566,8 +673,12 @@ for i = 1:zdim
     %-Compute t-statistics for specified compounds of parameters
     %-----------------------------------------------------------
     T      = zeros(1,size(BETA,2));
+    Fnum   = zeros(1,size(BETA,2));
+    CON    = zeros(1,size(BETA,2));
     Co     = CONT;
     if STAT=='T'
+      CON(1,:) = Co*BETA;
+      CONSE(1,:) = sqrt((ResSS*(Co*pinv([H C B G]'*[H C B G])*Co'))/df);
       % t, as usual
       T(1,:) = Co*BETA./sqrt((ResSS*(Co*pinv([H C B G]'*[H C B G])*Co'))/df);
     else
@@ -575,6 +686,8 @@ for i = 1:zdim
       pX   = pinv([H C B G]);
       T(1,:) = (sum(((Co*BETA)'*inv(Co*pinv([H C B G]'*[H C B G])*Co'))' .* ...
 		    (Co*BETA),1)/rank(Co)) ./ (ResSS/df);
+      Fnum(1,:) = (sum(((Co*BETA)'*inv(Co*pinv([H C B G]'*[H C B G])*Co'))' .* ...
+		    (Co*BETA),1)/rank(Co));
     end	
     
     %-Save Max T statistic
@@ -604,13 +717,21 @@ for i = 1:zdim
     %
     %- New! Write out data images.
     %- Input image data.
+    gmean_image(:,Q)=gmean;
     BETA_image(:,Q)=BETA;
     ResSS_image(:,Q)=ResSS;
+    mask_image(:,Q)=1;
     if STAT=='T'
       T_pos_image(:,Q)=T;
       T_neg_image(:,Q)=-T;
+      
+      CON_pos_image(:,Q)=CON;
+      CON_neg_image(:,Q)=-CON;
+      
+      CONSE_image(:,Q)=CONSE;
     elseif STAT=='F'
       F_image(:,Q)=T;
+      Fnum_image(:,Q)=Fnum;
     end
 	
     if bVarAlph
@@ -643,16 +764,36 @@ for i = 1:zdim
     ResSS_vol=reshape(ResSS_image,DIM(1),DIM(2),DIM(3));
     spm_write_vol(VResMS, ResSS_vol);
     
+    % Analysis mask
+    mask_vol=reshape(mask_image,DIM(1),DIM(2),DIM(3));
+    spm_write_vol(Vmask,mask_vol);
+
+    % Grand mean
+    gmean_vol = reshape(gmean_image,DIM(1),DIM(2),DIM(3));
+    spm_write_vol(Vgmean,gmean_vol);
+    
     if STAT=='T'
       T_pos_vol=reshape(T_pos_image,DIM(1),DIM(2),DIM(3));
       spm_write_vol(VT_pos,T_pos_vol);
       
       T_neg_vol=reshape(T_neg_image,DIM(1),DIM(2),DIM(3));
       spm_write_vol(VT_neg,T_neg_vol);
+
+      CON_pos_vol=reshape(CON_pos_image,DIM(1),DIM(2),DIM(3));
+      spm_write_vol(VCON_pos,CON_pos_vol);
+      
+      CON_neg_vol=reshape(CON_neg_image,DIM(1),DIM(2),DIM(3));
+      spm_write_vol(VCON_neg,CON_neg_vol);
+      
+      CONSE_vol=reshape(CONSE_image,DIM(1),DIM(2),DIM(3));
+      spm_write_vol(VCONSE,CONSE_vol);
       
     elseif STAT=='F'
       F_vol=reshape(F_image,DIM(1),DIM(2),DIM(3));
       spm_write_vol(VF,F_vol);
+      
+      Fnum_vol=reshape(Fnum_image,DIM(1),DIM(2),DIM(3));
+      spm_write_vol(VFnum,Fnum_vol);
     end
 	  
     if bVarAlph
@@ -660,7 +801,15 @@ for i = 1:zdim
       spm_write_vol(VlwP, lwP_vol);
     end
 	  
-  else  
+  else
+    % Analysis mask
+    mask_plate=reshape(mask_image,DIM(1),DIM(2));
+    spm_write_plane(Vmask,mask_plate,i);  
+      
+    % Grand mean
+    gmean_plate=reshape(gmean_image, DIM(1), DIM(2));
+    spm_write_plane(Vgmean,gmean_plate,i);
+
     for ii=1:p
       BETA_plate=reshape(BETA_image(ii,:), DIM(1), DIM(2));
       spm_write_plane(Vbeta(ii),BETA_plate,i);
@@ -675,10 +824,22 @@ for i = 1:zdim
       
       T_neg_plate=reshape(T_neg_image, DIM(1), DIM(2));
       spm_write_plane(VT_neg,T_neg_plate,i);
+      
+      CON_pos_plate=reshape(CON_pos_image,DIM(1),DIM(2));
+      spm_write_plane(VCON_pos,CON_pos_plate,i);
+      
+      CON_neg_plate=reshape(CON_neg_image,DIM(1),DIM(2));
+      spm_write_plane(VCON_neg,CON_neg_plate,i);
+      
+      CONSE_plate=reshape(CONSE_image,DIM(1),DIM(2));
+      spm_write_plane(VCONSE,CONSE_plate,i);
 	  
     elseif STAT=='F'
       F_plate=reshape(F_image, DIM(1), DIM(2));
       spm_write_plane(VF,F_plate,i);
+      
+      Fnum_plate=reshape(Fnum_image, DIM(1), DIM(2));
+      spm_write_plane(VFnum,Fnum_plate,i);
     end  
 	    
     if bVarAlph

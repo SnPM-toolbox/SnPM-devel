@@ -370,7 +370,6 @@ load(fullfile(CWD,'SnPMcfg'))
 load(fullfile(CWD,'SnPM'))
 load(fullfile(CWD,'SnPMucp'))
 
-
 %-Ask whether positive or negative effects be analysed
 %-----------------------------------------------------------------------
 if BATCH
@@ -387,6 +386,13 @@ else
     str = 'Positive effects';
     spm_input('F-statistic, so only:','+1','b',str,1);
   end
+end
+
+% Find corresponding contrast name in nidm json structure
+if bNeg == 0;
+    nidm.Inferences(1).StatisticMap_contrastName = {con_name};
+else
+    nidm.Inferences(1).StatisticMap_contrastName = {con_neg_name};
 end
 
 %-Take MaxT for increases or decreases according to bNeg
@@ -484,6 +490,7 @@ C_STCS    = NaN;   % Cluster size threshold (set directly by uncorrected
 alph_FWE  = NaN;   % FWE rate of a specified u threshold
 alph_FDR  = NaN;   % FDR rate of a specified alpha_ucp
   
+nidm.Inferences(1).Inference_hasAlternativeHypothesis = 'nidm_OneTailedTest';
 if BATCH
     bSpatEx = isfield(job.Thr,'Clus');
     if ~bSpatEx
@@ -493,12 +500,18 @@ if BATCH
         case 'Pth'
             alpha_ucp = BoundCheck(job.Thr.Vox.VoxSig.Pth,[0 1],'Invalid Uncorrected P');
             alph_FDR  = snpm_P_FDR(alpha_ucp,[],'P',[],sSnPMucp');
+            nidm.Inferences(1).HeightThreshold_type = 'nidm_PValueUncorrected';
+            nidm.Inferences(1).HeightThreshold_value = alpha_ucp;
         case 'TFth'
             u         = BoundCheck(job.Thr.Vox.VoxSig.TFth,[0 Inf],'Negative Threshold!');
             alph_FWE  = sum(MaxT > u -tol) / nPermReal;
+            nidm.Inferences(1).HeightThreshold_type = 'obo_Statistic';
+            nidm.Inferences(1).HeightThreshold_value = u;
         case 'FDRth'
             alph_FDR  = BoundCheck(job.Thr.Vox.VoxSig.FDRth,[0 1],'Invalid FDR level');
             alpha_ucp = snpm_uc_FDR(alph_FDR,[],'P',[],sSnPMucp');
+            nidm.Inferences(1).HeightThreshold_type = 'obo_QValue';
+            nidm.Inferences(1).HeightThreshold_value = alph_FDR;
         case 'FWEth'
             alph_FWE  = BoundCheck(job.Thr.Vox.VoxSig.FWEth,[0 1],'Invalid FWE level');
             iFWE      = ceil((1-alph_FWE)*nPermReal);
@@ -508,7 +521,14 @@ if BATCH
                 C_MaxT = 0;
             end
             u = C_MaxT;
+            nidm.Inferences(1).HeightThreshold_type = 'obo_FWERAdjustedPValue';
+            nidm.Inferences(1).HeightThreshold_value = alph_FWE;
+        otherwise
+            error('Unknown threshold')
         end
+        % No extent thresholding when voxelwise threshold is requested
+        nidm.Inferences(1).ExtentThreshold_type = 'obo_Statistic';
+        nidm.Inferences(1).ExtentThreshold_clusterSizeInVoxels = 0;
     else
         % Cluster-wise inference
         if exist(fullfile(CWD,'SnPM_ST.mat'))~=2 & exist(fullfile(CWD,'STCS.mat'))~=2
@@ -523,6 +543,14 @@ if BATCH
             % Save original ST_Ut
             ST_Ut_0 = ST_Ut;
             CFth=job.Thr.Clus.ClusSize.CFth;
+            if (CFth<1)
+                nidm.Inferences(1).HeightThreshold_type = 'nidm_PValueUncorrected';
+                nidm.Inferences(1).HeightThreshold_value = CFth;
+            else
+                nidm.Inferences(1).HeightThreshold_type = 'obo_Statistic';
+                nidm.Inferences(1).HeightThreshold_value = CFth;
+            end
+            
             if (CFth<=0)
                 error('SnPM:InvalidClusterFormingThresh', 'ERROR: Cluster-forming threshold must be strictly positive.\nRe-run results with a cluster-forming threshold greater than 0.\n')
             end
@@ -575,9 +603,19 @@ if BATCH
             end
                 ST_Ut = CFth;
         else % Threshold *was* set in snpm_ui.
+            
+%             TODO check why job.Thr.Clus.ClusSize.CFth is not stored in CFth
             if ~isnan(job.Thr.Clus.ClusSize.CFth)
                 error('SnPM:InvalidClusterFormingThresh', sprintf('ERROR: Cluster-forming threshold of T=%0.2f was already set during analysis configuration; hence, in results, cluster-forming threshold must be left as "NaN".\nRe-run results with cluster-forming threshold set to NaN.\n',ST_Ut))
             end
+            if (job.Thr.Clus.ClusSize.CFth<1)
+                nidm.Inferences(1).HeightThreshold_type = 'nidm_PValueUncorrected';
+                nidm.Inferences(1).HeightThreshold_value = job.Thr.Clus.ClusSize.CFth;
+            else
+                nidm.Inferences(1).HeightThreshold_type = 'obo_Statistic';
+                nidm.Inferences(1).HeightThreshold_value = job.Thr.Clus.ClusSize.CFth;
+            end
+
         end
         u=ST_Ut; % Flag use of a statistic-value threshold
         % Inference details...
@@ -585,14 +623,20 @@ if BATCH
         switch tmp{1}
             case 'Cth'
                 C_STCS = job.Thr.Clus.ClusSize.ClusSig.Cth;
+                nidm.Inferences(1).ExtentThreshold_type = 'obo_Statistic';
+                nidm.Inferences(1).ExtentThreshold_clusterSizeInVoxels = C_STCS;
             case 'PthC'
                 alpha_ucp = BoundCheck(job.Thr.Clus.ClusSize.ClusSig.PthC,[0 1],'Invalid uncorrected P(k)');
+                nidm.Inferences(1).ExtentThreshold_type = 'nidm_PValueUncorrected';
+                nidm.Inferences(1).ExtentThreshold_value = alpha_ucp;
             case 'FWEthC'
                 alph_FWE  = BoundCheck(job.Thr.Clus.ClusSize.ClusSig.FWEthC,[0 1],'Invalid FWE level (cluster-level inference)');
                 iFWE      = ceil((1-alph_FWE)*nPermReal);
+                nidm.Inferences(1).ExtentThreshold_type = 'obo_FWERAdjustedPValue';
+                nidm.Inferences(1).ExtentThreshold_value = alph_FWE;
         end
     end % END: Cluster-wise inference
-
+    
 else  % GUI, interative inference specification
 
   str_img =[STAT,'|P'];
@@ -772,6 +816,10 @@ set(Finter,'Pointer','Watch')
 %-Calculate distribution of Maximum Suprathreshold Cluster size
 %-Calculate critical Suprathreshold Cluster Size
 %=======================================================================
+
+% TODO: check this is always true
+nidm.ClusterDefinitionCriteria_hasConnectivityCriterion = 'nidm_voxel18connected';
+
 if bSpatEx
 	fprintf('Working on spatial extent...\n');
 	%-Compute suprathreshold voxels - check there are some
@@ -896,6 +944,7 @@ if bSpatEx
             if i==1
                 %-Save perm 1 stats for use later - [X;Y;Z;T;perm;STCno]
                 tmp = spm_clusters(Locs_vox(1:3,:));
+                
                 if isPos==1
                     STCstats_Pos = [ SnPM_ST(:,tQ); tmp];
                     if bNeg==0
@@ -1141,8 +1190,75 @@ if bSpatEx
 	end
 end
 
-% Display only if *not* in command line mode
-if ~spm_get_defaults('cmdline')
+% NIDM export
+nidm_export=isfield(job.export, 'nidm');
+
+% Display only if *not* in command line mode or for NIDM export
+if ~spm_get_defaults('cmdline') || nidm_export
+    
+    if nidm_export
+        % ---- Code adapted from SPM's spm_results_nidm -----
+        %-NIDM Export
+        %----------------------------------------------------------------------
+        %-Reference space
+        %--------------------------------------------------------------------------
+        switch job.export.nidm.refspace
+            case 'subject'
+                coordsys = 'nidm_SubjectCoordinateSystem';
+            case 'ixi'
+                coordsys = 'nidm_Ixi549CoordinateSystem';
+            case 'icbm'
+                coordsys = 'nidm_IcbmMni152LinearCoordinateSystem';
+            case 'custom'
+                coordsys = 'nidm_CustomCoordinateSystem';        
+            case 'mni'
+                coordsys = 'nidm_MNICoordinateSystem';        
+            case 'talairach'
+                coordsys = 'nidm_TalairachCoordinateSystem';  
+            otherwise
+                error('Unknown reference space.');
+        end
+        nidm.CoordinateSpace_inWorldCoordinateSystem = coordsys;
+
+        %-Data modality
+        %--------------------------------------------------------------------------
+        MRIProtocol  = '';
+        switch job.export.nidm.modality
+            case 'AMRI'
+                ImagingInstrument = 'nlx_MagneticResonanceImagingScanner';
+                MRIProtocol       = 'nlx_AnatomicalMRIProtocol';    
+            case 'FMRI'
+                ImagingInstrument = 'nlx_MagneticResonanceImagingScanner';
+                MRIProtocol       = 'nlx_FunctionalMRIProtocol';
+            case 'DMRI'
+                ImagingInstrument = 'nlx_MagneticResonanceImagingScanner';
+                MRIProtocol       = 'nlx_DiffusionWeightedImagingProtocol';
+            case 'PET'
+                ImagingInstrument = 'nlx_PositronEmissionTomographyScanner';
+            case 'SPECT'
+                ImagingInstrument = 'nlx_SinglePhotonEmissionComputedTomographyScanner';
+            case 'EEG'
+                ImagingInstrument = 'nlx_ElectroencephalographyMachine';
+            case 'MEG'
+                ImagingInstrument = 'nlx_MagnetoencephalographyMachine';
+            otherwise
+                error('Unknown modality.');
+        end
+        nidm.ImagingInstrument_type = ImagingInstrument;
+        if ~isempty(MRIProtocol)
+            nidm.Data_hasMRIProtocol = MRIProtocol;
+        end
+
+        %-Subject/Group(s)
+        %--------------------------------------------------------------------------
+        groups = job.export.nidm.group;
+        if ~isequal(groups.nsubj,1)
+            for i=1:numel(groups)
+                nidm.Groups(i).StudyGroupPopulation_groupName = groups(i).label;
+                nidm.Groups(i).StudyGroupPopulation_numberOfSubjects = groups(i).nsubj;
+            end
+        end        
+    end
     
 %=======================================================================
 %-D I S P L A Y :   Max report
@@ -1311,6 +1427,7 @@ if length(strmatch('MIPtable',Report))>0
   %-----------------------------------------------------------------------
   r = 1;
   bUsed = zeros(size(STC_SnPMt));
+  
   while max(STC_SnPMt.*(~bUsed)) & (y > 3)
     
     [null, i] = max(STC_SnPMt.*(~bUsed));	% Largest t value
@@ -1341,10 +1458,23 @@ if length(strmatch('MIPtable',Report))>0
     text(tCol(8),y,sprintf(Fmtst{8},STC_XYZ(1,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
     text(tCol(9),y,sprintf(Fmtst{9},STC_XYZ(2,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
     text(tCol(10),y,sprintf(Fmtst{10},STC_XYZ(3,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
+    
+    % TODO: this is overwritten by 1st peak i below    
+    nidm.Inferences(1).Clusters(r).SupraThresholdCluster_clusterSizeInVoxels = STC_N(i);
+    nidm.Inferences(1).Clusters(r).Peaks(1).Peak_pValueFWER = Pt(i);
+    nidm.Inferences(1).Clusters(r).Peaks(1).Peak_pValueFDR = Pfdr(i);
+    nidm.Inferences(1).Clusters(r).Peaks(1).Peak_value = STC_SnPMt(i);
+    nidm.Inferences(1).Clusters(r).Peaks(1).Peak_pValueUncorrected = Pu(i);
+    nidm.Inferences(1).Clusters(r).Peaks(1).Peak_equivalentZStatistic = norminv(1-Pu(i));
+    nidm.Inferences(1).Clusters(r).Peaks(1).Coordinate_coordinateVector = STC_XYZ(1:3,i);
+    
     y = y -1;
     
     %-Print up to 3 secondary maxima (>8mm apart)
-    %-------------------------------------------------------------------
+    %-------------------------------------------------------------------   
+    nidm.PeakDefinitionCriteria_minDistanceBetweenPeaks = 8;
+    nidm.PeakDefinitionCriteria_maxNumberOfPeaksPerCluster = 3;
+    
     [null, k] = sort(-STC_SnPMt(j));	% Sort on t value
     D         = i;
     for i = 1:length(k)
@@ -1365,13 +1495,21 @@ if length(strmatch('MIPtable',Report))>0
 	  y = y -1;
 	end
       end
+
+      
+        nidm.Inferences(1).Clusters(r).Peaks(i).Peak_pValueFWER = Pt(d);
+        nidm.Inferences(1).Clusters(r).Peaks(i).Peak_pValueFDR = Pfdr(d);
+        nidm.Inferences(1).Clusters(r).Peaks(i).Peak_value = STC_SnPMt(d);
+        nidm.Inferences(1).Clusters(r).Peaks(i).Peak_pValueUncorrected = Pu(d);
+        nidm.Inferences(1).Clusters(r).Peaks(i).Peak_equivalentZStatistic = norminv(1-Pu(d));
+        nidm.Inferences(1).Clusters(r).Peaks(i).Coordinate_coordinateVector = STC_XYZ(1:3,d);      
     end
-    
+       
     bUsed(j) = (bUsed(j) | 1 );		%-Mark maxima as "used"
     r = r + 1;				% Next region
   end
+ 
   clear i j k D d r
-  
   
   %-Footnote with SnPM parameters
   %=======================================================================
@@ -1416,7 +1554,14 @@ if length(strmatch('MIPtable',Report))>0
   y=y-0.8;
   text(0,y,sprintf('Design: %s',sDesign),'FontSize',8);
   y=y-0.8;
-  text(0,y,sprintf('Search vol: %d cmm, %d voxels',S*abs(prod(VOX)),S), 'FontSize',8)
+  search_vol_cmm = S*abs(prod(VOX));
+  search_vol_vox = S;
+  text(0,y,sprintf('Search vol: %d cmm, %d voxels',search_vol_cmm,search_vol_vox), 'FontSize',8)
+  nidm.Inferences(1).SearchSpaceMaskMap_searchVolumeInVoxels = search_vol_vox;
+  
+%   TODO convert back to units
+  nidm.Inferences(1).SearchSpaceMaskMap_searchVolumeInUnits = search_vol_cmm;
+  
   y=y-0.8;
   text(0.7,y,sprintf('Voxel size: [%5.2f, %5.2f, %5.2f] mm',abs(VOX)), ...
        'FontSize', 8)
@@ -1445,7 +1590,7 @@ end
 %- Image output?
 %=======================================================================
 %-Write out filtered SnPMt?
-if WrtFlt
+if WrtFlt || nidm_export
 	
   Fname = WrtFltFn;
   
@@ -1490,6 +1635,28 @@ if WrtFlt
   end
   Vs =  sf_close_vol(Vs);
   clear t
+  
+  % TODO SearchSpaceMaskMap can be different from analysis mask
+  nidm.Inferences(1).SearchSpaceMaskMap_atLocation = 'mask.img';
+  
+  % TODO: always stationary??
+  nidm.Inferences(1).SearchSpaceMaskMap_randomFieldStationarity = true;
+  
+  nidm.Inferences(1).ExcursionSetMap_atLocation = Fname;
+
+  nidm.NIDMResultsExporter_softwareVersion = snpm('ver');
+  nidm.NeuroimagingAnalysisSoftware_softwareVersion = snpm('ver');
+  
+  %   TODO: are other units possible in SnPM??
+  nidm.CoordinateSpace_voxelUnits = {'mm', 'mm', 'mm'};
+   
+  nidm.NeuroimagingAnalysisSoftware_type = 'src_SnPM';
+  nidm.NeuroimagingAnalysisSoftware_label = 'SnPM';
+  
+  % TODO: This temp file should only be produced if NIDM export is requested
+  jsonwrite('snpm_nidm_thresh.json', nidm, ...
+            struct('indent','    ', 'escape', false));
+  spm_nidmresults(nidm, CWD)
 end
 
 %-Reset Interactive Window
@@ -1630,6 +1797,7 @@ elseif ~isempty(C)
   text(cC.^(1/3)+diff(Xlim)*0.01,Ylim(2)*0.85,'Threshold','FontSize',10)
 
 end
+
 
 return
 
