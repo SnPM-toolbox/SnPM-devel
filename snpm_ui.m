@@ -310,6 +310,8 @@ elseif exist('nPiStud_mx', 'var')
     nPerm_max = nPiStud_mx;
 elseif exist('nPiSubj_mx', 'var')
     nPerm_max = nPiSubj_mx;
+elseif exist('nOfPerm', 'var')
+    nPerm_max = nOfPerm;
 else
     error('snpm:MissingMaxPerm', 'Maximum number of permutations not found')
 end
@@ -598,7 +600,7 @@ nidm.DesignMatrix_regressorNames = HCBGnames;
 s_SnPMcfg_save = ['s_SnPMcfg_save H C B G HCBGnames P PiCond ',...
 	'sPiCond bhPerms sHCform iGloNorm sGloNorm GM rg GX GMscale CONT ',...
 	'THRESH MASK ImMASK TH bVarSm vFWHM sVarSm bVolm bST sDesFile sDesign ',...
-        'V pU_ST_Ut df1 nidm nPerm_max nidm_json ', ...
+        'V pU_ST_Ut df1 nidm nPerm_max nidm ', ...
 	'sDesSave ',sDesSave];
 eval(['save SnPMcfg ',s_SnPMcfg_save])
 

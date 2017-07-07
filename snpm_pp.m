@@ -390,9 +390,9 @@ end
 
 % Find corresponding contrast name in nidm json structure
 if bNeg == 0;
-    contrast_id = con_name;
+    nidm.Inferences(1).StatisticMap_contrastName = {con_name};
 else
-    contrast_id = con_neg_name;
+    nidm.Inferences(1).StatisticMap_contrastName = {con_neg_name};
 end
 
 %-Take MaxT for increases or decreases according to bNeg
@@ -624,7 +624,7 @@ if BATCH
             case 'Cth'
                 C_STCS = job.Thr.Clus.ClusSize.ClusSig.Cth;
                 nidm.Inferences(1).ExtentThreshold_type = 'obo_statistic';
-                nidm.Inferences(1).ExtentThreshold_value = C_STCS;
+                nidm.Inferences(1).ExtentThreshold_clusterSizeInVoxels = C_STCS;
             case 'PthC'
                 alpha_ucp = BoundCheck(job.Thr.Clus.ClusSize.ClusSig.PthC,[0 1],'Invalid uncorrected P(k)');
                 nidm.Inferences(1).ExtentThreshold_type = 'nidm_PValueUncorrected';
@@ -1491,10 +1491,10 @@ if length(strmatch('MIPtable',Report))>0
   search_vol_cmm = S*abs(prod(VOX));
   search_vol_vox = S;
   text(0,y,sprintf('Search vol: %d cmm, %d voxels',search_vol_cmm,search_vol_vox), 'FontSize',8)
-  nidm.SearchSpaceMaskMap_searchVolumeInVoxels = search_vol_vox;
+  nidm.Inferences(1).SearchSpaceMaskMap_searchVolumeInVoxels = search_vol_vox;
   
 %   TODO convert back to units
-  nidm.SearchSpaceMaskMap_searchVolumeInUnits = search_vol_cmm;
+  nidm.Inferences(1).SearchSpaceMaskMap_searchVolumeInUnits = search_vol_cmm;
   
   y=y-0.8;
   text(0.7,y,sprintf('Voxel size: [%5.2f, %5.2f, %5.2f] mm',abs(VOX)), ...
@@ -1571,10 +1571,10 @@ if WrtFlt || nidm_export
   clear t
   
   % TODO SearchSpaceMaskMap can be different from analysis mask
-  nidm.SearchSpaceMaskMap_atLocation = 'mask.img';
+  nidm.Inferences(1).SearchSpaceMaskMap_atLocation = 'mask.img';
   
   % TODO: always stationary??
-  nidm.SearchSpaceMaskMap_randomFieldStationarity = true;
+  nidm.Inferences(1).SearchSpaceMaskMap_randomFieldStationarity = true;
   
   nidm.Inferences(1).ExcursionSetMap_atLocation = Fname;
 
@@ -1582,7 +1582,7 @@ if WrtFlt || nidm_export
   nidm.NeuroimagingAnalysisSoftware_softwareVersion = snpm('ver');
   
   %   TODO: are other units possible in SnPM??
-  nidm.CoordinateSpace_units = {'mm', 'mm', 'mm'};
+  nidm.CoordinateSpace_voxelUnits = {'mm', 'mm', 'mm'};
   
   % TODO: these should be filled in by the user ---
   nidm.CoordinateSpace_inWorldCoordinateSystem = 'nidm_StandardizedCoordinateSystem';
@@ -1593,9 +1593,9 @@ if WrtFlt || nidm_export
   nidm.NeuroimagingAnalysisSoftware_label = 'SnPM';
   
   % TODO: This temp file should only be produced if NIDM export is requested
-  jsonwrite('snpm_nidm_thresh.json', nidm_json, ...
+  jsonwrite('snpm_nidm_thresh.json', nidm, ...
             struct('indent','    ', 'escape', false));
-  spm_nidmresults(nidm_json, CWD)
+  spm_nidmresults(nidm, CWD)
 end
 
 %-Reset Interactive Window

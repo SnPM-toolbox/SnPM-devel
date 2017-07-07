@@ -545,6 +545,8 @@ for i = 1:zdim
   gmean_image=repmat(NaN,1,WorkDim);
   BETA_image=repmat(NaN,p,WorkDim);
   ResSS_image=repmat(NaN,1,WorkDim);
+  mask_image=repmat(NaN,1,WorkDim);
+  CONSE_image=repmat(NaN,1,WorkDim);
   if STAT=='T'
     T_pos_image=repmat(NaN,1,WorkDim);
     T_neg_image=repmat(NaN,1,WorkDim);
@@ -718,6 +720,7 @@ for i = 1:zdim
     gmean_image(:,Q)=gmean;
     BETA_image(:,Q)=BETA;
     ResSS_image(:,Q)=ResSS;
+    mask_image(:,Q)=1;
     if STAT=='T'
       T_pos_image(:,Q)=T;
       T_neg_image(:,Q)=-T;
@@ -762,7 +765,7 @@ for i = 1:zdim
     spm_write_vol(VResMS, ResSS_vol);
     
     % Analysis mask
-    mask_vol=reshape(Q,DIM(1),DIM(2),DIM(3));
+    mask_vol=reshape(mask_image,DIM(1),DIM(2),DIM(3));
     spm_write_vol(Vmask,mask_vol);
 
     % Grand mean
@@ -800,8 +803,8 @@ for i = 1:zdim
 	  
   else
     % Analysis mask
-    mask_plate=reshape(Q,DIM(1),DIM(2));
-    spm_write_plane(Vmask,mask_plate);  
+    mask_plate=reshape(mask_image,DIM(1),DIM(2));
+    spm_write_plane(Vmask,mask_plate,i);  
       
     % Grand mean
     gmean_plate=reshape(gmean_image, DIM(1), DIM(2));
@@ -823,13 +826,13 @@ for i = 1:zdim
       spm_write_plane(VT_neg,T_neg_plate,i);
       
       CON_pos_plate=reshape(CON_pos_image,DIM(1),DIM(2));
-      spm_write_plane(VCON_pos,CON_pos_plate);
+      spm_write_plane(VCON_pos,CON_pos_plate,i);
       
       CON_neg_plate=reshape(CON_neg_image,DIM(1),DIM(2));
-      spm_write_plane(VCON_neg,CON_neg_plate);
+      spm_write_plane(VCON_neg,CON_neg_plate,i);
       
       CONSE_plate=reshape(CONSE_image,DIM(1),DIM(2));
-      spm_write_plane(VCONSE,CONSE_plate);
+      spm_write_plane(VCONSE,CONSE_plate,i);
 	  
     elseif STAT=='F'
       F_plate=reshape(F_image, DIM(1), DIM(2));
