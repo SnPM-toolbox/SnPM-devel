@@ -25,6 +25,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
         numBetas;
         inter_map;
         batch_map;
+        stat_tolerance;
         tolerance;
         mapName;
         SnPMrefVersion;
@@ -79,6 +80,8 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             
             testCase.checks = true;
             testCase.warningId = '';
+            
+            testCase.stat_tolerance = 10^-10;
         end
         
         function update_basis_matlabbatch(testCase)
@@ -147,7 +150,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             % Compare t-maps
             testCase.inter_map = inter_tmap;
             testCase.batch_map = batch_tmap;
-            testCase.tolerance = 10^-10;
+            testCase.tolerance = testCase.stat_tolerance;
             testCase.mapName = 'tmap';
             testCase.compare_batch_with_inter();
             
@@ -195,7 +198,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             % Compare filtered maps
             testCase.inter_map = inter_filtmap;
             testCase.batch_map = batch_filtmap;
-            testCase.tolerance = 10^-10;
+            testCase.tolerance = testCase.stat_tolerance;
             testCase.mapName = 'filtered map';
             refVersion = regexp(testCase.SnPMrefVersion, '^SnPM(?<num>\d+)\.?(?<subnum>\d?\d?)', 'names');
             zeroingNaNs = false;
@@ -218,6 +221,15 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.complete_batch();
             testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), ...
                 ['GT_' strrep(testCase.SnPMrefVersion, '.', '') '_' version('-release')], testCase.testName);
+            
+            if ~exist(testCase.interResDir, 'dir')
+                warning('test:noGroundTruth', ['Ground truth data for ' version('-release') ' is not available yet' ... 
+                    ', please consider sending an update at https://github.com/SnPM-toolbox/SnPM_test_data.' ...
+                    ' Data generated with 2014b will be used instead for testing and tolerance increased.']);
+                testCase.interResDir = fullfile(spm_str_manip(testCase.batchResDir,'hh'), ...
+                    ['GT_' strrep(testCase.SnPMrefVersion, '.', '') '_2016b'], testCase.testName);
+                testCase.stat_tolerance = 10^(-6);
+            end
             
             if ~exist(testCase.batchResDir, 'dir')
                 mkdir(testCase.batchResDir);
