@@ -1392,7 +1392,7 @@ if length(strmatch('MIPtable',Report))>0
     for i = 1:length(k)
       d     = j(k(i));
       if min( sqrt( sum((STC_XYZ(:,D) - ...
-			 STC_XYZ(:,d)*ones(1,size(D,2))).^2) ) ) > Dis;
+			 STC_XYZ(:,d)*ones(1,size(D,2))).^2) ) ) > Dis
 	if length(D) < Num
 	  r = r + 1;				% Next row
 

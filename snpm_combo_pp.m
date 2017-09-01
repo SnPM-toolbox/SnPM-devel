@@ -328,7 +328,7 @@ if bSpatEx
 	ClInfo = zeros(8,size(SnPM_ST,2));
 	ClInfoEnd = 0;
 	for i = nPerm:-1:1
-                if (rem(i,10)==0)
+        if (rem(i,10)==0)
 		  fprintf('\b\b\b\b%-4u',i)
 		  drawnow
 		end
@@ -400,12 +400,12 @@ if bSpatEx
 
 	fprintf('Calculating corr p-values for each voxel / cluster\n');
 	for ip = 1:(nPerm-1)
-           if rem(ip,50)==0, fprintf('.'), end
-           Qvox = find(ClInfo(4,:)>StMaxT(ip));
-           CorrPs(1,Qvox) = (nPerm-ip)/nPerm;
-           Qcl  = find(ClInfo(5,:)>StMaxSTCS(ip));
-           CorrPs(2,Qcl) = (nPerm-ip)/nPerm;
-        end
+        if rem(ip,50)==0, fprintf('.'), end
+        Qvox = find(ClInfo(4,:)>StMaxT(ip));
+        CorrPs(1,Qvox) = (nPerm-ip)/nPerm;
+        Qcl  = find(ClInfo(5,:)>StMaxSTCS(ip));
+        CorrPs(2,Qcl) = (nPerm-ip)/nPerm;
+    end
 	fprintf('.Done!\n');
 
 	fprintf('Calculating voxel-cluster combining functions\n');
@@ -812,7 +812,7 @@ while max(STC_SnPMt.*(~bUsed)) && (y > 3)
 	for i = 1:length(k)
 	    d     = j(k(i));
 	    if min( sqrt( sum((STC_XYZ(:,D) - ...
-			STC_XYZ(:,d)*ones(1,size(D,2))).^2) ) ) > 8;
+			STC_XYZ(:,d)*ones(1,size(D,2))).^2) ) ) > 8
 		if length(D) < 3
        	
 	text(tCol(5)+0.08,y,sprintf(Fmtst{5},Pt(d)),...

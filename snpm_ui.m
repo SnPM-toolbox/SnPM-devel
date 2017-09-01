@@ -653,7 +653,7 @@ if ~spm_get_defaults('cmdline')
         x = x + dx; end
        text(x,y,Q(i,:),'FontSize',10,'interpreter','none');
        y     = y - dy;
-       if y < 0;
+       if y < 0
         spm_print
         spm_clf; axis off
         y = y0;
