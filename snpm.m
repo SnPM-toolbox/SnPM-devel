@@ -56,7 +56,7 @@ SnPMver    = 'SnPM13.1.06';
 if nargin == 0, Action='Init'; end
 
 
-if strcmp(lower(Action),lower('Init'))
+if strcmpi(Action,'Init')
 %=======================================================================
 global MODALITY
 if isempty(spm_figure('FindWin','Menu'))
@@ -77,7 +77,7 @@ snpm('AsciiWelcome')
 spm_help('!Disp','snpm.m','','Graphics',snpm('Ver'))
 snpm('CreateMenuWin')
 
-elseif strcmp(lower(Action),lower('AsciiWelcome'))
+elseif strcmpi(Action,'AsciiWelcome')
 %=======================================================================
 disp( ' ___       ____  __  __                                                  ')
 disp( '/ __) ___ (  _ \(  \/  )  Statistical nonParametric Mapping toolbox      ')
@@ -86,12 +86,12 @@ disp(['(___/(_)_)(__)  (_/\/\_)  Version: ',snpm('Ver')])
 fprintf('\n')
 
 
-elseif strcmp(lower(Action),lower('Ver'))
+elseif strcmpi(Action,'Ver')
 %=======================================================================
 % snpm('Ver')
 varargout = {SnPMver};
 
-elseif strcmp(lower(Action),lower('Colour'))
+elseif strcmpi(Action,'Colour')
 %=======================================================================
 % snpm('Colour')
 %-----------------------------------------------------------------------
