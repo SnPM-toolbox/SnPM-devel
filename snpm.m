@@ -66,7 +66,7 @@ else
 	clc
 end
 % Add test code to Matlabpath
-if ~exist('test_oneSample', 'file')
+if ~exist('test_oneSample', 'file') && ~isdeployed
     addpath(fullfile(spm_file(which('snpm'), 'path'), 'test'));
     addpath(fullfile(spm_file(which('snpm'), 'path'), 'test', 'common'));
 end
