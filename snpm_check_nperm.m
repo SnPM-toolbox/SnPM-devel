@@ -1,4 +1,4 @@
-function snpm_check_perm(nPerm,TotPerm)
+function snpm_check_nperm(nPerm,TotPerm)
 %
 % Issue consistent warning messages about number of permutations
 %
