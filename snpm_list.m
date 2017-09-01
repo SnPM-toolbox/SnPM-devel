@@ -1,4 +1,4 @@
-function varargout = spm_list(varargin)
+function varargout = snpm_list(varargin)
 % Support function for snpm_pp.m
 % FORMAT spm_list('CSVList',TabDat,ofile)
 %
