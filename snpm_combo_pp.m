@@ -232,7 +232,7 @@ if bSpatEx
             clear pU_C_MaxT
         end
         clear pU_ST_Ut
-        if (primaryThresh < 1), 
+        if (primaryThresh < 1) 
             primaryThresh = spm_invTcdf(1-primaryThresh,df); 
         end
     end
@@ -357,7 +357,7 @@ if bSpatEx
                            % all cluster info
                            tmpCLoc  = (tmp==j);
                            subsubST = subSnPM_ST(:,tmpCLoc);
-                           [tmpPeak tmpPLoc] = max(subsubST(4,:));
+                           [tmpPeak, tmpPLoc] = max(subsubST(4,:));
                            tmpXYZ   = subsubST(1:3,tmpPLoc);
                            tmpMass  = sum((subsubST(4,:)-ST_Ut).^mTheta);
                            tmpVec   = [tmpXYZ; tmpPeak; tmpCS(j); tmpMass; j; i];
@@ -432,9 +432,9 @@ if bSpatEx
            end
         end
 
-        [StMaxWf iStMaxWf] = sort(MaxWf);
-        [StMaxWt iStMaxWt] = sort(MaxWt);
-        [StMaxWm iStMaxWm] = sort(MaxWm);
+        [StMaxWf, iStMaxWf] = sort(MaxWf);
+        [StMaxWt, iStMaxWt] = sort(MaxWt);
+        [StMaxWm, iStMaxWm] = sort(MaxWm);
 	C_Wcomb = zeros(4,1);
 	if alpha < 1
 		C_Wcomb(1) = StMaxWf(c);
@@ -481,7 +481,7 @@ if bSpatEx
 
 
         % Corrected critical meta-statistic
-        [StMaxWa iStMaxWa] = sort(MaxWa);
+        [StMaxWa, iStMaxWa] = sort(MaxWa);
 	if alpha < 1
 		C_Wcomb(4) = StMaxWa(c);
 	else
@@ -560,7 +560,7 @@ if isempty(Q)
 	tmp='voxels'; if bSpatEx, tmp='suprathreshold clusters'; end
 	text(0,0.93,sprintf(...
 		'No %s significant at alpha=%6.4f (corrected)',tmp,alpha));
-	if bSpatEx,
+	if bSpatEx
 	  ShowDist(MaxT,C_MaxT,MaxSTCS,C_STCS);
 	else	   
 	  ShowDist(MaxT,C_MaxT);

@@ -1075,7 +1075,7 @@ if isempty(Q)
 	  fprintf(['WARNING: ' str])
 	end
 	if length(strmatch('FWEreport',Report))>0
-	  if bSpatEx,
+	  if bSpatEx
 	    ShowDist(MaxT,C_MaxT,alph_FWE,STCS_MxK,C_STCS,alph_FWE,'max');
 	  else	   
 	    ShowDist(MaxT,C_MaxT,alph_FWE,[],[],[],'max');

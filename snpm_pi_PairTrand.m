@@ -256,7 +256,7 @@ clear tmp1 tmp2 tmp3
 %=======================================================================
 %-Use implicit SumToZero constraints via relative block effects & pinv.
 %-See spm_DesMtx for more information on this.
-[B Bnames] = spm_DesMtx(iSUBJ,'+0m','Subj');
+[B,Bnames] = spm_DesMtx(iSUBJ,'+0m','Subj');
 
 %-Form non-null design matrix partitions (Globals handled later)
 %=======================================================================

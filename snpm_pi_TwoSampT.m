@@ -148,7 +148,7 @@ g = numel(job.cov);
 for i = 1:g
     nGcs = size(Gc,2);
     d = job.cov(i).c;%spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
-    if (size(d,1) == 1), 
+    if (size(d,1) == 1)
         d = d'; 
     end
     if size(d,1) == q
@@ -156,7 +156,7 @@ for i = 1:g
         Gc = [Gc,d];
         %-Always Centre the covariate
         bCntr = 1;	    
-        if bCntr, 
+        if bCntr
             d  = d - ones(q,1)*mean(d); str=''; 
         else
             str='r'; 

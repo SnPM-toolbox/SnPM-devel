@@ -327,7 +327,7 @@ ydim     = DIM(2);			%-Y dimension
 zdim     = DIM(3);			%-Z dimension
 PlDim    = xdim*ydim;			%-Plane size in voxels
 VolDim   = xdim*ydim*zdim;		%-Volume size in voxels
-if bVolm,
+if bVolm
   WorkDim = VolDim;	%-Working dimension (if volumetric)
 else
   WorkDim = PlDim;	%-Working dimension (if plane by plane)
@@ -335,7 +335,7 @@ end
 
 %-Location vectors --> In units of mm <--
 %-----------------------------------------------------------------------
-[y x] = meshgrid([1:ydim],[1:xdim]');
+[y,x] = meshgrid([1:ydim],[1:xdim]');
 x     = x(:)';
 y     = y(:)';
 z     = (1:zdim);
@@ -350,7 +350,7 @@ MaxT  = repmat(-Inf,nPerm,2);	%-Max t
 nP    = zeros(1,WorkDim);	%-Nonparam P's
 XYZ_total=[];                   %-the variable for keeping all XYZ
 %-If working plane by plane, preallocate Q & XYZ for speed/mem. efficiency
-if ~bVolm, 
+if ~bVolm 
   Q    = zeros(1,PlDim);
   XYZ  = zeros(3,PlDim);
 end
@@ -458,7 +458,7 @@ for i = 1:zdim
   %-Form data matrix for this slice/volume
   %---------------------------------------------------------------------
   X     = zeros(q,WorkDim);
-  if bMask, 
+  if bMask
     Wt = zeros(1,WorkDim); 
   else
     Wt = 1;
@@ -584,7 +584,7 @@ for i = 1:zdim
     
     %-Save min weighted p-value
     %-----------------------------------------------------------
-    if bVarAlph,
+    if bVarAlph
       MinwP(perm,:) = min([ min(Wt.*(1-spm_Tcdf(T(1,:),df))),     ...
 		    min(Wt.*(1-spm_Tcdf(-T(1,:),df)));    ...
 		    MinwP(perm,1), MinwP(perm,2) ]);
@@ -592,7 +592,7 @@ for i = 1:zdim
     
     %-Save weighted p-value (later converted into corr'd wt'd p-val)
     %-----------------------------------------------------------
-    if bVarAlph,
+    if bVarAlph
       wP = [Wt.*(1-spm_Tcdf( T(1,:),df));  ...
 	    Wt.*(1-spm_Tcdf(-T(1,:),df))];
     end
@@ -765,7 +765,7 @@ end
 %-Cycle over planes (or just once for volumetric mode)
 
 %-If working plane by plane, preallocate Q & XYZ for speed/mem. efficiency
-if ~bVolm, 
+if ~bVolm
   Q    = zeros(1,PlDim);
   XYZ  = zeros(3,PlDim);
 end
@@ -921,7 +921,7 @@ for i = 1:zdim
       
       %-Save min weighted p-value
       %-----------------------------------------------------------
-      if bVarAlph,
+      if bVarAlph
         MinwP(perm,:) = min([ min(Wt.*(1-spm_Tcdf( T(1,:),df))),     ...
               min(Wt.*(1-spm_Tcdf(-T(1,:),df)));    ...
               MinwP(perm,1), MinwP(perm,2) ]);

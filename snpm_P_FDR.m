@@ -84,7 +84,7 @@ else
   Cnj_n = abs(n);  % Inf on Global Null
 end
 
-if isempty(Z), 
+if isempty(Z)
   AllP = 1;
   Z = Ps;
   STAT = 'P';
