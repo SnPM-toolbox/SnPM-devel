@@ -321,7 +321,7 @@ end
 
 %-Decide upon volumetric operation
 bVolm = job.bVolm;
-if ~bVolm & (vFWHM(3)~=0)
+if ~bVolm && (vFWHM(3)~=0)
 warning('SnPM:MayRunOutOfMemory', ...
     sprintf(['Working volumetrically because of smoothing in z (%g).\n'... 
          'May run out of memory.'],vFWHM(3)));
@@ -446,8 +446,8 @@ MASK = job.masking.em{1};
 %-Condition Cc & Gc "Shadow" partitions if no FxC interactions
 % These store the covariate values for printing only
 %-----------------------------------------------------------------------
-if (isempty(Cc) & ~isempty(C)), Cc=C; Ccnames=Cnames; end
-if (isempty(Gc) & ~isempty(G)), Gc=G; Gcnames=Gnames; end
+if (isempty(Cc) && ~isempty(C)), Cc=C; Ccnames=Cnames; end
+if (isempty(Gc) && ~isempty(G)), Gc=G; Gcnames=Gnames; end
 
 
 %-Examine images

@@ -216,7 +216,7 @@ load(CfgFile);
 if isempty([H C])
   error('SnPM:NoModel', 'No model specified; [H C] empty'); 
 end
-if ~isempty(H) & ~isempty(C)
+if ~isempty(H) && ~isempty(C)
     error('SnPM:HierarchicalAndCov', 'Cannot have both heirachical and covariate effects'); 
 end
 if size(CONT,2) ~= size([H C B G],2)
@@ -233,19 +233,19 @@ else
   STAT = 'T';
 end
 if rank(CONT)<size(CONT,1)
-  [u s] = spm_svd(CONT'); % Kill zero-rank components
+  [u, s] = spm_svd(CONT'); % Kill zero-rank components
   CONT = full(u*sqrt(s))';
 end
-if ~bVolm & bVarSm & vFWHM(3)
+if ~bVolm && bVarSm && vFWHM(3)
   error('SnPM:ZSmoothVolume', 'Cannot z-smooth variance in non-volumetric mode'); 
 end
 if exist('bVarAlph')~=1
   bVarAlph=0; 
 end
-if bVarAlph & ~(~bVarSm & bVolm)
+if bVarAlph && ~(~bVarSm && bVolm)
   error('SnPM:AlphaVolumePseudo', 'No pseudo t or nonvolumetric w/ variable alpha');
 end
-if ~bVolm & pU_ST_Ut>=0
+if ~bVolm && pU_ST_Ut>=0
   error('SnPM:STCSNotVolume', 'Must work volumetrically to computer STCS on-the-fly');
 end
 % Re-map files to avoid Endian headaches; note if NaN's available
@@ -498,7 +498,7 @@ for i = 1:zdim
   %-Eliminate background voxels (based on threshold TH), and
   % eliminate voxels where there are no differences across scans.
   %---------------------------------------------------------------------
-  if ImMASK & NaNrep==0
+  if ImMASK && NaNrep==0
     Q = find(all(X>TH) & any(diff(X)) & Wt & all(X~=0));
   else
     Q = find(all(X>TH) & any(diff(X)) & Wt);
@@ -747,7 +747,7 @@ else
 end
 
 %-Save correctly labeled T's
-if bVolm & (StartPerm==2)
+if bVolm && (StartPerm==2)
   T0 = T;
   nPtmp = ones(size(T));
   if bhPerms
@@ -814,11 +814,11 @@ for i = 1:zdim
   end % (if ~bVolm)
     
   if length(Q)
-    if ~bVolm, 
+    if ~bVolm
       X = X(:,Q); 
     end	%-Already done if bVolm
     
-    if bST & ~bVolm			%-XYZ already done if bVolm
+    if bST && ~bVolm			%-XYZ already done if bVolm
       XYZ   = [ x(rem(Q-1,PlDim)+1);          ...
         y(rem(Q-1,PlDim)+1);          ...
         z(i)*ones(length(Q),1)];	%-Locations
@@ -826,7 +826,7 @@ for i = 1:zdim
       XYZ(4,:) = [];
     end 
 		
-    if bVarSm & ~bVolm			%-Smoothing & plane-by-plane
+    if bVarSm && ~bVolm			%-Smoothing & plane-by-plane
       SmStart = toc;			%-Timestamp (>)
       TmpPl     = zeros(xdim,ydim);
       TmpPl(Q)  = ones(size(Q));
@@ -836,7 +836,7 @@ for i = 1:zdim
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Initialize structure STCS 
-    if bST & pU_ST_Ut>=0
+    if bST && pU_ST_Ut>=0
       STCS = snpm_STcalc('init',nPerm); 
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1022,7 +1022,7 @@ for i = 1:zdim
     end 	% (for perm = StartPerm:nPerm) - Perm loop
     
     %- save STCS
-    if bST & pU_ST_Ut>=0
+    if bST && pU_ST_Ut>=0
       if bhPerms %Double the STCS variables.
 	STCS = snpm_STcalc('double',STCS);
       end

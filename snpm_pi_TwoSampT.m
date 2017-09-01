@@ -206,7 +206,7 @@ if nScan<=12 || ~bAproxTst                    % exact method
 
     %-Only do half the work, if possible
     bhPerms=0;
-    if ~bAproxTst & (nFlip==nScan/2) % balanced group numbers
+    if ~bAproxTst && (nFlip==nScan/2) % balanced group numbers
 	% Here, PiCond should *always* satisfy:
 	% all(all(PiCond(PiCond(:,1)==1,:)==flipud(-PiCond(PiCond(:,1)==-1,:))))
 	PiCond=PiCond(PiCond(:,1)==1,:);
@@ -260,7 +260,7 @@ if length(perm)==1
 	% Allows interim analysis	
 	PiCond=[PiCond(1,:);PiCond(randperm(size(PiCond,1)-1)+1,:)];
     end	
-elseif length(perm)==0 & (nScan<=12) & bAproxTst
+elseif length(perm)==0 && (nScan<=12) && bAproxTst
     % Special case where we missed iCond; order of perms is random 
     % so can we can just replace first perm.
     PiCond(1,:) = iCond;

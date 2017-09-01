@@ -169,7 +169,7 @@ else
         '+1','y/n')=='y';
     if bAproxTst
         tmp = 0;
-        while ((tmp>nPiCond_mx) | (tmp==0) )
+        while ((tmp>nPiCond_mx) || (tmp==0) )
             tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond_mx),'+0');
             tmp = floor(max([0,tmp]));
         end

@@ -148,7 +148,7 @@ for subj=1:nSubj
 	    elseif isempty(iCond)
 		sCond=setstr(tmp([1,diff(sort(tmp))]~=0));
 		Cond = tmpCond;		
-	    elseif any(iCond(1:nScan)~=tmpCond) & ...
+	    elseif any(iCond(1:nScan)~=tmpCond) && ...
 			any(iCond(1:nScan)~=(-tmpCond))
 		error('SnPM:InvalidiCond',['Conditions index must be same as ', ...
 			    'first subject, or flipped']);
@@ -193,7 +193,7 @@ nPiSubj = prod(nSubj-nFlip+1:nSubj)/prod(1:nFlip); % nSubj-choose-nFlip
 if (spm_input(sprintf('%d Perms. Use approx. test?',nPiSubj),'+1','y/n')=='y')
     bAproxTst = 1;
     tmp = 0;
-    while ((tmp>nPiSubj) | (tmp==0))
+    while ((tmp>nPiSubj) || (tmp==0))
 	tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiSubj),'+0');
 	tmp = floor(max([0,tmp]));
 	if rem(tmp,2)

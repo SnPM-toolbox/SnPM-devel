@@ -159,7 +159,7 @@ alpha = job.Thr.Clus.ClusMass.PFilt; %spm_input('Corrected p value for filtering
 
 %-Compute critical threshold for level alpha test
 %-----------------------------------------------------------------------
-if alpha < 1;
+if alpha < 1
 	c=ceil((1-alpha)*nPerm);
 	C_MaxT=StMaxT(c);
 else
@@ -175,7 +175,7 @@ end
 % significant.
 %-bST flags whether spatial extent information was collected.)
 bSpatEx = bST & exist(fullfile(CWD,'SnPM_ST.mat'))==2;
-if bSpatEx & (C_MaxT <= ST_Ut) & (alpha ~= 1)
+if bSpatEx && (C_MaxT <= ST_Ut) && (alpha ~= 1)
   str = 'Voxelwise corrected threshold = %g, which is smaller ';
   str = [str 'than minimum saved suprathreshold information (%g)'];
   str = [str '\nAll results significant voxelwise.'];
@@ -524,7 +524,7 @@ if bSpatEx
 	for i = 1:nSTC
 		tQ = find(STCstats(6,:)==i);
 	     ttQ= find(ClInfo(7,:)==i & ClInfo(8,:)==1);
-		if ( STCS(i) > C_STCS | max(STCstats(4,tQ)) > C_MaxT | ...
+		if ( STCS(i) > C_STCS || max(STCstats(4,tQ)) > C_MaxT || ...
                      max(ComboF(iW,ttQ)) > C_Wcomb(iW))
 			Q        = [Q tQ];
 		end
@@ -765,7 +765,7 @@ Fmtst = {	'%0.4f','%0.0f', ...	        %-cluster
 %-----------------------------------------------------------------------
 r = 1;
 bUsed = zeros(size(STC_SnPMt));
-while max(STC_SnPMt.*(~bUsed)) & (y > 3)
+while max(STC_SnPMt.*(~bUsed)) && (y > 3)
 
 	[null, i] = max(STC_SnPMt.*(~bUsed));	% Largest t value
 	j         = find(STC_r == STC_r(i));	% Maxima in same region
