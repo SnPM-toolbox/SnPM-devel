@@ -1396,7 +1396,7 @@ if length(strmatch('MIPtable',Report))>0
 	if length(D) < Num
 	  r = r + 1;				% Next row
 
-	  TabDat.dat(r,4:8)={Pt(i),Pfdr(i),STC_SnPMt(i),Pu(i),STC_XYZ(:,i)};
+	  TabDat.dat(r,4:8)={Pt(d),Pfdr(d),STC_SnPMt(d),Pu(d),STC_XYZ(:,d)};
 
 	  if (y>3)
 	    text(tCol(4)+0.08,y,sprintf(Fmtst{4}, Pt(d)),'UserData',Pt(d),StrAttr{:})
