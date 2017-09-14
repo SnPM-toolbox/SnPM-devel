@@ -20,7 +20,7 @@ function h=snpm_abline(b,a,varargin)
 % Id: snpm_abline.m  SnPM13 2013/10/12
 % Thomas Nichols
 
-if (nargin==2) & isstr(b)
+if (nargin==2) && ischar(b)
   b = lower(b);
 else
 
@@ -36,11 +36,11 @@ end
 XX=get(gca,'Xlim');
 YY=get(gca,'Ylim');
 
-if isstr(b) & (b=='h')
+if ischar(b) && (b=='h')
 
   g=line(XX,[a a],'LineStyle',':',varargin{:});
 
-elseif isstr(b) & (b=='v')
+elseif ischar(b) && (b=='v')
 
   g=line([a a],YY,'LineStyle',':',varargin{:});
 

@@ -284,7 +284,7 @@ elseif length(perm)==1
 	PiCond(perm,:)=[];
 	PiCond=[iCond;PiCond];
     end
-elseif length(perm)==0 & (nScan<=10) & bAproxTst
+elseif length(perm)==0 && (nScan<=10) && bAproxTst
     % If ~bAproxTst, we won't miss iCond;
     % If (nScan>10)& bAproxTst, we use random method, iCond is guaranteed to be there.
     % So the only way in which we miss iCond is: (nScan<=10) & bAproxTst.

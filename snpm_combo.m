@@ -24,7 +24,7 @@ function varargout=snpm_combo(Action)
 if nargin == 0, Action='Init'; end
 
 
-if strcmp(lower(Action),lower('Init'))
+if strcmpi(Action,'Init')
 %=======================================================================
 global MODALITY
 if isempty(spm_figure('FindWin','Menu'))
@@ -41,7 +41,7 @@ snpm_combo('CreateMenuWin')
 
 
 
-elseif strcmp(lower(Action),lower('AsciiWelcome'))
+elseif strcmpi(Action,'AsciiWelcome')
 %=======================================================================
 disp( ' SnPM Combo Toolbox                                   ')
 disp( ' -----------------------------------------------------')
@@ -52,7 +52,7 @@ fprintf('\n')
 
 
 
-elseif strcmp(lower(Action),lower('CreateMenuWin'))
+elseif strcmpi(Action,'CreateMenuWin')
 %=======================================================================
 %close(findobj(get(0,'Children'),'Tag','SnPM Menu'))
 
@@ -113,7 +113,7 @@ set(F,'Pointer','Arrow','Visible','on')
 
 
 
-elseif strcmp(lower(Action),lower('Colour'))
+elseif strcmpi(Action,'Colour')
 %=======================================================================
 % snpm_combo('Colour')
 %-----------------------------------------------------------------------

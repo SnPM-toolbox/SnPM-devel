@@ -515,7 +515,7 @@ if BATCH
         end
     else
         % Cluster-wise inference
-        if exist(fullfile(CWD,'SnPM_ST.mat'))~=2 & exist(fullfile(CWD,'STCS.mat'))~=2
+        if exist(fullfile(CWD,'SnPM_ST.mat'))~=2 && exist(fullfile(CWD,'STCS.mat'))~=2
             error(['SnPM:NoClusterInfo', 'ERROR: Cluster-wise inference requested, but no cluster information saved.\n',...
             'Re-configure analysis changing "Cluster inference" to "Yes" and re-run.\n'])
         end
@@ -692,7 +692,7 @@ else  % GUI, interative inference specification
 	else
 	  %-Statistic image is t with df degrees of freedom
 	  p_ST_Ut  = STalpha;
-	  while ~( tmp>=ST_Ut-tol | (tmp>0 & tmp<=p_ST_Ut))
+	  while ~( tmp>=ST_Ut-tol || (tmp>0 && tmp<=p_ST_Ut))
 	    tmp = spm_input(sprintf(...
 		'Clus-def thresh(p<=%4.2fIt>=%4.2f)',p_ST_Ut,ST_Ut),'+0','r',ST_Ut,1); 
 	  end
@@ -985,7 +985,7 @@ end
 
 %-Save some time consuming results
 %-----------------------------------------------------------------------
-if bSpatEx & pU_ST_Ut==-1
+if bSpatEx && pU_ST_Ut==-1
   save SnPM_pp STCstats_Pos
   if STAT == 'T'
      save SnPM_pp_Neg STCstats_Neg
@@ -1000,7 +1000,7 @@ if bSpatEx
     %-Analysing spatial extent
     % if alph_FWE is set then only do it when alph_FWE<1
     % otherwise(alph_FWE=NaN), do the analysis.
-    if (alph_FWE<1|isnan(alph_FWE))
+    if (alph_FWE<1 || isnan(alph_FWE))
 	%-Filter on significance of cluster size
 	%---------------------------------------------------------------
 	fprintf('Filtering statistic image, clusterwise...');
@@ -1075,7 +1075,7 @@ if isempty(Q)
 	  fprintf(['WARNING: ' str])
 	end
 	if length(strmatch('FWEreport',Report))>0
-	  if bSpatEx,
+	  if bSpatEx
 	    ShowDist(MaxT,C_MaxT,alph_FWE,STCS_MxK,C_STCS,alph_FWE,'max');
 	  else	   
 	    ShowDist(MaxT,C_MaxT,alph_FWE,[],[],[],'max');
@@ -1392,7 +1392,7 @@ if length(strmatch('MIPtable',Report))>0
     for i = 1:length(k)
       d     = j(k(i));
       if min( sqrt( sum((STC_XYZ(:,D) - ...
-			 STC_XYZ(:,d)*ones(1,size(D,2))).^2) ) ) > Dis;
+			 STC_XYZ(:,d)*ones(1,size(D,2))).^2) ) ) > Dis
 	if length(D) < Num
 	  r = r + 1;				% Next row
 
@@ -1663,7 +1663,7 @@ if strcmp(Typ,'max')
   xlabel(str)
   line(T(1)*[1 1],Ylim.*[1 0.95],'LineStyle','--','color',[1 0 0]);
   text(T(1)+diff(Xlim)*0.01,Ylim(2)*0.95,'Observed','FontSize',10)
-  if (Xlim(1)<=cT) & (cT<=Xlim(2))
+  if (Xlim(1)<=cT) && (cT<=Xlim(2))
   line(cT*[1 1],Ylim.*[1 0.85],'LineStyle','-');
   end
 else
@@ -1693,7 +1693,7 @@ if strcmp(Typ,'uncor')
   set(get(gca,'children'),'LineWidth',1,'MarkerSize',2)
   snpm_abline(0,1);
   snpm_abline(0,aT,'LineStyle','-','color','red')
-  if ~isnan(cT) & (cT~=0)
+  if ~isnan(cT) && (cT~=0)
     snpm_abline('h',cT,'LineStyle','-','Color','blue');
     text(10^(log10(1/S)*0.9),10^(log10(cT)*.85),...
 	 sprintf('%3.3g FDR: p=%g',aT,cT),'color','red','FontSize',10)
@@ -1750,7 +1750,7 @@ end
 return
 
 function v = BoundCheck(val,Range,ErrMsg)
-if val<Range(1) | val>Range(2)
+if val<Range(1) || val>Range(2)
   error('SnPM:RangeError', [ErrMsg ': ' num2str(val)])
 else
   v=val;

@@ -1,4 +1,4 @@
-function varargout = spm_list(varargin)
+function varargout = snpm_list(varargin)
 % Support function for snpm_pp.m
 % FORMAT spm_list('CSVList',TabDat,ofile)
 %
@@ -19,7 +19,7 @@ switch lower(varargin{1})
         if nargin<2, error('Not enough input arguments.'); end
         TabDat = varargin{2};
         if nargin == 3, ofile = varargin{3};
-        else            ofile = [tempname '.csv']; end
+        else,           ofile = [tempname '.csv']; end
         
         fid = fopen(ofile,'wt');
 	ncol=size(TabDat.hdr,2);

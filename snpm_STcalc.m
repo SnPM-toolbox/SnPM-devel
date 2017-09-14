@@ -121,7 +121,7 @@ switch (lower(varargin{1}))
   df    = varargin{8};
   
   %- determine whether the user input is a p value or real threshold
-  if (ST_Ut < 1),
+  if (ST_Ut < 1)
     ST_Ut = spm_invTcdf(1-ST_Ut,df);
   end 
   

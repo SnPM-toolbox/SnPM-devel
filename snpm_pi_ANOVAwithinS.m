@@ -202,7 +202,7 @@ end
 %-If user wants all perms, then random method would seem to take an
 % absurdly long time, so exact is used.
 
-if nSubj<=12 | ~bAproxTst                    % exact method
+if nSubj<=12 || ~bAproxTst                    % exact method
 
     %-Generate all labellings of nSubj scans as +/- 1
     PiCond=[];
@@ -267,7 +267,7 @@ if length(perm)==1
 	% Allows interim analysis	
 	PiCond=[PiCond(1,:);PiCond(randperm(size(PiCond,1)-1)+1,:)];
     end	
-elseif length(perm)==0 & (nSubj<=12) & bAproxTst
+elseif length(perm)==0 && (nSubj<=12) && bAproxTst
     % Special case where we missed iCond; order of perms is random 
     % so can we can just replace first perm.
     PiCond(1,:) = iCond;

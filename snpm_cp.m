@@ -216,7 +216,7 @@ load(CfgFile);
 if isempty([H C])
   error('SnPM:NoModel', 'No model specified; [H C] empty'); 
 end
-if ~isempty(H) & ~isempty(C)
+if ~isempty(H) && ~isempty(C)
     error('SnPM:HierarchicalAndCov', 'Cannot have both heirachical and covariate effects'); 
 end
 if size(CONT,2) ~= size([H C B G],2)
@@ -233,19 +233,19 @@ else
   STAT = 'T';
 end
 if rank(CONT)<size(CONT,1)
-  [u s] = spm_svd(CONT'); % Kill zero-rank components
+  [u, s] = spm_svd(CONT'); % Kill zero-rank components
   CONT = full(u*sqrt(s))';
 end
-if ~bVolm & bVarSm & vFWHM(3)
+if ~bVolm && bVarSm && vFWHM(3)
   error('SnPM:ZSmoothVolume', 'Cannot z-smooth variance in non-volumetric mode'); 
 end
 if exist('bVarAlph')~=1
   bVarAlph=0; 
 end
-if bVarAlph & ~(~bVarSm & bVolm)
+if bVarAlph && ~(~bVarSm && bVolm)
   error('SnPM:AlphaVolumePseudo', 'No pseudo t or nonvolumetric w/ variable alpha');
 end
-if ~bVolm & pU_ST_Ut>=0
+if ~bVolm && pU_ST_Ut>=0
   error('SnPM:STCSNotVolume', 'Must work volumetrically to computer STCS on-the-fly');
 end
 % Re-map files to avoid Endian headaches; note if NaN's available
@@ -327,7 +327,7 @@ ydim     = DIM(2);			%-Y dimension
 zdim     = DIM(3);			%-Z dimension
 PlDim    = xdim*ydim;			%-Plane size in voxels
 VolDim   = xdim*ydim*zdim;		%-Volume size in voxels
-if bVolm,
+if bVolm
   WorkDim = VolDim;	%-Working dimension (if volumetric)
 else
   WorkDim = PlDim;	%-Working dimension (if plane by plane)
@@ -335,7 +335,7 @@ end
 
 %-Location vectors --> In units of mm <--
 %-----------------------------------------------------------------------
-[y x] = meshgrid([1:ydim],[1:xdim]');
+[y,x] = meshgrid([1:ydim],[1:xdim]');
 x     = x(:)';
 y     = y(:)';
 z     = (1:zdim);
@@ -350,7 +350,7 @@ MaxT  = repmat(-Inf,nPerm,2);	%-Max t
 nP    = zeros(1,WorkDim);	%-Nonparam P's
 XYZ_total=[];                   %-the variable for keeping all XYZ
 %-If working plane by plane, preallocate Q & XYZ for speed/mem. efficiency
-if ~bVolm, 
+if ~bVolm 
   Q    = zeros(1,PlDim);
   XYZ  = zeros(3,PlDim);
 end
@@ -458,7 +458,7 @@ for i = 1:zdim
   %-Form data matrix for this slice/volume
   %---------------------------------------------------------------------
   X     = zeros(q,WorkDim);
-  if bMask, 
+  if bMask
     Wt = zeros(1,WorkDim); 
   else
     Wt = 1;
@@ -498,7 +498,7 @@ for i = 1:zdim
   %-Eliminate background voxels (based on threshold TH), and
   % eliminate voxels where there are no differences across scans.
   %---------------------------------------------------------------------
-  if ImMASK & NaNrep==0
+  if ImMASK && NaNrep==0
     Q = find(all(X>TH) & any(diff(X)) & Wt & all(X~=0));
   else
     Q = find(all(X>TH) & any(diff(X)) & Wt);
@@ -584,7 +584,7 @@ for i = 1:zdim
     
     %-Save min weighted p-value
     %-----------------------------------------------------------
-    if bVarAlph,
+    if bVarAlph
       MinwP(perm,:) = min([ min(Wt.*(1-spm_Tcdf(T(1,:),df))),     ...
 		    min(Wt.*(1-spm_Tcdf(-T(1,:),df)));    ...
 		    MinwP(perm,1), MinwP(perm,2) ]);
@@ -592,7 +592,7 @@ for i = 1:zdim
     
     %-Save weighted p-value (later converted into corr'd wt'd p-val)
     %-----------------------------------------------------------
-    if bVarAlph,
+    if bVarAlph
       wP = [Wt.*(1-spm_Tcdf( T(1,:),df));  ...
 	    Wt.*(1-spm_Tcdf(-T(1,:),df))];
     end
@@ -747,7 +747,7 @@ else
 end
 
 %-Save correctly labeled T's
-if bVolm & (StartPerm==2)
+if bVolm && (StartPerm==2)
   T0 = T;
   nPtmp = ones(size(T));
   if bhPerms
@@ -765,7 +765,7 @@ end
 %-Cycle over planes (or just once for volumetric mode)
 
 %-If working plane by plane, preallocate Q & XYZ for speed/mem. efficiency
-if ~bVolm, 
+if ~bVolm
   Q    = zeros(1,PlDim);
   XYZ  = zeros(3,PlDim);
 end
@@ -814,11 +814,11 @@ for i = 1:zdim
   end % (if ~bVolm)
     
   if length(Q)
-    if ~bVolm, 
+    if ~bVolm
       X = X(:,Q); 
     end	%-Already done if bVolm
     
-    if bST & ~bVolm			%-XYZ already done if bVolm
+    if bST && ~bVolm			%-XYZ already done if bVolm
       XYZ   = [ x(rem(Q-1,PlDim)+1);          ...
         y(rem(Q-1,PlDim)+1);          ...
         z(i)*ones(length(Q),1)];	%-Locations
@@ -826,7 +826,7 @@ for i = 1:zdim
       XYZ(4,:) = [];
     end 
 		
-    if bVarSm & ~bVolm			%-Smoothing & plane-by-plane
+    if bVarSm && ~bVolm			%-Smoothing & plane-by-plane
       SmStart = toc;			%-Timestamp (>)
       TmpPl     = zeros(xdim,ydim);
       TmpPl(Q)  = ones(size(Q));
@@ -836,7 +836,7 @@ for i = 1:zdim
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Initialize structure STCS 
-    if bST & pU_ST_Ut>=0
+    if bST && pU_ST_Ut>=0
       STCS = snpm_STcalc('init',nPerm); 
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -921,7 +921,7 @@ for i = 1:zdim
       
       %-Save min weighted p-value
       %-----------------------------------------------------------
-      if bVarAlph,
+      if bVarAlph
         MinwP(perm,:) = min([ min(Wt.*(1-spm_Tcdf( T(1,:),df))),     ...
               min(Wt.*(1-spm_Tcdf(-T(1,:),df)));    ...
               MinwP(perm,1), MinwP(perm,2) ]);
@@ -1022,7 +1022,7 @@ for i = 1:zdim
     end 	% (for perm = StartPerm:nPerm) - Perm loop
     
     %- save STCS
-    if bST & pU_ST_Ut>=0
+    if bST && pU_ST_Ut>=0
       if bhPerms %Double the STCS variables.
 	STCS = snpm_STcalc('double',STCS);
       end
