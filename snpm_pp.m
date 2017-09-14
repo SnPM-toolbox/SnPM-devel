@@ -1307,7 +1307,7 @@ if length(strmatch('MIPtable',Report))>0
 		'%0.4f', '%0.4f', '%6.2f','%0.4f', ...		%-Voxel
 		'%3.0f', '%3.0f', '%3.0f'};			%-XYZ
   TabDat.fmt = Fmtst(1:7);
-  TabDat.fmt(8) = {'%3.0f %4.0f %3.0f '};  % Needed for compatibilty with spm_list
+  TabDat.fmt(8) = {'%3.0f %3.0f %3.0f '};  % Needed for compatibilty with spm_list
   
   %-Column Locations
   %-----------------------------------------------------------------------
