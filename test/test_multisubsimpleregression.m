@@ -45,7 +45,8 @@ classdef test_multisubsimpleregression < generic_test_snpm
         % With 3 covariates
         function test_multisubsimpleregression_cov3(testCase)
             % This was introduced in SnPM13 and can therefore not be tested
-            % for non-regression with SnPM8            
+            % for non-regression with SnPM8        
+            % TODO: we should create this test data now based on SnPM13?
             testCase.checks = false;
             
             testCase.testName = 'multisubsimpleregression_cov3';
