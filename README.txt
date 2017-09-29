@@ -4,6 +4,14 @@ This file describes the bugs that have been reported, along with the appropriate
 Updated versions of appropriate SnPM functions are available from in the snpm13_updates: 
 http://warwick.ac.uk/snpm/distribution/snpm13_updates
 
+--- SnPM 13.1.07 ---
+ * fix: Add GPL licence. 
+ * fix: decrease lower bound on number of subject for approximate perms.
+ * enh: Table: Create TabDat structure expected by spm_list, allowing access to all peak/cluster results, even if there are too many for the SnPM results page. 
+ * enh: Apply mlint suggestions for better compatibility with MATLAB Compiler and Octave. 
+ * test: use latest available ground truth if perfect match for matlab version is not available.
+ * Version 13.1.07
+
 --- SnPM 13.1.06 ---
  * fix: ANOVA between group "all zero"/"all equal" options were flipped in the menu of the matlabbatch.
  * fix: snpm_cp can now handle XYZ locations in a 1D space.

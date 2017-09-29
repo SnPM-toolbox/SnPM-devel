@@ -303,7 +303,7 @@ if length(perm)==1
         % Allows interim analysis	
 	PiStud=[PiStud(1,:);PiStud(randperm(size(PiStud,1)-1)+1,:)];
     end	
-elseif length(perm)==0 & (nSUBJ<=12) & bAproxTst % MODIFIED FROM ORIGINAL CHANGED BUG (nScan -> nSUBJ)
+elseif length(perm)==0 && (nSUBJ<=12) && bAproxTst % MODIFIED FROM ORIGINAL CHANGED BUG (nScan -> nSUBJ)
     % Special case where we missed iStud; order of perms is random 
     % so can we can just replace first perm.
     PiStud(1,:) = iStudC;
@@ -323,7 +323,7 @@ PiCond = 1.5-PiStud*tmp/2;
 %=======================================================================
 %-Use implicit SumToZero constraints via relative block effects & pinv.
 %-See spm_DesMtx for more information on this.
-[B Bnames] = spm_DesMtx(iSUBJ,'+0m','Subj');
+[B, Bnames] = spm_DesMtx(iSUBJ,'+0m','Subj');
 
 
 %-Form non-null design matrix partitions (Globals handled later)

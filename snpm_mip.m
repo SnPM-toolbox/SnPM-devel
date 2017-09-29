@@ -50,7 +50,7 @@ end
 
 %-Single slice case
 %=======================================================================
-if DIM(3) == 1,
+if DIM(3) == 1
 	VOX = sqrt(sum(M(1:3,1:3).^2));
 	XYZ = round(M\[XYZ; ones(1,size(XYZ,2))]);
 	mip = full(sparse(XYZ(1,:),XYZ(2,:),Z,DIM(1),DIM(2)));

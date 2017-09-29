@@ -1,4 +1,4 @@
-function snpm_check_perm(nPerm,TotPerm)
+function snpm_check_nperm(nPerm,TotPerm)
 %
 % Issue consistent warning messages about number of permutations
 %
@@ -13,11 +13,11 @@ function snpm_check_perm(nPerm,TotPerm)
 % specific warning about variability of Monte Carlo variation.
 
 str='';
-if nPerm<100 & nPerm>=0.9*TotPerm
+if nPerm<100 && nPerm>=0.9*TotPerm
   str = sprintf(['Very few (%d) permutations used, nonparametric P-values are very coarse (but exact).\n'...
 		 'Smallest possible P-value is %0.4f.'],nPerm,1/nPerm);
   id = 'SnPM:VeryFewPermsCoarseExactPValues';
-elseif nPerm<100 & nPerm<0.9*TotPerm
+elseif nPerm<100 && nPerm<0.9*TotPerm
   str = sprintf(['Very few (%d) permutations used, nonparametric P-values are very coarse will vary \n'...
 		 'substantially over repeated re-analyses.'...
 		 'Smallest possible P-value is %0.4f.'],nPerm,1/nPerm);

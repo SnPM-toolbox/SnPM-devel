@@ -163,7 +163,7 @@ for subj=1:nSubj
             elseif isempty(iCond)
             sCond=setstr(tmp([1,diff(sort(tmp))]~=0));
             Cond = tmpCond;		
-            elseif any(iCond(1:nScan)~=tmpCond) & ...
+            elseif any(iCond(1:nScan)~=tmpCond) && ...
                 any(iCond(1:nScan)~=(-tmpCond))
             error('SnPM:InvalidiCond', ['Conditions index must be same as', ...
                     'first subject, or flipped']);
@@ -236,7 +236,7 @@ end
 %=======================================================================
 %-All possible labelings correspond to the binary representation of
 % numbers {1...2^nSubj}.
-if nSubj<=52
+if nSubj<=35
   if (bAproxTst)
     tmp = randperm(2^nSubj)-1;
     tmp = tmp(1:nPiSubj)';
@@ -251,7 +251,7 @@ if nSubj<=52
   end
   % Look for correct labeling
   d = find(all((PiSubj==meshgrid(iSubjC,1:size(PiSubj,1)))'));
-  if (length(d)~=1 & ~bAproxTst)
+  if (length(d)~=1 && ~bAproxTst)
     error('SnPM:CorrectLabelMissing', 'Internal error: Correct labeling is not in the perms');
   elseif (length(d)~=1)
     % Correct labeling randomly removed, insert at top
@@ -296,7 +296,7 @@ PiCond(PiCond==-1) = 2;
 %=======================================================================
 %-Use implicit SumToZero constraints via relative block effects & pinv.
 %-See spm_DesMtx for more information on this.
-[B Bnames] = spm_DesMtx(iSUBJ,'+0m','Subj');
+[B,Bnames] = spm_DesMtx(iSUBJ,'+0m','Subj');
 
 %-Form non-null design matrix partitions (Globals handled later)
 %=======================================================================

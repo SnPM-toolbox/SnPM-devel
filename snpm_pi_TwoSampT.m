@@ -148,7 +148,7 @@ g = numel(job.cov);
 for i = 1:g
     nGcs = size(Gc,2);
     d = job.cov(i).c;%spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
-    if (size(d,1) == 1), 
+    if (size(d,1) == 1)
         d = d'; 
     end
     if size(d,1) == q
@@ -156,7 +156,7 @@ for i = 1:g
         Gc = [Gc,d];
         %-Always Centre the covariate
         bCntr = 1;	    
-        if bCntr, 
+        if bCntr
             d  = d - ones(q,1)*mean(d); str=''; 
         else
             str='r'; 
@@ -206,7 +206,7 @@ if nScan<=12 || ~bAproxTst                    % exact method
 
     %-Only do half the work, if possible
     bhPerms=0;
-    if ~bAproxTst & (nFlip==nScan/2) % balanced group numbers
+    if ~bAproxTst && (nFlip==nScan/2) % balanced group numbers
 	% Here, PiCond should *always* satisfy:
 	% all(all(PiCond(PiCond(:,1)==1,:)==flipud(-PiCond(PiCond(:,1)==-1,:))))
 	PiCond=PiCond(PiCond(:,1)==1,:);
@@ -260,12 +260,12 @@ if length(perm)==1
 	% Allows interim analysis	
 	PiCond=[PiCond(1,:);PiCond(randperm(size(PiCond,1)-1)+1,:)];
     end	
-elseif length(perm)==0 & (nScan<=12) & bAproxTst
+elseif length(perm)==0 && (nScan<=12) && bAproxTst
     % Special case where we missed iCond; order of perms is random 
     % so can we can just replace first perm.
     PiCond(1,:) = iCond;
     perm = 1;
-else    
+elseif job.nPerm<=nPermMC
     error('SnPM:InvalidPiCond', ['Bad PiCond (' num2str(perm) ')'])
 end    
 

@@ -321,7 +321,7 @@ end
 
 %-Decide upon volumetric operation
 bVolm = job.bVolm;
-if ~bVolm & (vFWHM(3)~=0)
+if ~bVolm && (vFWHM(3)~=0)
 warning('SnPM:MayRunOutOfMemory', ...
     sprintf(['Working volumetrically because of smoothing in z (%g).\n'... 
          'May run out of memory.'],vFWHM(3)));
@@ -375,10 +375,10 @@ if (iGMsca==2) % CHANGED from 1 to 2 as should not ask for a value if grand mean
   end
   % As in SPM:
   switch char(fieldnames(job.globalm.gmsca))
-      case 'gmsca_yes',
+      case 'gmsca_yes'
           % Proportionally scale to this value
           GM = job.globalm.gmsca.gmsca_yes.gmscv;
-      case 'gmsca_no',
+      case 'gmsca_no'
           GM = 50;
   end
 elseif (iGMsca==1) % No grand mean scaling
@@ -446,8 +446,8 @@ MASK = job.masking.em{1};
 %-Condition Cc & Gc "Shadow" partitions if no FxC interactions
 % These store the covariate values for printing only
 %-----------------------------------------------------------------------
-if (isempty(Cc) & ~isempty(C)), Cc=C; Ccnames=Cnames; end
-if (isempty(Gc) & ~isempty(G)), Gc=G; Gcnames=Gnames; end
+if (isempty(Cc) && ~isempty(C)), Cc=C; Ccnames=Cnames; end
+if (isempty(Gc) && ~isempty(G)), Gc=G; Gcnames=Gnames; end
 
 
 %-Examine images
@@ -492,7 +492,7 @@ end
 % Done here to provide check on V's in snpm_cp
 if GM ~= 0
 	GMscale = GM/mean(GX);
-	for i = 1:nScan, 
+	for i = 1:nScan
 		V(i).pinfo(1:2,:)  = V(i).pinfo(1:2,:) * GMscale;
 	end
 	GX      = GX     * GMscale;
@@ -517,7 +517,7 @@ end
 %=======================================================================
 Gc    = [Gc,GX];
 if isempty(Gcnames), Gcnames = 'Global';
-    else Gcnames = str2mat(Gcnames,'Global'); end
+else, Gcnames = str2mat(Gcnames,'Global'); end
 
 if iGloNorm == 1				%-No global adjustment
 %-----------------------------------------------------------------------
@@ -525,7 +525,7 @@ elseif iGloNorm == 2				%-Proportional scaling
 %-----------------------------------------------------------------------
 % Since images are unmapped, this must be replicated in snpm_cp
 % Done here to provide check on V's in snpm_cp
-   for i = 1:nScan,
+   for i = 1:nScan
       V(i).pinfo(1:2,:) = GM*V(i).pinfo(1:2,:)/GX(i);
    end
 
@@ -533,21 +533,21 @@ elseif iGloNorm == 3				%-AnCova
 %-----------------------------------------------------------------------
    G = [G,(GX - mean(GX))];
    if isempty(Gnames), Gnames = 'Global'; 
-       else Gnames = str2mat(Gnames,'Global'); end
+   else, Gnames = str2mat(Gnames,'Global'); end
 
 elseif iGloNorm == 4				%-AnCova by subject
 %-----------------------------------------------------------------------
     [GL,GLnames] = spm_DesMtx([iSUBJ',GX-mean(GX)],'FxC',['SUBJ  ';'Global']);
     G = [G,GL];
     if isempty(Gnames), Gnames = GLnames;
-        else Gnames = str2mat(Gnames,GLnames); end
+    else, Gnames = str2mat(Gnames,GLnames); end
 
 elseif iGloNorm == 5				%-AnCova by study
 %-----------------------------------------------------------------------
     [GL,GLnames] = spm_DesMtx([iStud',GX-mean(GX)],'FxC',['Stud  ';'Global']);
     G = [G,GL];
     if isempty(Gnames), Gnames = GLnames; 
-        else Gnames = str2mat(Gnames,GLnames); end
+    else, Gnames = str2mat(Gnames,GLnames); end
 else
 %-----------------------------------------------------------------------
     error('SnPM:InvalidiGloNorm', sprintf('%cError: invalid iGloNorm option\n',7))
@@ -653,7 +653,7 @@ if ~spm_get_defaults('cmdline')
         x = x + dx; end
        text(x,y,Q(i,:),'FontSize',10,'interpreter','none');
        y     = y - dy;
-       if y < 0;
+       if y < 0
         spm_print
         spm_clf; axis off
         y = y0;
@@ -715,7 +715,7 @@ if ~spm_get_defaults('cmdline')
         'giving %d residual df (%d scans).'],...
         size([H C B G],2),rank([H C B G]),nScan-rank([H C B G]),nScan),...
         'Fontsize',10);
-    if (bVarSm) text(0,0.2,sVarSm,'Fontsize',10);
+    if (bVarSm), text(0,0.2,sVarSm,'Fontsize',10);
     end
 
     spm_print

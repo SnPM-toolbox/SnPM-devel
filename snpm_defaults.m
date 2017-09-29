@@ -56,3 +56,7 @@ SnPMdefs.CovVals = {
 %------------------------------------------------------------------------
 SnPMdefs.shuffle_seed = true; 
 
+% Reporting options for tabular listing of maximum
+%------------------------------------------------------------------------
+SnPMdefs.Results_distmin = 8;   % Minimum distance between peaks
+SnPMdefs.Results_nbmax   = 3;   % Maximum number secondary peaks

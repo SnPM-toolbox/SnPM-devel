@@ -10,7 +10,7 @@ function snpm_init
 rev = '$Rev: 1716 $'; %#ok
 
 if exist('snpm_defaults')~=2
-  error('SnPM:MissingSnPM', 'Cannot initialize - SnPM toolbox not found in path')
+  error('SnPM:MissingSnPM', 'Cannot initialize - SnPM toolbox not found in path');
 end
 if isempty(whos('global','SnPMdefs'))
   snpm_defaults
@@ -19,7 +19,7 @@ end
 % the application config resides in the current directory, therefore add
 % this to the path
 p = fileparts(mfilename('fullpath'));
-addpath(fullfile(p,'config'));
+if ~isdeployed, addpath(fullfile(p,'config')); end
 
 % cfg_util initialisation
 cfg_util('initcfg');

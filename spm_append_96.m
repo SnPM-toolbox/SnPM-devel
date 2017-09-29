@@ -45,7 +45,7 @@ end
 
 % check for number of rows compatibility
 %----------------------------------------------------------------------------
-[m n] = size(X);
+[m,n] = size(X);
 HDR   = fread(fid,5,'int32');
 if m ~= HDR(2);  error('SnPM:InvalidSizes', '  Incompatible sizes');  end
 fclose(fid);

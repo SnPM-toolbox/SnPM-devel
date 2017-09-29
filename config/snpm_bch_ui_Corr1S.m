@@ -1,4 +1,4 @@
-function snpmui = snpm_bch_ui_Corr1s
+function snpmui = snpm_bch_ui_Corr1S
 % Example script that creates an cfg_exbranch to sum two numbers. The
 % inputs are entered as two single numbers, the output is just a single
 % number.

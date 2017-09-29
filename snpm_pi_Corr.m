@@ -120,7 +120,7 @@ G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nSubj;
 if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
     for i = 1:numel(job.cov)
         d = job.cov(i).c;
-        if (size(d,1) == 1), 
+        if (size(d,1) == 1)
             d = d'; 
         end
         nGcs = size(Gc,2);
@@ -142,7 +142,7 @@ if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
         end 
     end
     %-Strip off blank line from str2mat concatenations
-    if size(Gc,2), 
+    if size(Gc,2)
         Gcnames(1,:)=[]; 
     end
 end
@@ -169,7 +169,7 @@ else
         '+1','y/n')=='y';
     if bAproxTst
         tmp = 0;
-        while ((tmp>nPiCond_mx) | (tmp==0) )
+        while ((tmp>nPiCond_mx) || (tmp==0) )
             tmp = spm_input(sprintf('# perms. to use? (Max %d)',nPiCond_mx),'+0');
             tmp = floor(max([0,tmp]));
         end

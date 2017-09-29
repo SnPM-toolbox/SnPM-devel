@@ -116,7 +116,7 @@ G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
 if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
     for i = 1:numel(job.cov)
         d = job.cov(i).c;
-        if (size(d,1) == 1), 
+        if (size(d,1) == 1)
             d = d'; 
         end
         nGcs = size(Gc,2);
@@ -138,7 +138,7 @@ if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
         end 
     end
     %-Strip off blank line from str2mat concatenations
-    if size(Gc,2), 
+    if size(Gc,2)
         Gcnames(1,:)=[]; 
     end
 end
@@ -234,7 +234,7 @@ else
 	PiCond=XblkPiCond;
 	for i=2:nXblk
 		tmp=size(PiCond,1);
-		[iSup iInf] = meshgrid(1:nXblkPiCond,1:tmp);
+		[iSup,iInf] = meshgrid(1:nXblkPiCond,1:tmp);
 		iSup = iSup(:)';
 		iInf = iInf(:)';
 		PiCond=[XblkPiCond(iSup,:),PiCond(iInf,:)];

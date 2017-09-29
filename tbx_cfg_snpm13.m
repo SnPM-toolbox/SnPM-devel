@@ -13,8 +13,10 @@ function snpmBatch = tbx_cfg_snpm13()
 
 toolboxDir = spm_str_manip(mfilename('fullpath'), 'h');
 
-addpath(toolboxDir);
-addpath(fullfile(toolboxDir, 'config'));
+if ~isdeployed
+    addpath(toolboxDir);
+    addpath(fullfile(toolboxDir, 'config'));
+end
 
 snpmBatch = snpm_cfg_master;
 end
