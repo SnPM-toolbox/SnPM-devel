@@ -67,6 +67,42 @@ nullHypAllZero.labels  = {'Groups are all equal' 'Groups are all zero'};
 nullHypAllZero.values  = {false true};
 nullHypAllZero.help    = {'','Null Hypothesis: Groups are all zero|all equal.'};
 
+% ---------------------------------------------------------------------
+% c Vector
+% ---------------------------------------------------------------------
+c         = cfg_entry;
+c.tag     = 'c';
+c.name    = 'Vector';
+c.help    = {'Vector of covariate values'};
+c.strtype = 'e';
+c.num     = [Inf 1];
+% ---------------------------------------------------------------------
+% cname Name
+% ---------------------------------------------------------------------
+cname         = cfg_entry;
+cname.tag     = 'cname';
+cname.name    = 'Name';
+cname.help    = {'Name of covariate'};
+cname.strtype = 's';
+cname.num     = [1 Inf];
+
+% ---------------------------------------------------------------------
+% cov Covariate
+% ---------------------------------------------------------------------
+cov         = cfg_branch;
+cov.tag     = 'cov';
+cov.name    = 'Covariate';
+cov.val     = {c cname };
+cov.help    = {'Add a new covariate to your experimental design'};
+% ---------------------------------------------------------------------
+% generic Covariates
+% ---------------------------------------------------------------------
+generic_cov         = cfg_repeat;
+generic_cov.tag     = 'generic_cov';
+generic_cov.name    = 'Covariates';
+generic_cov.help    = {'Covariates'};
+generic_cov.values  = {cov };
+generic_cov.num     = [0 Inf];
 
 %% Executable Branch
-snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{generic nullHypAllZero}, true);
+snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{generic nullHypAllZero generic_cov}, true);
