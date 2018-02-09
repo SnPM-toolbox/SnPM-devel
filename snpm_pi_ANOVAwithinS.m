@@ -267,9 +267,9 @@ if length(perm)==1
 	% Allows interim analysis	
 	PiCond=[PiCond(1,:);PiCond(randperm(size(PiCond,1)-1)+1,:)];
     end	
-elseif length(perm)==0 && (nSubj<=12) && bAproxTst
-    % Special case where we missed iCond; order of perms is random 
-    % so can we can just replace first perm.
+elseif length(perm)==0 && ~(nSubj<=12 || ~bAproxTst)
+    % Special case where random method missed iCond; order of perms is
+    % random so can we can just replace first perm.
     PiCond(1,:) = iCond;
     perm = 1;
 else    
