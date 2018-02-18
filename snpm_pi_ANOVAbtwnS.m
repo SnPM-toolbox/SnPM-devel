@@ -173,6 +173,35 @@ GrpCnt = arrayfun(@(x) numel(x.scans), job.group);
 %-----------------------------------------------------------------------
 b_all_zero = job.nullHypAllZero; %spm_input('Null Hypothesis: Groups are','+1','b','all zero|all equal',[1,0],1);
 
+%-Get and center confounding covariates
+%-----------------------------------------------------------------------
+G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nScan;
+g = numel(job.cov);
+for i = 1:g
+    nGcs = size(Gc,2);
+    d = job.cov(i).c;%spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
+    if (size(d,1) == 1)
+        d = d'; 
+    end
+    if size(d,1) == q
+        %-Save raw covariates for printing later on
+        Gc = [Gc,d];
+        %-Always Centre the covariate
+        bCntr = 1;	    
+        if bCntr
+            d  = d - ones(q,1)*mean(d); str=''; 
+        else
+            str='r'; 
+        end
+        G = [G, d];
+        dnames = job.cov(i).cname;
+        Gcnames = str2mat(Gcnames,dnames);
+    end
+end
+%-Strip off blank line from str2mat concatenations
+if size(Gc,2), Gcnames(1,:)=[]; end
+%-Since no FxC interactions these are the same
+Gnames = Gcnames;
 
 %-Compute permutations of conditions
 %=======================================================================
