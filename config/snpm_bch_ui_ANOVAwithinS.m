@@ -52,12 +52,12 @@ fsubject.help    = {'Enter data and conditions for a new subject'};
 % ---------------------------------------------------------------------
 % generic Subjects
 % ---------------------------------------------------------------------
-generic1         = cfg_repeat;
-generic1.tag     = 'generic';
-generic1.name    = 'Subjects';
-generic1.help    = {''};
-generic1.values  = {fsubject };
-generic1.num     = [1 Inf];
+generic         = cfg_repeat;
+generic.tag     = 'generic';
+generic.name    = 'Subjects';
+generic.help    = {''};
+generic.values  = {fsubject };
+generic.num     = [1 Inf];
 
 
 % % Scans per Subject
@@ -99,12 +99,12 @@ cov.help    = {'Add a new covariate to your experimental design'};
 % ---------------------------------------------------------------------
 % generic Covariates
 % ---------------------------------------------------------------------
-generic2         = cfg_repeat;
-generic2.tag     = 'generic2';
-generic2.name    = 'Covariates of no interest';
-generic2.help    = {'Covariates of no interest'};
-generic2.values  = {cov };
-generic2.num     = [0 Inf];
+generic_cov         = cfg_repeat;
+generic_cov.tag     = 'generic_cov';
+generic_cov.name    = 'Covariates of no interest';
+generic_cov.help    = {'Covariates of no interest'};
+generic_cov.values  = {cov };
+generic_cov.num     = [0 Inf];
 
 %% Executable Branch
-snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{generic1 generic2}, true);
+snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{generic generic_cov}, true);
