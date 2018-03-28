@@ -118,6 +118,8 @@ if snpm_get_defaults('shuffle_seed')
         rand('seed',sum(100*clock));
     end
 end
+MaxExh_nSubj = snpm_get_defaults('pi_PairT_MaxExh');
+
 
 				% PlugIn variables to save in cfg file
 
@@ -236,7 +238,7 @@ end
 %=======================================================================
 %-All possible labelings correspond to the binary representation of
 % numbers {1...2^nSubj}.
-if nSubj<=35
+if nSubj<=MaxExh_nSubj
   if (bAproxTst)
     tmp = randperm(2^nSubj)-1;
     tmp = tmp(1:nPiSubj)';
