@@ -6,12 +6,12 @@ The Statistical non-Parametric Mapping (SnPM) toolbox provides an extensible fra
 
 The SnPM toolbox provides an alternative to the Statistics section of [SPM](http://www.fil.ion.ucl.ac.uk/spm/). SnPM uses the General Linear Model to construct pseudo t-statistic images, which are then assessed for significance using a standard non-parametric multiple comparisons procedure based on randomisation/permutation testing. It is most suitable for single subject PET/SPECT analyses, or designs with low degrees of freedom available for variance estimation. In these situations the freedom to use weighted locally pooled variance estimates, or variance smoothing, makes the non-parametric approach considerably more powerful than conventional parametric approaches, as are implemented in SPM. Further, the non-parametric approach is always valid, given only minimal assumptions.
 
-**More information at: www.warwick.ac.uk/snpm**
+**More information at: http://www.nisox.org/Software/SnPM**
 
- - [Getting started](http://www.warwick.ac.uk/snpm/man)
- - [fMRI example](http://www.warwick.ac.uk/snpm/man/exnew)
- - [PET example](http://www.warwick.ac.uk/snpm/man/ex)
- - [Download](http://www.warwick.ac.uk/snpm/snpmreg)
+ - [Getting started](http://www.nisox.org/Software/SnPM13/man)
+ - [fMRI example](http://www.nisox.org/Software/SnPM13/man/exnew)
+ - [PET example](http://www.nisox.org/Software/SnPM13/man/ex)
+ - [Download](http://www.nisox.org/Software/SnPM13/snpmreg)
 
 
 ### Non-regression testing
@@ -46,7 +46,7 @@ run(test_oneSample, 'test_onesample_1')
 ### SnPM13: Bugs & Fixes
 
 This section describes the bugs that have been reported, along with the appropriate fixes. 
-Updated versions of appropriate SnPM functions are available at [snpm13_updates](http://warwick.ac.uk/snpm/distribution/snpm13_updates)
+Updated versions of appropriate SnPM functions are available at [snpm13_updates](http://www.nisox.org/Software/SnPM13/snpm13_updates)
 
 #####  SnPM 13.1.05
  * fix: two-sample t-test with nscans>12 was errored due to call to undefined variable `nPerm` (bug introduced in previous release: 13.1.4) (`snpm_pi_TwoSampT`)

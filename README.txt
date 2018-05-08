@@ -2,7 +2,7 @@ SnPM13: Bugs & Fixes
 
 This file describes the bugs that have been reported, along with the appropriate fixes. 
 Updated versions of appropriate SnPM functions are available from in the snpm13_updates: 
-http://warwick.ac.uk/snpm/distribution/snpm13_updates
+http://www.nisox.org/Software/SnPM13/snpm13_updates
 
 --- SnPM 13.1.07 ---
  * fix: Add GPL licence. 
