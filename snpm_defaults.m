@@ -60,3 +60,8 @@ SnPMdefs.shuffle_seed = true;
 %------------------------------------------------------------------------
 SnPMdefs.Results_distmin = 8;   % Minimum distance between peaks
 SnPMdefs.Results_nbmax   = 3;   % Maximum number secondary peaks
+
+% In Paired T test plugin, maximum number of subjects for which exhustive
+% computation of permutations can be conducted.
+%------------------------------------------------------------------------
+SnPMdefs.pi_PairT_MaxExh = 25; 
