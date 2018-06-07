@@ -820,8 +820,8 @@ for i = 1:zdim
     
     if bST && ~bVolm			%-XYZ already done if bVolm
       XYZ   = [ x(rem(Q-1,PlDim)+1);          ...
-        y(rem(Q-1,PlDim)+1);          ...
-        z(i)*ones(length(Q),1)];	%-Locations
+                y(rem(Q-1,PlDim)+1);          ...
+                z(i)*ones(1,length(Q))];%-Locations
       XYZ = MAT*[XYZ;ones(1,length(Q))]; 
       XYZ(4,:) = [];
     end 
