@@ -149,30 +149,34 @@ iCond = ones(1,nSubj);
 
 %-Get confounding covariates
 %-----------------------------------------------------------------------
-G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nSubj;
-% g = spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
-% if (g == 6), g = spm_input('# of confounding covariates','+1'); end
-% while size(Gc,2) < g
-%   nGcs = size(Gc,2);
-%   d = spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
-%   if (size(d,1) == 1), d = d'; end
-%   if size(d,1) == q
-%     %-Save raw covariates for printing later on
-%     Gc = [Gc,d];
-%     %-Always Centre the covariate
-%     bCntr = 1;	    
-%     if bCntr, d  = d - ones(q,1)*mean(d); str=''; else, str='r'; end
-%     G = [G, d];
-%     dnames = [str,'ConfCov#',int2str(nGcs+1)];
-%     for i = nGcs+1:nGcs+size(d,1)
-%       dnames = str2mat(dnames,['ConfCov#',int2str(i)]); end
-%     Gcnames = str2mat(Gcnames,dnames);
-%   end
-% end
-% %-Strip off blank line from str2mat concatenations
-% if size(Gc,2), Gcnames(1,:)=[]; end
-% %-Since no FxC interactions these are the same
-% Gnames = Gcnames;
+G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nSubj*nRepl;
+if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
+    for i = 1:numel(job.cov)
+        d = job.cov(i).c;
+        if (size(d,1) == 1)
+            d = d';
+        end
+        nGcs = size(Gc,2);
+        if size(d,1) ~= q
+            error('SnPM:InvalidCovariate', sprintf('Covariate [%d,1] does not match number of scans [%d]',...
+                size(job.cov(i).c,1),q))
+        else
+            %-Save raw covariates for printing later on
+            Gc = [Gc,d];
+            % Center
+            d  = d - ones(q,1)*mean(d); str='';
+            G = [G, d];
+            dnames = job.cov(i).cname;
+            Gcnames = str2mat(Gcnames,dnames);
+        end
+    end
+    %-Strip off blank line from str2mat concatenations
+    if size(Gc,2)
+        Gcnames(1,:)=[];
+    end
+end
+%-Since no FxC interactions these are the same
+Gnames = Gcnames;
 
 
 %-Compute permutations of subjects (we'll call them scans)
@@ -267,9 +271,9 @@ if length(perm)==1
 	% Allows interim analysis	
 	PiCond=[PiCond(1,:);PiCond(randperm(size(PiCond,1)-1)+1,:)];
     end	
-elseif length(perm)==0 && (nSubj<=12) && bAproxTst
-    % Special case where we missed iCond; order of perms is random 
-    % so can we can just replace first perm.
+elseif length(perm)==0 && ~(nSubj<=12 || ~bAproxTst)
+    % Special case where random method missed iCond; order of perms is
+    % random so can we can just replace first perm.
     PiCond(1,:) = iCond;
     perm = 1;
 else    
