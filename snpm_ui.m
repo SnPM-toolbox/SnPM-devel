@@ -699,7 +699,7 @@ if ~spm_get_defaults('cmdline')
     %-----------------------------------------------------------------------
     hPramAxes=axes('Position',[0.05 0.08 0.8 0.20],'Visible','off');
     text(0,1.00,sDesign,'Fontsize',10);
-    text(0,0.90,['SnPM design flie: ',sDesFile],'Fontsize',10);
+    text(0,0.90,['SnPM design file: ',sDesFile],'Fontsize',10);
     text(0,0.80,sPiCond,'Fontsize',10);
     text(0,0.70,['Global normalisation: ',deblank(sGloNorm)],'Fontsize',10);
     text(0,0.60,['Threshold masking: ',deblank(sThresh)],'Fontsize',10);
