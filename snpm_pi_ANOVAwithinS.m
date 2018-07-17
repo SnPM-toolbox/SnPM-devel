@@ -205,6 +205,7 @@ end
 % use 12 as a cut off. (2^nSubj*nSubj * 8bytes/element).  
 %-If user wants all perms, then random method would seem to take an
 % absurdly long time, so exact is used.
+%-If number of subjects is too large, abandon integer indexing
 
 if nSubj<=12 || ~bAproxTst                    % exact method
 
@@ -218,7 +219,7 @@ if nSubj<=12 || ~bAproxTst                    % exact method
     PiCond =[a,PiCond];
     
     if bAproxTst                 % pick random supsample of perms
-	tmp=randperm(size(PiCond,1)-1);
+	tmp=1+randperm(size(PiCond,1)-1);
 	PiCond=PiCond([1 tmp(1:nPiCond)],:);
     end	
     
