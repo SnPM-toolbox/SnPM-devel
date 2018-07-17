@@ -218,9 +218,8 @@ if nSubj<=12 || ~bAproxTst                    % exact method
     PiCond =[a,PiCond];
     
     if bAproxTst                 % pick random supsample of perms
-	tmp=randperm(size(PiCond,1));
-	PiCond=PiCond(tmp(1:nPiCond),:);
-        % Note we may have missed iCond!  We catch this below.	
+	tmp=randperm(size(PiCond,1)-1);
+	PiCond=PiCond([1 tmp(1:nPiCond)],:);
     end	
     
     % Set bhPerms=0. The reason is this:
@@ -229,7 +228,7 @@ if nSubj<=12 || ~bAproxTst                    % exact method
     % Another way to think about it is to always keep first subject as +1.
     bhPerms=0;
     
-else                                          % random method
+elseif nSubj<=53      % random method, using integer indexing
     
     d       = nPiCond-1;
     tmp     = pow2(0:nSubj-2)*iCond(1:(nSubj-1))';  % Include correctly labeled iCond
@@ -248,6 +247,16 @@ else                                          % random method
     
     a = ones(size(PiCond,1),1);
     PiCond =[a,PiCond]; 
+    
+    bhPerms=0;    
+
+else    % random method, for nSubj>=54, when exceeding
+        % double-precision's significand's 53 bit precision
+        % For now, don't check for duplicates
+    
+    d       = nPiCond-1;
+    PiCond  = [iCond;
+	       2*(rand(nPiCond-1,nSubj)>0.5)-1];
     
     bhPerms=0;    
 
@@ -271,11 +280,6 @@ if length(perm)==1
 	% Allows interim analysis	
 	PiCond=[PiCond(1,:);PiCond(randperm(size(PiCond,1)-1)+1,:)];
     end	
-elseif length(perm)==0 && ~(nSubj<=12 || ~bAproxTst)
-    % Special case where random method missed iCond; order of perms is
-    % random so can we can just replace first perm.
-    PiCond(1,:) = iCond;
-    perm = 1;
 else    
     error('SnPM:InvalidPiCond', ['Bad PiCond (' num2str(perm) ')'])
 end    
