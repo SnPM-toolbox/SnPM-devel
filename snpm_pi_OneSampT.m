@@ -189,9 +189,12 @@ if nScan<=12 || ~bAproxTst                    % exact method
     if ~bAproxTst
 	PiCond=PiCond(PiCond(:,1)==1,:);
 	bhPerms=1;
-    elseif bAproxTst                 % pick random supsample of perms
-	tmp=1+randperm(size(PiCond,1)-1);
-	PiCond=PiCond([1 tmp(1:nPiCond-1)],:);
+    elseif bAproxTst                 % pick random supsample of perms  
+        tmp=randperm(size(PiCond,1));
+        if min(tmp(1:nPiCond)) ~= 1
+            tmp(1) = 1; % Always include correctly labeled iCond
+        end
+        PiCond=PiCond(tmp(1:nPiCond),:);
     end	
 
 elseif nScan<=53      % random method, using integer indexing

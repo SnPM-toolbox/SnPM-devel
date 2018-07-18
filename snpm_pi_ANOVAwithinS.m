@@ -219,8 +219,11 @@ if nSubj<=12 || ~bAproxTst                    % exact method
     PiCond =[a,PiCond];
     
     if bAproxTst                 % pick random supsample of perms
-	tmp=1+randperm(size(PiCond,1)-1);
-	PiCond=PiCond([1 tmp(1:nPiCond)],:);
+        tmp=randperm(size(PiCond,1));
+        if min(tmp(1:nPiCond)) ~= 1
+            tmp(1) = 1; % Always include correctly labeled iCond
+        end
+        PiCond=PiCond(tmp(1:nPiCond),:);
     end	
     
     % Set bhPerms=0. The reason is this:
