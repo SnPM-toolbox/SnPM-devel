@@ -49,7 +49,7 @@ function varargout=snpm(Action)
 
 %-Parameters
 %-----------------------------------------------------------------------
-SnPMver    = 'SnPM13.1.06';
+SnPMver    = 'SnPM13.1.08';
 
 %-Format arguments
 %-----------------------------------------------------------------------
@@ -64,11 +64,6 @@ if isempty(spm_figure('FindWin','Menu'))
 	clc
 else
 	clc
-end
-% Add test code to Matlabpath
-if ~exist('test_oneSample', 'file') && ~isdeployed
-    addpath(fullfile(spm_file(which('snpm'), 'path'), 'test'));
-    addpath(fullfile(spm_file(which('snpm'), 'path'), 'test', 'common'));
 end
 snpm_defaults;
 [Finter,Fgraph,CmdLine] = spm('FnUIsetup','Statistical non-Parametric Mapping (SnPM)');

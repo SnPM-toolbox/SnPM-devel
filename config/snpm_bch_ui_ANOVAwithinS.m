@@ -52,12 +52,12 @@ fsubject.help    = {'Enter data and conditions for a new subject'};
 % ---------------------------------------------------------------------
 % generic Subjects
 % ---------------------------------------------------------------------
-generic1         = cfg_repeat;
-generic1.tag     = 'generic';
-generic1.name    = 'Subjects';
-generic1.help    = {''};
-generic1.values  = {fsubject };
-generic1.num     = [1 Inf];
+generic         = cfg_repeat;
+generic.tag     = 'generic';
+generic.name    = 'Subjects';
+generic.help    = {''};
+generic.values  = {fsubject };
+generic.num     = [1 Inf];
 
 
 % % Scans per Subject
@@ -69,5 +69,42 @@ generic1.num     = [1 Inf];
 % scans_sub.num        = [1 1];
 % scans_sub.help       = {'This is the number of subjects'};
 
+% ---------------------------------------------------------------------
+% c Vector
+% ---------------------------------------------------------------------
+c         = cfg_entry;
+c.tag     = 'c';
+c.name    = 'Vector';
+c.help    = {'Vector of covariate values'};
+c.strtype = 'e';
+c.num     = [Inf 1];
+% ---------------------------------------------------------------------
+% cname Name
+% ---------------------------------------------------------------------
+cname         = cfg_entry;
+cname.tag     = 'cname';
+cname.name    = 'Name';
+cname.help    = {'Name of covariate'};
+cname.strtype = 's';
+cname.num     = [1 Inf];
+
+% ---------------------------------------------------------------------
+% mcov Covariate
+% ---------------------------------------------------------------------
+cov         = cfg_branch;
+cov.tag     = 'cov';
+cov.name    = 'Covariate';
+cov.val     = {c cname };
+cov.help    = {'Add a new covariate to your experimental design'};
+% ---------------------------------------------------------------------
+% generic Covariates
+% ---------------------------------------------------------------------
+generic_cov         = cfg_repeat;
+generic_cov.tag     = 'generic_cov';
+generic_cov.name    = 'Covariates of no interest';
+generic_cov.help    = {'Covariates of no interest'};
+generic_cov.values  = {cov };
+generic_cov.num     = [0 Inf];
+
 %% Executable Branch
-snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{generic1}, true);
+snpmui = snpm_bch_ui(DesNm,DesFile,DesHelp,{generic generic_cov}, true);

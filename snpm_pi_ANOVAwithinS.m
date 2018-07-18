@@ -149,30 +149,34 @@ iCond = ones(1,nSubj);
 
 %-Get confounding covariates
 %-----------------------------------------------------------------------
-G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nSubj;
-% g = spm_input('# of confounding covariates','+1','0|1|2|3|4|5|>',0:6,1);
-% if (g == 6), g = spm_input('# of confounding covariates','+1'); end
-% while size(Gc,2) < g
-%   nGcs = size(Gc,2);
-%   d = spm_input(sprintf('[%d] - Covariate %d',[q,nGcs + 1]),'0');
-%   if (size(d,1) == 1), d = d'; end
-%   if size(d,1) == q
-%     %-Save raw covariates for printing later on
-%     Gc = [Gc,d];
-%     %-Always Centre the covariate
-%     bCntr = 1;	    
-%     if bCntr, d  = d - ones(q,1)*mean(d); str=''; else, str='r'; end
-%     G = [G, d];
-%     dnames = [str,'ConfCov#',int2str(nGcs+1)];
-%     for i = nGcs+1:nGcs+size(d,1)
-%       dnames = str2mat(dnames,['ConfCov#',int2str(i)]); end
-%     Gcnames = str2mat(Gcnames,dnames);
-%   end
-% end
-% %-Strip off blank line from str2mat concatenations
-% if size(Gc,2), Gcnames(1,:)=[]; end
-% %-Since no FxC interactions these are the same
-% Gnames = Gcnames;
+G = []; Gnames = ''; Gc = []; Gcnames = ''; q = nSubj*nRepl;
+if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
+    for i = 1:numel(job.cov)
+        d = job.cov(i).c;
+        if (size(d,1) == 1)
+            d = d';
+        end
+        nGcs = size(Gc,2);
+        if size(d,1) ~= q
+            error('SnPM:InvalidCovariate', sprintf('Covariate [%d,1] does not match number of scans [%d]',...
+                size(job.cov(i).c,1),q))
+        else
+            %-Save raw covariates for printing later on
+            Gc = [Gc,d];
+            % Center
+            d  = d - ones(q,1)*mean(d); str='';
+            G = [G, d];
+            dnames = job.cov(i).cname;
+            Gcnames = str2mat(Gcnames,dnames);
+        end
+    end
+    %-Strip off blank line from str2mat concatenations
+    if size(Gc,2)
+        Gcnames(1,:)=[];
+    end
+end
+%-Since no FxC interactions these are the same
+Gnames = Gcnames;
 
 
 %-Compute permutations of subjects (we'll call them scans)
@@ -201,6 +205,7 @@ end
 % use 12 as a cut off. (2^nSubj*nSubj * 8bytes/element).  
 %-If user wants all perms, then random method would seem to take an
 % absurdly long time, so exact is used.
+%-If number of subjects is too large, abandon integer indexing
 
 if nSubj<=12 || ~bAproxTst                    % exact method
 
@@ -214,9 +219,11 @@ if nSubj<=12 || ~bAproxTst                    % exact method
     PiCond =[a,PiCond];
     
     if bAproxTst                 % pick random supsample of perms
-	tmp=randperm(size(PiCond,1));
-	PiCond=PiCond(tmp(1:nPiCond),:);
-        % Note we may have missed iCond!  We catch this below.	
+        tmp=randperm(size(PiCond,1));
+        if min(tmp(1:nPiCond)) ~= 1
+            tmp(1) = 1; % Always include correctly labeled iCond
+        end
+        PiCond=PiCond(tmp(1:nPiCond),:);
     end	
     
     % Set bhPerms=0. The reason is this:
@@ -225,7 +232,7 @@ if nSubj<=12 || ~bAproxTst                    % exact method
     % Another way to think about it is to always keep first subject as +1.
     bhPerms=0;
     
-else                                          % random method
+elseif nSubj<=53      % random method, using integer indexing
     
     d       = nPiCond-1;
     tmp     = pow2(0:nSubj-2)*iCond(1:(nSubj-1))';  % Include correctly labeled iCond
@@ -244,6 +251,16 @@ else                                          % random method
     
     a = ones(size(PiCond,1),1);
     PiCond =[a,PiCond]; 
+    
+    bhPerms=0;    
+
+else    % random method, for nSubj>=54, when exceeding
+        % double-precision's significand's 53 bit precision
+        % For now, don't check for duplicates
+    
+    d       = nPiCond-1;
+    PiCond  = [iCond;
+	       2*(rand(nPiCond-1,nSubj)>0.5)-1];
     
     bhPerms=0;    
 
@@ -267,11 +284,6 @@ if length(perm)==1
 	% Allows interim analysis	
 	PiCond=[PiCond(1,:);PiCond(randperm(size(PiCond,1)-1)+1,:)];
     end	
-elseif length(perm)==0 && (nSubj<=12) && bAproxTst
-    % Special case where we missed iCond; order of perms is random 
-    % so can we can just replace first perm.
-    PiCond(1,:) = iCond;
-    perm = 1;
 else    
     error('SnPM:InvalidPiCond', ['Bad PiCond (' num2str(perm) ')'])
 end    
