@@ -174,6 +174,7 @@ snpm_check_nperm(nPiCond,nPiCond_mx);
 % use 12 as a cut off. (2^nScan*nScan * 8bytes/element).  
 %-If user wants all perms, then random method would seem to take an
 % absurdly long time, so exact is used.
+%-If number of subjects/scans is too large, abandon integer indexing
 
 if nScan<=12 || ~bAproxTst                    % exact method
 
@@ -189,9 +190,8 @@ if nScan<=12 || ~bAproxTst                    % exact method
 	PiCond=PiCond(PiCond(:,1)==1,:);
 	bhPerms=1;
     elseif bAproxTst                 % pick random supsample of perms
-	tmp=randperm(size(PiCond,1));
-	PiCond=PiCond(tmp(1:nPiCond),:);
-        % Note we may have missed iCond!  We catch this below.	
+	tmp=1+randperm(size(PiCond,1)-1);
+	PiCond=PiCond([1 tmp(1:nPiCond-1)],:);
     end	
 
 elseif nScan<=53      % random method, using integer indexing
@@ -244,13 +244,8 @@ if length(perm)==1
 	% Allows interim analysis	
 	PiCond=[PiCond(1,:);PiCond(randperm(size(PiCond,1)-1)+1,:)];
     end	
-elseif length(perm)==0 && (nScan<=12) && bAproxTst
-    % Special case where we missed iCond; order of perms is random 
-    % so can we can just replace first perm.
-    PiCond(1,:) = iCond;
-    perm = 1;
 else    
-    error('SnPM:PiCond', ['Bad PiCond (' num2str(perm) ')'])
+    error('SnPM:InvalidPiCond', ['Bad PiCond (' num2str(perm) ')'])
 end    
 
 
