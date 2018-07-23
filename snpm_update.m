@@ -35,4 +35,4 @@ function snpm_update()
 
     if ~nargout, fprintf([blanks(9) msg '\n']); end
 
-end 
+end
