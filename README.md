@@ -9,8 +9,8 @@ The SnPM toolbox provides an alternative to the Statistics section of [SPM](http
 **More information at: http://www.nisox.org/Software/SnPM**
 
  - [Getting started](http://www.nisox.org/Software/SnPM13/man)
- - [fMRI example](http://www.nisox.org/Software/SnPM13/man/exnew)
- - [PET example](http://www.nisox.org/Software/SnPM13/man/ex)
+ - [fMRI example](http://www.nisox.org/Software/SnPM13/exnew)
+ - [PET example](http://www.nisox.org/Software/SnPM13/ex)
  - [Download](http://www.nisox.org/Software/SnPM13/snpmreg)
 
 
