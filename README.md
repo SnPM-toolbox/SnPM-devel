@@ -43,10 +43,15 @@ snpm_tests
 run(test_oneSample, 'test_onesample_1')
 ```
 
+### Citation
+
+Suggestion for citing SnPM
+Citation of the SnPM software can be made with reference to this URL: http://nisox.org/Software/SnPM13/; please also note the version (i.e. SnPM13) in any citation. Please also note the exact version (e.g. SnPM13.1.06) to maximise reproducibility. The full version number can be found from the `snpm('ver')` command. Concepts implemented in the SnPM software are best described in the Nichols & Holmes (2001) paper; see [here](https://www.ncbi.nlm.nih.gov/pubmed?term=11747097). Alternatively, please see the `Citation.cff` file included in the root of this repository.
+
 ### SnPM13: Bugs & Fixes
 
 This section describes the bugs that have been reported, along with the appropriate fixes. 
-Updated versions of appropriate SnPM functions are available at [snpm13_updates](http://www.nisox.org/Software/SnPM13/snpm13_updates)
+Refer to https://github.com/SnPM-toolbox/SnPM-devel/releases for further information on bugs and fixes. Alternatively, to check for updates, type `SnPM_update` in the Matlab command line to verify that the current version of SnPM which you have installed is up to date (Note: this feature will not work for releases prior to SnPM 13.0.9 and requires an internet connection).
 
 #####  SnPM 13.1.05
  * fix: two-sample t-test with nscans>12 was errored due to call to undefined variable `nPerm` (bug introduced in previous release: 13.1.4) (`snpm_pi_TwoSampT`)
