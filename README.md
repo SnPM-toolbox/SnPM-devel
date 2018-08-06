@@ -54,7 +54,7 @@ This section describes the bugs that have been reported, along with the appropri
 Refer to https://github.com/SnPM-toolbox/SnPM-devel/releases for further information on bugs and fixes. Alternatively, to check for updates, type `SnPM_update` in the Matlab command line to verify that the current version of SnPM which you have installed is up to date (Note: this feature will not work for releases prior to SnPM 13.0.9 and requires an internet connection).
 
 #####  SnPM 13.1.05
- * fix: two-sample t-test with nscans>12 was errored due to call to undefined variable `nPerm` (bug introduced in previous release: 13.1.4) (`snpm_pi_TwoSampT`)
+ * fix: two-sample t-test with nscans>12 caused an error due to call to an ndefined variable, `nPerm` (bug introduced in previous release: 13.1.4) (`snpm_pi_TwoSampT`)
  * fix: warning on size of `SnPM_ST.mat` was never raised
  * Add seed shuffling for paired two-sample test modules (`snpm_pi_PairT`, `snpm_pi_PairTrand`)
  * Version 13.1.05 (`snpm`)
