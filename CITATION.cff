@@ -1,0 +1,42 @@
+cff-version: 13.0.8
+message: If you use this software, please cite it as below.
+authors:
+  - family-names: Nichols 
+    given-names: Thomas E.
+  - family-names: Thomas 
+    given-names: Emma
+  - family-names: Ding 
+    given-names: Jun
+  - family-names: Xu
+    given-names: Yanjun
+  - family-names: Flandin
+    given-names: Guillaume
+  - family-names: Hayasaka
+    given-names: Satoru
+  - family-names: Gitelman
+    given-names: Darren R.
+  - family-names: Holmes
+    given-names: Andrew P.
+  - family-names: Maumet
+    given-names: Camille
+title: SnPM-13.0.8
+version: 13.0.8
+doi: https://doi.org/10.5281/zenodo.1314670
+date-released: 2018-06-18
+references:
+  - type: article
+    authors:
+    - family-names: Nichols
+      given-names: Thomas E.
+      affiliation: "Department of Biostatistics, University of Michigan, Ann Arbor, Michigan"
+    - family-names: Holmes
+      given-names: Andrew P.
+      affiliation: "Robertson Centre for Biostatistics, Department of Statistics, University of Glasgow, Scotland, United Kingdom. Wellcome Department of Cognitive Neurology, Institute of Neurology, London, United Kingdom"
+    title: "Nonparametric Permutation Tests For Functional Neuroimaging: A Primer with Examples"
+    year: 2001
+    journal: Hum Brain Mapp
+    volume: 15
+    issue: 1
+    pages: 1–25
+    doi: 10.1002/hbm.1058 
+    url: https://onlinelibrary.wiley.com/doi/abs/10.1002/hbm.1058
