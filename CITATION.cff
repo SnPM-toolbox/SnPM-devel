@@ -1,4 +1,4 @@
-cff-version: 13.0.8
+cff-version: 13.0.9
 message: If you use this software, please cite it as below.
 authors:
   - family-names: Nichols 
@@ -19,8 +19,8 @@ authors:
     given-names: Andrew P.
   - family-names: Maumet
     given-names: Camille
-title: SnPM-13.0.8
-version: 13.0.8
+title: SnPM-13.0.9
+version: 13.0.9
 doi: https://doi.org/10.5281/zenodo.1314670
 date-released: 2018-06-18
 references:
