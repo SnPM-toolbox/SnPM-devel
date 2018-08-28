@@ -6,9 +6,9 @@
 % % RapidPT: https://github.com/felipegb94/RapidPT
 
 %%% Corresponding papers :
-% % Accelerating Permutation Testing in Neuroimaging through Subspace Tracking
-% % F Gutierrez-Barragan VK Ithapu, C Hinrichs, T Nichols, SC Johnson, V Singh
-% % Under Review
+% % Accelerating Permutation Testing in Neuroimaging through Subspace Tracking: A new plugin for SnPM.
+% % F. Gutierrez-Barragan, V.K. Ithapu, C. Hinrichs, C. Maumet, S.C. Johnson, T.E. Nichols, V. Singh.
+% % Neuorimage, 2017.
 % % Speeding up Permutation Testing in Neuroimaging 
 % % C Hinrichs, VK Ithapu, Q Sun, SC Johnson, V Singh
 % % NIPS 2013
