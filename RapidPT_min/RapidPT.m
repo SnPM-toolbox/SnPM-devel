@@ -1,5 +1,4 @@
 %% Efficient permutation testing using Matrix completion
-% % the following function computes the max Null statistic distribution 
 % % the following function computes the max and min null statistic distribution 
 % % in its current format, the code only uses t-statistics
 
@@ -7,9 +6,15 @@
 % % RapidPT: https://github.com/felipegb94/RapidPT
 
 %%% Corresponding papers :
+<<<<<<< HEAD
 % % Accelerating Permutation Testing in Neuroimaging through Subspace Tracking: A new plugin for SnPM.
 % % F. Gutierrez-Barragan, V.K. Ithapu, C. Hinrichs, C. Maumet, S.C. Johnson, T.E. Nichols, V. Singh.
 % % Neuorimage, 2017.
+=======
+% % Accelerating Permutation Testing in Neuroimaging through Subspace Tracking
+% % F Gutierrez-Barragan VK Ithapu, C Hinrichs, T Nichols, SC Johnson, V Singh
+% % Under Review
+>>>>>>> 23d60186508776c0dab1fece518912d6d32970ee
 % % Speeding up Permutation Testing in Neuroimaging 
 % % C Hinrichs, VK Ithapu, Q Sun, SC Johnson, V Singh
 % % NIPS 2013
@@ -45,17 +50,6 @@
 % % Codes already included in the package
 
 %%% Usage 
-% %     inputs.data = '/home/user/mydata/pt_data.mat';
-% %     inputs.maxrank = 30; input.T = 1000; input.traintime = 50; 
-% %     inputs.display = 1;
-% %     outputs = RapidPT(inputs);
-
-function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath )
-% RapidPermutationTesting 
-%   Modified permutation testing algorithm described in the following paper
-%   Speeding up Permutation Testing in Neuroimaging  C Hinrichs, VK Ithapu, Q Sun, SC Johnson, V Singh, NIPS 2013
-    
-    fprintf('Starting RapidPermutationTesting...\n');
 % %     See https://github.com/felipegb94/RapidPT
 
 function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath, T0 )
@@ -92,6 +86,7 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath, T0 )
     binRes = 0.05; 
     maxnullBins = -9:binRes:9; %% bin resolution in maxnull histogram computation
     subV = CheckSamplingRate(N, V, sub); %% number of samples used per permutation
+%     subV = round(V*sub);
     maxTStatistics = zeros(1, numPermutations); %% estimated max statistics for all permutations
     minTStatistics = zeros(1, numPermutations); %% estimated max statistics for all permutations
 
@@ -126,6 +121,7 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath, T0 )
     end 
     
     diffForNormal = zeros(trainNum,maxCycles);
+
     for m = 1:1:maxCycles
         Ts_ac = zeros(V,trainNum); 
         Ts_tr = zeros(V,trainNum);
@@ -147,7 +143,7 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath, T0 )
     end
 
     [muFit,~] = normfit(diffForNormal(:));
-    
+
     tTraining = toc(tTraining);
     timings.tTraining = tTraining;
 
@@ -168,12 +164,6 @@ function [ outputs, timings ] = RapidPT( inputs, rapidPTLibraryPath, T0 )
 
 %% Recovery : Filling in W and residuals for all numPermutations
     fprintf('\n Recovering the subspace coefficients and residuals for all permutations \n');
-    tRecovery = tic;    
-    
-    
-    %W = cell(numPermutations,1); 
-    % Calculate small portion of the permutation matrix
-    parfor i = 1:numPermutations
     tRecovery = tic;  
     nPtmp = ones(V,1); T0 = T0'; % Initialize to ones because the first statistic is equal to T0
     % If numWorkers==1 the following loop will simply run serially
