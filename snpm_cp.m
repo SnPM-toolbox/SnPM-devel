@@ -789,6 +789,8 @@ nP = [];
 
 if (UseRapidPT >= 1)
     
+    bhPerm = 0; % We don't want to assume distributional symmetry, plus we are not doing exhaustive permutation tests.
+    
     params.N = size(X,1);
     params.V = size(X,2);
     params.nPerm = nPerm;
@@ -799,10 +801,10 @@ if (UseRapidPT >= 1)
     params.nGroup1 = size(find(iCond == 1),2); 
     params.nGroup2 = params.N - params.nGroup1; 
 
-    datasetInfo = strcat(num2str(params.N),'_',num2str(params.nGroup1),'_',num2str(params.nGroup2));
-    runInfo = strcat(datasetInfo,'_',num2str(nPerm),'.mat');
-    save(strcat('params',runInfo),'params');
-
+%     datasetInfo = strcat(num2str(params.N),'_',num2str(params.nGroup1),'_',num2str(params.nGroup2));
+%     runInfo = strcat(datasetInfo,'_',num2str(nPerm),'.mat');
+%     save(strcat('RapidPTParams.mat'),'params');
+    save('RapidPTParams.mat','params');
     
     fullpath = mfilename('fullpath');
     % We only need the directory of snpm_cp so we remove the 7 chars
@@ -813,22 +815,27 @@ if (UseRapidPT >= 1)
     write = 0;
 
     [~, SnPMucp, ~, stats] = ttest2(X(1:params.nGroup1, :), X(params.nGroup1+1:end, :), 0.05, 'both', 'unequal');
+    T0 = stats.tstat;
     MaxT11 = max(stats.tstat);
     MaxT12 = -1*min(stats.tstat);
     
+    
     % Do one less permutation b.c the first MaxT is for the original labels
-    [outputs, timings] = TwoSampleRapidPT(X, nPerm-1, params.nGroup1, write, RapidPT_path);
+    [outputs, timings] = TwoSampleRapidPT(X, nPerm-1, params.nGroup1, write, RapidPT_path, T0);
     MaxT = outputs.MaxT;
     MinT = outputs.MinT;
-    save(strcat('timings',runInfo),'timings');
+    nP = outputs.nP;
+%     save(strcat('timings',runInfo),'timings');
+    save('RapidPTTimings.mat','timings');
+
     % Save variables for snpm_pp
     MaxT = [MaxT11, MaxT12;...
             MaxT', -MinT'];
-    % Uncorrected p-vals
-    save('SnPMucp.mat','SnPMucp')
-    save('XYZ.mat','XYZ');
-    eval(['save SnPM ',s_SnPM_save]);
-    save('SnPMt.mat','SnPMt'); % Real t-statistic for each voxel.
+
+%     save('SnPMucp.mat','SnPMucp')
+%     save('XYZ.mat','XYZ');
+%     eval(['save SnPM ',s_SnPM_save]);
+%     save('SnPMt.mat','SnPMt'); % Real t-statistic for each voxel.
     
 else % UseRapidPT == 0
 for i = 1:zdim
@@ -1098,6 +1105,8 @@ for i = 1:zdim
   
 end		% (for i = 1:zdim) - loop over planes
 
+end % End else (when UseRapidPT == 0)
+
 
 fprintf('\n\nPermutations are done. Writing out images.\n')
 
@@ -1118,7 +1127,6 @@ lP_pos_image(spm_xyz2e(XYZ_total, Vt))=lP_pos;
 lP_pos_vol=reshape(lP_pos_image,DIM(1),DIM(2),DIM(3));
 spm_write_vol(VlP_pos, lP_pos_vol);
 
-% save MaxT for accuracy comparisson
 if STAT == 'T'
   if bhPerms
     nP_neg=1+1/(2*nPerm)-nP;
@@ -1215,7 +1223,9 @@ end
 
 if bWin, spm_progress_bar('Clear'), end
 %-Printout final timing information (>)
-fprintf('\n\nThe run took %0.02f minutes\n', toc/60);
+snpmTiming = toc;
+fprintf('\n\nThe run took %0.02f minutes\n', snpmTiming/60);
+save('snpmTiming.mat','snpmTiming');
 
 %-Cleanup
 clear X
@@ -1235,7 +1245,6 @@ fprintf(['\nCorrect Perm has max t %g & rank %d out of %d ', ...
 	'completed permutations\n'],MaxT(1,1),Rank,perm*(bhPerms+1));
 fprintf('\n\tRun snpm_pp for full results\n\n');
 
-end % End else (when UseRapidPT == 0)
 
 
 

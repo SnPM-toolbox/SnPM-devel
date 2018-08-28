@@ -5,14 +5,13 @@
 %%% Original Library:
 % % RapidPT: https://github.com/felipegb94/RapidPT
 
-%%% Corresponding paper :
+%%% Corresponding papers :
+% % Accelerating Permutation Testing in Neuroimaging through Subspace Tracking
+% % F Gutierrez-Barragan VK Ithapu, C Hinrichs, T Nichols, SC Johnson, V Singh
+% % Under Review
 % % Speeding up Permutation Testing in Neuroimaging 
 % % C Hinrichs, VK Ithapu, Q Sun, SC Johnson, V Singh
 % % NIPS 2013
-% % Accelerating Permutation Testing in Neuroimaging through Subspace Tracking
-% % F Gutierrez-Barragan VK Ithapu, C Hinrichs, T Nichols, SC Johnson, V Singh
-% % Under Preparation
-
 
 %%% Inputs: 
 %       - Data: NxV matrix - N: number of subject, V: number of voxels per subject.
@@ -32,7 +31,7 @@
 %       matrix.
 %       - timings.tTotal - Total time it took.
 
-function [ outputs, timings ] = TwoSampleRapidPT(Data, numPermutations, nGroup1, writingVal, RapidPTLibraryPath)
+function [ outputs, timings ] = TwoSampleRapidPT(Data, numPermutations, nGroup1, writingVal, RapidPTLibraryPath,T0)
 % RapidPT 
 %   Modified permutation testing algorithm described in the following paper
 %   Speeding up Permutation Testing in Neuroimaging  C Hinrichs, VK Ithapu, Q Sun, SC Johnson, V Singh, NIPS 2013
@@ -57,7 +56,9 @@ function [ outputs, timings ] = TwoSampleRapidPT(Data, numPermutations, nGroup1,
 % The following parameters have been extensively tested and have produced
 % good results, independent of the dataset size and number of permutations
 
-    
+    % Set the sub-sampling rate to low values. Inside the RapidPT function
+    % these values will be checked and IF they are too low they will be set
+    % to the correct value.
     if(numPermutations < 10000)      
         subVal = {0.005};
     else
@@ -87,7 +88,7 @@ function [ outputs, timings ] = TwoSampleRapidPT(Data, numPermutations, nGroup1,
                     iterKey, iterVal,...
                     writingKey, writingVal);
             
-    [outputs, timings] = RapidPT(inputs, RapidPTLibraryPath);
+    [outputs, timings] = RapidPT(inputs, RapidPTLibraryPath, T0);
 
     
 end
