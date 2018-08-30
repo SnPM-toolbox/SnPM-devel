@@ -81,7 +81,7 @@ classdef generic_test_snpm < matlab.unittest.TestCase
             testCase.checks = true;
             testCase.warningId = '';
             
-            testCase.stat_tolerance = 10^-10;
+            testCase.stat_tolerance = 10^-7;
         end
         
         function update_basis_matlabbatch(testCase)
