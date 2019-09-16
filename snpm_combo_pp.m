@@ -217,17 +217,17 @@ if bSpatEx
         %-Statistic image is t with df degrees of freedom
         pU_ST_Ut  = 1-spm_Tcdf(ST_Ut,df);
         if alpha==1	% Not filtering on significance
-            if ~( primaryThresh>=ST_Ut || (primaryThresh>0 && primaryThresh<=pU_ST_Ut_filt))
+            if ~( primaryThresh>=ST_Ut || (primaryThresh>0 && primaryThresh<=pU_ST_Ut))
                 error('SnPM:InvalidPrimaryThresh', ['Primary threshold must be >=' num2str(ST_Ut) ...
-                    ' and >0 and <=' num2str(pU_ST_Ut_filt) ]);
+                    ' and >0 and <=' num2str(pU_ST_Ut) ]);
             end  
         else
             pU_C_MaxT = 1-spm_Tcdf(C_MaxT,df);
             if ~((primaryThresh>=ST_Ut && primaryThresh<C_MaxT) || ...
-                    (primaryThresh>pU_C_MaxT && primaryThresh<=pU_ST_Ut_filt))
+                    (primaryThresh>pU_C_MaxT && primaryThresh<=pU_ST_Ut))
                 error('SnPM:InvalidPrimaryThresh', ['Primary threshold must be >=' num2str(ST_Ut) ...
                     ' and <' num2str(C_MaxT) ' or >' num2str(pU_C_MaxT) ...
-                    ' and <= ' num2str(pU_ST_Ut_filt)]);
+                    ' and <= ' num2str(pU_ST_Ut)]);
             end
             clear pU_C_MaxT
         end
