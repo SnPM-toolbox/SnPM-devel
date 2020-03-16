@@ -986,11 +986,11 @@ end
 %-Save some time consuming results
 %-----------------------------------------------------------------------
 if bSpatEx && pU_ST_Ut==-1
-  save SnPM_pp STCstats_Pos
+  save SnPM_pp.mat STCstats_Pos
   if STAT == 'T'
-     save SnPM_pp_Neg STCstats_Neg
+     save SnPM_pp_Neg.mat STCstats_Neg
   end
-  save STCS STCS
+  save STCS.mat STCS
 end
 
 

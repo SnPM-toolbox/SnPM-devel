@@ -696,12 +696,12 @@ end
 % Make an error if actually 'no voxels in brain'. 
 if perm==0, error('SnPM:NoVoxelsInBrain', 'No voxels in brain'); end
 
-save SnPMt SnPMt
+save SnPMt.mat SnPMt
 
 %save XYZ in a XYZ.mat file.
 %===============
 XYZ=XYZ_total;
-save XYZ XYZ
+save XYZ.mat XYZ
 
 
 %-Set SupraThreshold t-threshold
@@ -996,10 +996,10 @@ for i = 1:zdim
                 tmp = spm_clusters(Locs_vox(1:3,:));
                 STCstats=[SnPM_ST;perm*ones(1,size(SnPM_ST,2));tmp];
                 if isPos==1
-                  save SnPM_pp STCstats
+                  save SnPM_pp.mat STCstats
                 else
                   STCstats_Neg = STCstats;
-                  save SnPM_pp_Neg STCstats_Neg
+                  save SnPM_pp_Neg.mat STCstats_Neg
                 end
               end			
             end  % if ~isempty(SnPM_ST) 
@@ -1027,7 +1027,7 @@ for i = 1:zdim
 	STCS = snpm_STcalc('double',STCS);
       end
 	     	    
-      save STCS STCS
+      save STCS.mat STCS
     end
     
   end 	% (length(Q)) - Conditional on non-zero voxels
@@ -1056,7 +1056,7 @@ else
   nP = nP/nPerm;
 end
 SnPMucp=nP;
-save SnPMucp SnPMucp
+save SnPMucp.mat SnPMucp
 
 %
 % - write out lP+ and lP- images;
@@ -1170,7 +1170,7 @@ clear X
 
 %-Save key variables
 %=======================================================================
-eval(['save SnPM ',s_SnPM_save])
+eval(['save SnPM.mat ',s_SnPM_save])
 
 %-Print quick summary info (allowing for STOPing)
 %=======================================================================

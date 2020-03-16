@@ -505,8 +505,8 @@ end
 
 %-Save some time consuming results
 %-----------------------------------------------------------------------
-if bSpatEx, save SnPM_pp STCstats MaxSTCS SetLvl, end
-if bSpatEx, save SnPM_combo CorrPs ComboF ClInfo MaxWf MaxWt MaxWm MaxWa, end
+if bSpatEx, save SnPM_pp.mat STCstats MaxSTCS SetLvl, end
+if bSpatEx, save SnPM_combo.mat CorrPs ComboF ClInfo MaxWf MaxWt MaxWm MaxWa, end
 
 %-Filter data at specified corrected p-value alpha
 %=======================================================================
