@@ -193,7 +193,7 @@ end
   
 %-Definitions & Design parameters
 %=======================================================================
-sDesigns=char(...
+sDesigns=str2mat(...
 	'SingleSub: Two Sample T test; 2 conditions',...
 	'SingleSub: Simple Regression; 1 covariate of interest',...
 	'MultiSub: One Sample T test on differences; 1 condition',...
@@ -207,7 +207,7 @@ sDesigns=char(...
         'User Specified PlugIn',...
 	'keyboard');
 
-sDesFile=char(...
+sDesFile=str2mat(...
         'snpm_pi_TwoSampTss', ...
 	'snpm_pi_Corr1S', ...
 	'snpm_pi_OneSampT', ...     
@@ -228,7 +228,7 @@ sDesFile=char(...
 %%%
 
 %-Global normalization                                    (GloNorm)
-sGloNorm=char(... 
+sGloNorm=str2mat(... 
 	'<no global normalisation>',...				%-1
 	'proportional scaling',...				%-2
 	'AnCova',...						%-3
@@ -236,13 +236,13 @@ sGloNorm=char(...
 	'AnCova {study-specific}');				%-5
 
 %-Global calculation options                               (GXcalc)
-sGXcalc  = char(...
+sGXcalc  = str2mat(...
     'omit',...							%-1
     'user specified',...					%-2
     'mean voxel value (within per image fullmean/8 mask)');	%-3
 
 %-Grand mean scaling options                                (GMsca)
-sGMsca = char(...
+sGMsca = str2mat(...
     '<no grand Mean scaling>',...				%-1
     'scaling of overall grand mean');				%-2
 
@@ -321,7 +321,7 @@ end
 
 %-Decide upon volumetric operation
 bVolm = job.bVolm;
-if ~bVolm & (vFWHM(3)~=0)
+if ~bVolm && (vFWHM(3)~=0)
 warning('SnPM:MayRunOutOfMemory', ...
     sprintf(['Working volumetrically because of smoothing in z (%g).\n'... 
          'May run out of memory.'],vFWHM(3)));
@@ -375,10 +375,10 @@ if (iGMsca==2) % CHANGED from 1 to 2 as should not ask for a value if grand mean
   end
   % As in SPM:
   switch char(fieldnames(job.globalm.gmsca))
-      case 'gmsca_yes',
+      case 'gmsca_yes'
           % Proportionally scale to this value
           GM = job.globalm.gmsca.gmsca_yes.gmscv;
-      case 'gmsca_no',
+      case 'gmsca_no'
           GM = 50;
   end
 elseif (iGMsca==1) % No grand mean scaling
@@ -446,8 +446,8 @@ MASK = job.masking.em{1};
 %-Condition Cc & Gc "Shadow" partitions if no FxC interactions
 % These store the covariate values for printing only
 %-----------------------------------------------------------------------
-if (isempty(Cc) & ~isempty(C)), Cc=C; Ccnames=Cnames; end
-if (isempty(Gc) & ~isempty(G)), Gc=G; Gcnames=Gnames; end
+if (isempty(Cc) && ~isempty(C)), Cc=C; Ccnames=Cnames; end
+if (isempty(Gc) && ~isempty(G)), Gc=G; Gcnames=Gnames; end
 
 
 %-Examine images
@@ -456,14 +456,8 @@ if (isempty(Gc) & ~isempty(G)), Gc=G; Gcnames=Gnames; end
 %-MMap image files
 V = spm_vol(P);
 
-%-Check compatability of images (Bombs for single image)
-%-----------------------------------------------------------------------
-if any(any(diff(cat(1,V(:).dim),1,1),1)&[1,1,1]) 
-	error('SnPM:ImageDirections', 'images do not all have the same dimensions')
-end
-if any(any(any(diff(cat(3,V(:).mat),1,3),3)))
-	error('SnPM:ImageOrientationsResolutions','images do not all have same orientation & voxel size')
-end
+%-Check compatability of images
+spm_check_orientations(V);
 
 %-Get ORIGIN, etc
 DIM    = [V(1).dim(1)   V(1).dim(2)   V(1).dim(3)]';
@@ -498,7 +492,7 @@ end
 % Done here to provide check on V's in snpm_cp
 if GM ~= 0
 	GMscale = GM/mean(GX);
-	for i = 1:nScan, 
+	for i = 1:nScan
 		V(i).pinfo(1:2,:)  = V(i).pinfo(1:2,:) * GMscale;
 	end
 	GX      = GX     * GMscale;
@@ -523,7 +517,7 @@ end
 %=======================================================================
 Gc    = [Gc,GX];
 if isempty(Gcnames), Gcnames = 'Global';
-    else Gcnames = char(Gcnames,'Global'); end
+else, Gcnames = str2mat(Gcnames,'Global'); end
 
 if iGloNorm == 1				%-No global adjustment
 %-----------------------------------------------------------------------
@@ -531,7 +525,7 @@ elseif iGloNorm == 2				%-Proportional scaling
 %-----------------------------------------------------------------------
 % Since images are unmapped, this must be replicated in snpm_cp
 % Done here to provide check on V's in snpm_cp
-   for i = 1:nScan,
+   for i = 1:nScan
       V(i).pinfo(1:2,:) = GM*V(i).pinfo(1:2,:)/GX(i);
    end
 
@@ -539,21 +533,21 @@ elseif iGloNorm == 3				%-AnCova
 %-----------------------------------------------------------------------
    G = [G,(GX - mean(GX))];
    if isempty(Gnames), Gnames = 'Global'; 
-       else Gnames = char(Gnames,'Global'); end
+   else, Gnames = str2mat(Gnames,'Global'); end
 
 elseif iGloNorm == 4				%-AnCova by subject
 %-----------------------------------------------------------------------
     [GL,GLnames] = spm_DesMtx([iSUBJ',GX-mean(GX)],'FxC',['SUBJ  ';'Global']);
     G = [G,GL];
     if isempty(Gnames), Gnames = GLnames;
-        else Gnames = char(Gnames,GLnames); end
+    else, Gnames = str2mat(Gnames,GLnames); end
 
 elseif iGloNorm == 5				%-AnCova by study
 %-----------------------------------------------------------------------
     [GL,GLnames] = spm_DesMtx([iStud',GX-mean(GX)],'FxC',['Stud  ';'Global']);
     G = [G,GL];
     if isempty(Gnames), Gnames = GLnames; 
-        else Gnames = char(Gnames,GLnames); end
+    else, Gnames = str2mat(Gnames,GLnames); end
 else
 %-----------------------------------------------------------------------
     error('SnPM:InvalidiGloNorm', sprintf('%cError: invalid iGloNorm option\n',7))
@@ -586,7 +580,7 @@ s_SnPMcfg_save = ['s_SnPMcfg_save H C B G HCBGnames P PiCond ',...
 	'THRESH MASK ImMASK TH bVarSm vFWHM sVarSm bVolm bST sDesFile sDesign ',...
         'V pU_ST_Ut df1 ', ...
 	'sDesSave ',sDesSave];
-eval(['save SnPMcfg.mat ',s_SnPMcfg_save])
+eval(['save SnPMcfg ',s_SnPMcfg_save])
 
 
 
@@ -659,7 +653,7 @@ if ~spm_get_defaults('cmdline')
         x = x + dx; end
        text(x,y,Q(i,:),'FontSize',10,'interpreter','none');
        y     = y - dy;
-       if y < 0;
+       if y < 0
         spm_print
         spm_clf; axis off
         y = y0;
@@ -705,7 +699,7 @@ if ~spm_get_defaults('cmdline')
     %-----------------------------------------------------------------------
     hPramAxes=axes('Position',[0.05 0.08 0.8 0.20],'Visible','off');
     text(0,1.00,sDesign,'Fontsize',10);
-    text(0,0.90,['SnPM design flie: ',sDesFile],'Fontsize',10);
+    text(0,0.90,['SnPM design file: ',sDesFile],'Fontsize',10);
     text(0,0.80,sPiCond,'Fontsize',10);
     text(0,0.70,['Global normalisation: ',deblank(sGloNorm)],'Fontsize',10);
     text(0,0.60,['Threshold masking: ',deblank(sThresh)],'Fontsize',10);
@@ -721,7 +715,7 @@ if ~spm_get_defaults('cmdline')
         'giving %d residual df (%d scans).'],...
         size([H C B G],2),rank([H C B G]),nScan-rank([H C B G]),nScan),...
         'Fontsize',10);
-    if (bVarSm) text(0,0.2,sVarSm,'Fontsize',10);
+    if (bVarSm), text(0,0.2,sVarSm,'Fontsize',10);
     end
 
     spm_print

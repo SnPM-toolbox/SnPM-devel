@@ -159,7 +159,7 @@ alpha = job.Thr.Clus.ClusMass.PFilt; %spm_input('Corrected p value for filtering
 
 %-Compute critical threshold for level alpha test
 %-----------------------------------------------------------------------
-if alpha < 1;
+if alpha < 1
 	c=ceil((1-alpha)*nPerm);
 	C_MaxT=StMaxT(c);
 else
@@ -175,7 +175,7 @@ end
 % significant.
 %-bST flags whether spatial extent information was collected.)
 bSpatEx = bST & exist(fullfile(CWD,'SnPM_ST.mat'))==2;
-if bSpatEx & (C_MaxT <= ST_Ut) & (alpha ~= 1)
+if bSpatEx && (C_MaxT <= ST_Ut) && (alpha ~= 1)
   str = 'Voxelwise corrected threshold = %g, which is smaller ';
   str = [str 'than minimum saved suprathreshold information (%g)'];
   str = [str '\nAll results significant voxelwise.'];
@@ -232,7 +232,7 @@ if bSpatEx
             clear pU_C_MaxT
         end
         clear pU_ST_Ut
-        if (primaryThresh < 1), 
+        if (primaryThresh < 1) 
             primaryThresh = spm_invTcdf(1-primaryThresh,df); 
         end
     end
@@ -328,7 +328,7 @@ if bSpatEx
 	ClInfo = zeros(8,size(SnPM_ST,2));
 	ClInfoEnd = 0;
 	for i = nPerm:-1:1
-                if (rem(i,10)==0)
+        if (rem(i,10)==0)
 		  fprintf('\b\b\b\b%-4u',i)
 		  drawnow
 		end
@@ -357,7 +357,7 @@ if bSpatEx
                            % all cluster info
                            tmpCLoc  = (tmp==j);
                            subsubST = subSnPM_ST(:,tmpCLoc);
-                           [tmpPeak tmpPLoc] = max(subsubST(4,:));
+                           [tmpPeak, tmpPLoc] = max(subsubST(4,:));
                            tmpXYZ   = subsubST(1:3,tmpPLoc);
                            tmpMass  = sum((subsubST(4,:)-ST_Ut).^mTheta);
                            tmpVec   = [tmpXYZ; tmpPeak; tmpCS(j); tmpMass; j; i];
@@ -400,12 +400,12 @@ if bSpatEx
 
 	fprintf('Calculating corr p-values for each voxel / cluster\n');
 	for ip = 1:(nPerm-1)
-           if rem(ip,50)==0, fprintf('.'), end
-           Qvox = find(ClInfo(4,:)>StMaxT(ip));
-           CorrPs(1,Qvox) = (nPerm-ip)/nPerm;
-           Qcl  = find(ClInfo(5,:)>StMaxSTCS(ip));
-           CorrPs(2,Qcl) = (nPerm-ip)/nPerm;
-        end
+        if rem(ip,50)==0, fprintf('.'), end
+        Qvox = find(ClInfo(4,:)>StMaxT(ip));
+        CorrPs(1,Qvox) = (nPerm-ip)/nPerm;
+        Qcl  = find(ClInfo(5,:)>StMaxSTCS(ip));
+        CorrPs(2,Qcl) = (nPerm-ip)/nPerm;
+    end
 	fprintf('.Done!\n');
 
 	fprintf('Calculating voxel-cluster combining functions\n');
@@ -432,9 +432,9 @@ if bSpatEx
            end
         end
 
-        [StMaxWf iStMaxWf] = sort(MaxWf);
-        [StMaxWt iStMaxWt] = sort(MaxWt);
-        [StMaxWm iStMaxWm] = sort(MaxWm);
+        [StMaxWf, iStMaxWf] = sort(MaxWf);
+        [StMaxWt, iStMaxWt] = sort(MaxWt);
+        [StMaxWm, iStMaxWm] = sort(MaxWm);
 	C_Wcomb = zeros(4,1);
 	if alpha < 1
 		C_Wcomb(1) = StMaxWf(c);
@@ -481,7 +481,7 @@ if bSpatEx
 
 
         % Corrected critical meta-statistic
-        [StMaxWa iStMaxWa] = sort(MaxWa);
+        [StMaxWa, iStMaxWa] = sort(MaxWa);
 	if alpha < 1
 		C_Wcomb(4) = StMaxWa(c);
 	else
@@ -505,8 +505,8 @@ end
 
 %-Save some time consuming results
 %-----------------------------------------------------------------------
-if bSpatEx, save SnPM_pp.mat STCstats MaxSTCS SetLvl, end
-if bSpatEx, save SnPM_combo.mat CorrPs ComboF ClInfo MaxWf MaxWt MaxWm MaxWa, end
+if bSpatEx, save SnPM_pp STCstats MaxSTCS SetLvl, end
+if bSpatEx, save SnPM_combo CorrPs ComboF ClInfo MaxWf MaxWt MaxWm MaxWa, end
 
 %-Filter data at specified corrected p-value alpha
 %=======================================================================
@@ -524,7 +524,7 @@ if bSpatEx
 	for i = 1:nSTC
 		tQ = find(STCstats(6,:)==i);
 	     ttQ= find(ClInfo(7,:)==i & ClInfo(8,:)==1);
-		if ( STCS(i) > C_STCS | max(STCstats(4,tQ)) > C_MaxT | ...
+		if ( STCS(i) > C_STCS || max(STCstats(4,tQ)) > C_MaxT || ...
                      max(ComboF(iW,ttQ)) > C_Wcomb(iW))
 			Q        = [Q tQ];
 		end
@@ -560,7 +560,7 @@ if isempty(Q)
 	tmp='voxels'; if bSpatEx, tmp='suprathreshold clusters'; end
 	text(0,0.93,sprintf(...
 		'No %s significant at alpha=%6.4f (corrected)',tmp,alpha));
-	if bSpatEx,
+	if bSpatEx
 	  ShowDist(MaxT,C_MaxT,MaxSTCS,C_STCS);
 	else	   
 	  ShowDist(MaxT,C_MaxT);
@@ -765,7 +765,7 @@ Fmtst = {	'%0.4f','%0.0f', ...	        %-cluster
 %-----------------------------------------------------------------------
 r = 1;
 bUsed = zeros(size(STC_SnPMt));
-while max(STC_SnPMt.*(~bUsed)) & (y > 3)
+while max(STC_SnPMt.*(~bUsed)) && (y > 3)
 
 	[null, i] = max(STC_SnPMt.*(~bUsed));	% Largest t value
 	j         = find(STC_r == STC_r(i));	% Maxima in same region
@@ -812,7 +812,7 @@ while max(STC_SnPMt.*(~bUsed)) & (y > 3)
 	for i = 1:length(k)
 	    d     = j(k(i));
 	    if min( sqrt( sum((STC_XYZ(:,D) - ...
-			STC_XYZ(:,d)*ones(1,size(D,2))).^2) ) ) > 8;
+			STC_XYZ(:,d)*ones(1,size(D,2))).^2) ) ) > 8
 		if length(D) < 3
        	
 	text(tCol(5)+0.08,y,sprintf(Fmtst{5},Pt(d)),...
