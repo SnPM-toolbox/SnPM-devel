@@ -332,10 +332,6 @@ tol = 1e-4;	% Tolerance for comparing real numbers
 		% ( Reals have to be compared for equality when        )
 		% ( computing FWE-corrected p-values                   )
 
-Dis = SnPMdefs.Results_distmin;  % mm distance between sub regions
-Num = SnPMdefs.Results_nbmax;    % Maximum number of sub-regions
-units = {'mm' 'mm' 'mm'};
-
 %-SetUp figure window
 %-----------------------------------------------------------------------
 Finter = spm_figure('FindWin','Interactive');
@@ -515,7 +511,7 @@ if BATCH
         end
     else
         % Cluster-wise inference
-        if exist(fullfile(CWD,'SnPM_ST.mat'))~=2 && exist(fullfile(CWD,'STCS.mat'))~=2
+        if exist(fullfile(CWD,'SnPM_ST.mat'))~=2 & exist(fullfile(CWD,'STCS.mat'))~=2
             error(['SnPM:NoClusterInfo', 'ERROR: Cluster-wise inference requested, but no cluster information saved.\n',...
             'Re-configure analysis changing "Cluster inference" to "Yes" and re-run.\n'])
         end
@@ -692,7 +688,7 @@ else  % GUI, interative inference specification
 	else
 	  %-Statistic image is t with df degrees of freedom
 	  p_ST_Ut  = STalpha;
-	  while ~( tmp>=ST_Ut-tol || (tmp>0 && tmp<=p_ST_Ut))
+	  while ~( tmp>=ST_Ut-tol | (tmp>0 & tmp<=p_ST_Ut))
 	    tmp = spm_input(sprintf(...
 		'Clus-def thresh(p<=%4.2fIt>=%4.2f)',p_ST_Ut,ST_Ut),'+0','r',ST_Ut,1); 
 	  end
@@ -985,12 +981,12 @@ end
 
 %-Save some time consuming results
 %-----------------------------------------------------------------------
-if bSpatEx && pU_ST_Ut==-1
-  save SnPM_pp STCstats_Pos
+if bSpatEx & pU_ST_Ut==-1
+  save SnPM_pp.mat STCstats_Pos
   if STAT == 'T'
-     save SnPM_pp_Neg STCstats_Neg
+     save SnPM_pp_Neg.mat STCstats_Neg
   end
-  save STCS STCS
+  save STCS.mat STCS
 end
 
 
@@ -1000,7 +996,7 @@ if bSpatEx
     %-Analysing spatial extent
     % if alph_FWE is set then only do it when alph_FWE<1
     % otherwise(alph_FWE=NaN), do the analysis.
-    if (alph_FWE<1 || isnan(alph_FWE))
+    if (alph_FWE<1|isnan(alph_FWE))
 	%-Filter on significance of cluster size
 	%---------------------------------------------------------------
 	fprintf('Filtering statistic image, clusterwise...');
@@ -1075,7 +1071,7 @@ if isempty(Q)
 	  fprintf(['WARNING: ' str])
 	end
 	if length(strmatch('FWEreport',Report))>0
-	  if bSpatEx
+	  if bSpatEx,
 	    ShowDist(MaxT,C_MaxT,alph_FWE,STCS_MxK,C_STCS,alph_FWE,'max');
 	  else	   
 	    ShowDist(MaxT,C_MaxT,alph_FWE,[],[],[],'max');
@@ -1213,12 +1209,10 @@ if length(strmatch('MIPtable',Report))>0
   hmip = axes('Position',[0.05 0.5 0.5 0.5]);
   snpm_mip(SnPMt,XYZ,MAT,DIM); axis image
   if bVarSm
-    TitlStr='SnPM{Pseudo-t}';
+    title('SnPM{Pseudo-t}','FontSize',16,'Fontweight','Bold')
   else
-    TitlStr=sprintf('SnPM{%s}',STAT);
+    title(sprintf('SnPM{%s}',STAT),'FontSize',16,'Fontweight','Bold')
   end
-  title(TitlStr,'FontSize',16,'Fontweight','Bold')
-
   
   %-Design matrix and contrast
   %=======================================================================
@@ -1305,9 +1299,7 @@ if length(strmatch('MIPtable',Report))>0
   
   Fmtst = {	'%0.4f', '%0.4f', '%0.0f', ...                  %-Cluster
 		'%0.4f', '%0.4f', '%6.2f','%0.4f', ...		%-Voxel
-		'%3.0f', '%3.0f', '%3.0f'};			%-XYZ
-  TabDat.fmt = Fmtst(1:7);
-  TabDat.fmt(8) = {'%3.0f %3.0f %3.0f '};  % Needed for compatibilty with spm_list
+		'%3.0f','%3.0f','%3.0f'};			%-XYZ
   
   %-Column Locations
   %-----------------------------------------------------------------------
@@ -1315,221 +1307,125 @@ if length(strmatch('MIPtable',Report))>0
   %	           0.50      0.62      0.77           ...  %-Voxel
   %                0.86 0.93 1.00];			%-XYZ
   
-  
-  %-Table Headers
-  %----------------------------------------------------------------------
-  TabDat.tit = sprintf('%s p-values adjusted for search volume',TitlStr);
-  
-  TabDat.hdr = {...
-      'cluster',  'p(FWE-corr)',  '\itp\rm_{FWE-corr}';...
-      'cluster',  'p(uncorr)',    '\itp\rm_{uncorr}';...
-      'cluster',  'k',            '\itk';...
-      'peak',     'p(FWE-corr)',  '\itp\rm_{FWE-corr}';...
-      'peak',     'p(FDR-corr)',  '\itq\rm_{FDR-corr}';...
-      'peak',      STAT,          sprintf('\\it%s',STAT);...
-      'peak',     'p(uncorr)',    '\itp\rm_{uncorr}';...
-      '',         'x,y,z {mm}',   [units{:}]}';
-  
-  %-Table filtering note
-  %----------------------------------------------------------------------
-  if isinf(Num)
-    TabDat.str = sprintf('table shows all local maxima more than %.1fmm apart',Dis);
-  else
-    TabDat.str = sprintf('table shows %d local maxima more than %.1fmm apart',Num,Dis);
-    end 
-  TabDat.dat = cell(0,8);
-
-  StrAttr = {'Fontsize',10,'ButtonDownFcn','get(gcbo, ''UserData'')',...
-	     'HorizontalAlignment','right'};
-  StrAttrB = {StrAttr{:},'FontWeight','Bold'};
-  if ~bSpatEx
-      set(Hp,'Visible','off')
-  end
-
   %-List of maxima
   %-----------------------------------------------------------------------
-  r = 0;
+  r = 1;
   bUsed = zeros(size(STC_SnPMt));
-  while max(STC_SnPMt.*(~bUsed))
+  while max(STC_SnPMt.*(~bUsed)) & (y > 3)
     
     [null, i] = max(STC_SnPMt.*(~bUsed));	% Largest t value
     j         = find(STC_r == STC_r(i));	% Maxima in same region
-    r         = r + 1;				% Next row
     
     %-Print region and largest maximum
     %-------------------------------------------------------------------
     
+    StrAttr = {'Fontsize',10,'ButtonDownFcn','get(gcbo, ''UserData'')',...
+	       'HorizontalAlignment','right'};
+    StrAttrB = {StrAttr{:},'FontWeight','Bold'};
     %	text(0.00,y,sprintf('%0.0f',r),'UserData',r,StrAttrB{:})
     if bSpatEx
-      TabDat.dat(r,1:2) = {Pn(i),Pun(i)};
-      if (y>3) 
-	text(tCol(1)+0.09,y,sprintf(Fmtst{1},Pn(i)),'UserData',Pn(i), ...
-	     StrAttrB{:})
-	text(tCol(2)+0.09,y,sprintf(Fmtst{2},Pun(i)),'UserData',Pun(i), ...
-	     StrAttrB{:})
-      end
+      text(tCol(1)+0.09,y,sprintf(Fmtst{1},Pn(i)),'UserData',Pn(i), ...
+	   StrAttrB{:})
+      text(tCol(2)+0.09,y,sprintf(Fmtst{2},Pun(i)),'UserData',Pun(i), ...
+	   StrAttrB{:})
+    else
+      set(Hp,'Visible','off')
     end
     
-    TabDat.dat(r,3:8)={STC_N(i),Pt(i),Pfdr(i),STC_SnPMt(i),Pu(i),STC_XYZ(:,i)};
-
-    if (y>3)
-      text(tCol(3)+0.04,y,sprintf(Fmtst{3},STC_N(i)),'UserData',STC_N(i),StrAttrB{:})
-      text(tCol(4)+0.08,y,sprintf(Fmtst{4},Pt(i)),'UserData',Pt(i),StrAttrB{:})
-      text(tCol(5)+0.09,y,sprintf(Fmtst{5},Pfdr(i)),'UserData',Pfdr(i),StrAttrB{:})
-      text(tCol(6)+0.04,y,sprintf(Fmtst{6},STC_SnPMt(i)),'UserData',STC_SnPMt(i),StrAttrB{:})
-      
-      text(tCol(7)+0.09,y,sprintf(Fmtst{7},Pu(i)),'UserData',Pu(i),StrAttr{:})
-      text(tCol(8),y,sprintf(Fmtst{8},STC_XYZ(1,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
-      text(tCol(9),y,sprintf(Fmtst{9},STC_XYZ(2,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
-      text(tCol(10),y,sprintf(Fmtst{10},STC_XYZ(3,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
-      y = y -1;
-    end
+    text(tCol(3)+0.04,y,sprintf(Fmtst{3},STC_N(i)),'UserData',STC_N(i),StrAttrB{:})
+    text(tCol(4)+0.08,y,sprintf(Fmtst{4},Pt(i)),'UserData',Pt(i),StrAttrB{:})
+    text(tCol(5)+0.09,y,sprintf(Fmtst{5},Pfdr(i)),'UserData',Pfdr(i),StrAttrB{:})
+    text(tCol(6)+0.04,y,sprintf(Fmtst{6},STC_SnPMt(i)),'UserData',STC_SnPMt(i),StrAttrB{:})
     
-    %-Print up to Num secondary maxima (> Dis apart)
+    text(tCol(7)+0.09,y,sprintf(Fmtst{7},Pu(i)),'UserData',Pu(i),StrAttr{:})
+    text(tCol(8),y,sprintf(Fmtst{8},STC_XYZ(1,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
+    text(tCol(9),y,sprintf(Fmtst{9},STC_XYZ(2,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
+    text(tCol(10),y,sprintf(Fmtst{10},STC_XYZ(3,i)),'UserData',STC_XYZ(:,i),StrAttrB{:})
+    y = y -1;
+    
+    %-Print up to 3 secondary maxima (>8mm apart)
     %-------------------------------------------------------------------
     [null, k] = sort(-STC_SnPMt(j));	% Sort on t value
     D         = i;
     for i = 1:length(k)
       d     = j(k(i));
       if min( sqrt( sum((STC_XYZ(:,D) - ...
-			 STC_XYZ(:,d)*ones(1,size(D,2))).^2) ) ) > Dis
-	if length(D) < Num
-	  r = r + 1;				% Next row
-
-	  TabDat.dat(r,4:8)={Pt(d),Pfdr(d),STC_SnPMt(d),Pu(d),STC_XYZ(:,d)};
-
-	  if (y>3)
-	    text(tCol(4)+0.08,y,sprintf(Fmtst{4}, Pt(d)),'UserData',Pt(d),StrAttr{:})
-	    text(tCol(5)+0.09,y,sprintf(Fmtst{5}, Pfdr(d)),'UserData',Pfdr(d),StrAttr{:})
-	    text(tCol(6)+0.04,y,sprintf(Fmtst{6}, STC_SnPMt(d)), 'UserData',STC_SnPMt(d),StrAttr{:})
-	    
-	    text(tCol(7)+0.09,y,sprintf(Fmtst{7}, Pu(d)),'UserData',Pu(d),StrAttr{:})
-	    text(tCol(8),y,sprintf(Fmtst{8}, STC_XYZ(1,d)),'UserData',STC_XYZ(:,d),StrAttr{:})
-	    text(tCol(9),y,sprintf(Fmtst{9}, STC_XYZ(2,d)),'UserData',STC_XYZ(:,d),StrAttr{:})
-	    text(tCol(10),y,sprintf(Fmtst{10}, STC_XYZ(3,d)),'UserData',STC_XYZ(:,d),StrAttr{:})
+			 STC_XYZ(:,d)*ones(1,size(D,2))).^2) ) ) > 8;
+	if length(D) < 3
+	  text(tCol(4)+0.08,y,sprintf(Fmtst{4}, Pt(d)),'UserData',Pt(d),StrAttr{:})
+	  text(tCol(5)+0.09,y,sprintf(Fmtst{5}, Pfdr(d)),'UserData',Pfdr(d),StrAttr{:})
+	  text(tCol(6)+0.04,y,sprintf(Fmtst{6}, STC_SnPMt(d)), 'UserData',STC_SnPMt(d),StrAttr{:})
 	  
-	    y = y -1;
-	  end
+	  text(tCol(7)+0.09,y,sprintf(Fmtst{7}, Pu(d)),'UserData',Pu(d),StrAttr{:})
+	  text(tCol(8),y,sprintf(Fmtst{8}, STC_XYZ(1,d)),'UserData',STC_XYZ(:,d),StrAttr{:})
+	  text(tCol(9),y,sprintf(Fmtst{9}, STC_XYZ(2,d)),'UserData',STC_XYZ(:,d),StrAttr{:})
+	  text(tCol(10),y,sprintf(Fmtst{10}, STC_XYZ(3,d)),'UserData',STC_XYZ(:,d),StrAttr{:})
+	  
 	  D = [D d];
-
+	  y = y -1;
 	end
       end
     end
     
     bUsed(j) = (bUsed(j) | 1 );		%-Mark maxima as "used"
+    r = r + 1;				% Next region
   end
   clear i j k D d r
   
   
   %-Footnote with SnPM parameters
   %=======================================================================
-  TabDat.ftr    = cell(0,2);
   line([0,1],[0.5,0.5],'LineWidth',1,'Color','r')
-  r = 1;
   y = 0;
   if bSpatEx
+    tmp = sprintf('Cluster-defining thresh. = %7.4f',ST_Ut);
     if ~bVarSm
-      TabDat.ftr{r,1}='Cluster-defining thresh. = %7.4f (p = %6.4f)';  
-      TabDat.ftr{r,2}=[ST_Ut,spm_Tcdf(-ST_Ut,df)];
-    else
-      TabDat.ftr{r,1}='Cluster-defining thresh. = %7.4f';              
-      TabDat.ftr{r,2}=ST_Ut;
+      tmp=[tmp,sprintf(' (p = %6.4f)',spm_Tcdf(-ST_Ut,df))];
     end
-    text(0,y,sprintf(TabDat.ftr{r,1},TabDat.ftr{r,2}),'FontSize',8)
-    r = r + 1;
-
-    TabDat.ftr{r,1}='Critical STCS = %d voxels';    TabDat.ftr{r,2}=C_STCS;
-    text(0.7,y,sprintf(TabDat.ftr{r,1},TabDat.ftr{r,2}),'FontSize',8)
-    y = y -0.8; r = r + 1;
-
+    text(0,y,tmp,'FontSize',8)
+    text(0.7,y,sprintf('Critical STCS = %d voxels',C_STCS),'FontSize',8)
+    y = y -0.8;
     if ~isnan(alph_FWE)
-      TabDat.ftr{r,1}='Cluster threshold: FWE-corr. P value= %6.4f';     
-      TabDat.ftr{r,2}=alph_FWE;
+      tmp = sprintf('Cluster threshold: FWE-corr. P value= %6.4f', ...
+		    alph_FWE);
     elseif ~isnan(alpha_ucp)
-      TabDat.ftr{r,1}='Cluster threshold: Uncorr. P value= %6.4f';       
-      TabDat.ftr{r,2}=alpha_ucp;
+      tmp = sprintf('Cluster threshold: Uncorr. P value= %6.4f', ...
+		    alpha_ucp);
     else
-      TabDat.ftr{r,1}='Cluster threshold: Uncorr. cluster size STCS= %d';
-      TabDat.ftr{r,2}=C_STCS;
+      tmp = sprintf('Cluster threshold: Uncorr. cluster size STCS= %d', ...
+		    C_STCS);
     end
-    text(0,y,sprintf(TabDat.ftr{r,1},TabDat.ftr{r,2}), 'FontSize',8)
-    r = r + 1;
+    text(0,y,tmp, 'FontSize',8)
   else
     %make the format similar as spm.
     %text(0,y,sprintf('alpha = %6.4f, df = %d',alpha,df),'FontSize',8)
     if ~isnan(u)
-      TabDat.ftr{r,1}='Height threshold: statistic u= %6.2f (%0.4f FWE)';  
-      TabDat.ftr{r,2}=[u,alph_FWE];
+      text(0,y,sprintf('Height threshold: statistic u= %6.2f (%0.4f FWE)',u,alph_FWE),'FontSize',8)
     else
-      TabDat.ftr{r,1}='Height threshold: Nonparam. P value alpha= %0.4f (%0.4f FDR)';  
-      TabDat.ftr{r,2}=[alpha_ucp, alph_FDR];
-     end
-    text(0,y,sprintf(TabDat.ftr{r,1},TabDat.ftr{r,2}),'FontSize',8)
-    r = r + 1;
+      text(0,y,sprintf('Height threshold: Nonparam. P value alpha= %0.4f (%0.4f FDR)',alpha_ucp, alph_FDR), 'FontSize',8)   
+    end
+    
   end
   
   if bVarSm
-    TabDat.ftr{r,1}='Degrees of freedom = n/a (variance smoothing)';  
-    TabDat.ftr{r,2}=[];
+    str = 'n/a (variance smoothing)';
   else
-    TabDat.ftr{r,1}='Degrees of freedom = [%d %d]';  
-    TabDat.ftr{r,2}=[df1,df];
+    str = sprintf('[%d %d]',df1,df);
   end
-  text(0.7,y,sprintf(TabDat.ftr{r,1},TabDat.ftr{r,2}),'FontSize',8)
-  y=y-0.8;  r = r + 1;
-
-  TabDat.ftr{r,1}='';  
-  TabDat.ftr{r,2}=[];
-
-  TabDat.ftr{r,1}='Design: %s';  
-  TabDat.ftr{r,2}=sDesign;
-  text(0,y,sprintf(TabDat.ftr{r,1},TabDat.ftr{r,2}),'FontSize',8);
-  y=y-0.8;  r = r + 1;
-
-  TabDat.ftr{r,1}='Search vol: %d cmm, %d voxels';  
-  TabDat.ftr{r,2}=[S*abs(prod(VOX)),S];
-  text(0,y,sprintf(TabDat.ftr{r,1},TabDat.ftr{r,2}), 'FontSize',8)
-  y=y-0.8;  r = r + 1;
-
-  TabDat.ftr{r,1}='Voxel size: [%5.2f, %5.2f, %5.2f] mm';  
-  TabDat.ftr{r,2}=abs(VOX);
-  text(0.7,y,sprintf(TabDat.ftr{r,1},TabDat.ftr{r,2}), 'FontSize', 8)
-  r = r + 1;
+  text(0.7,y,['Degrees of freedom = ', str], 'FontSize',8)
+  y=y-0.8;
+  text(0,y,sprintf('Design: %s',sDesign),'FontSize',8);
+  y=y-0.8;
+  text(0,y,sprintf('Search vol: %d cmm, %d voxels',S*abs(prod(VOX)),S), 'FontSize',8)
+  y=y-0.8;
+  text(0.7,y,sprintf('Voxel size: [%5.2f, %5.2f, %5.2f] mm',abs(VOX)), ...
+       'FontSize', 8)
   
-  TabDat.ftr{r,1}='Perms: %s';  
-  TabDat.ftr{r,2}=sPiCond;
-  text(0,y,sprintf(TabDat.ftr{r,1},TabDat.ftr{r,2}),'FontSize',8);
-  r = r + 1;
-
+  text(0,y,sprintf('Perms: %s',sPiCond),'FontSize',8);
   if bVarSm
-    TabDat.ftr{r,1}=sVarSm;  
-    TabDat.ftr{r,2}=[];
-    text(0,y,sprintf(TabDat.ftr{r,1},TabDat.ftr{r,2}),'FontSize',8)
-    y = y -0.8;  r = r + 1;
+    y = y -0.8;
+    text(0,y,sVarSm,'FontSize',8)
   end
-  
-  h = uicontextmenu('Tag','TabDat','UserData',TabDat);
-  set(hTable,'UIContextMenu',h,...
-	  'Visible','on',...
-	  'XTick',[],'YTick',[],...
-	  'XColor','w','YColor','w')
-  uimenu(h,'Label','Print text table',...
-	 'CallBack',...
-	 'spm_list(''txtlist'',get(get(gcbo,''Parent''),''UserData''))',...
-	 'Interruptible','off','BusyAction','Cancel');
-  uimenu(h,'Label','Extract table data structure',...
-	 'CallBack','TabDat=get(get(gcbo,''Parent''),''UserData'')',...
-        'Interruptible','off','BusyAction','Cancel');
-  if ispc
-    uimenu(h,'Label','Export to Excel',...
-	   'CallBack',...
-	   'spm_list(''xlslist'',get(get(gcbo,''Parent''),''UserData''));',...
-	   'Interruptible','off','BusyAction','Cancel');
-  end
-  uimenu(h,'Label','Export to CSV file',...
-	 'CallBack',...
-	 'snpm_list(''csvlist'',get(get(gcbo,''Parent''),''UserData''));',...
-	 'Interruptible','off','BusyAction','Cancel');
   
 
   if ~BATCH
@@ -1663,7 +1559,7 @@ if strcmp(Typ,'max')
   xlabel(str)
   line(T(1)*[1 1],Ylim.*[1 0.95],'LineStyle','--','color',[1 0 0]);
   text(T(1)+diff(Xlim)*0.01,Ylim(2)*0.95,'Observed','FontSize',10)
-  if (Xlim(1)<=cT) && (cT<=Xlim(2))
+  if (Xlim(1)<=cT) & (cT<=Xlim(2))
   line(cT*[1 1],Ylim.*[1 0.85],'LineStyle','-');
   end
 else
@@ -1693,7 +1589,7 @@ if strcmp(Typ,'uncor')
   set(get(gca,'children'),'LineWidth',1,'MarkerSize',2)
   snpm_abline(0,1);
   snpm_abline(0,aT,'LineStyle','-','color','red')
-  if ~isnan(cT) && (cT~=0)
+  if ~isnan(cT) & (cT~=0)
     snpm_abline('h',cT,'LineStyle','-','Color','blue');
     text(10^(log10(1/S)*0.9),10^(log10(cT)*.85),...
 	 sprintf('%3.3g FDR: p=%g',aT,cT),'color','red','FontSize',10)
@@ -1750,7 +1646,7 @@ end
 return
 
 function v = BoundCheck(val,Range,ErrMsg)
-if val<Range(1) || val>Range(2)
+if val<Range(1) | val>Range(2)
   error('SnPM:RangeError', [ErrMsg ': ' num2str(val)])
 else
   v=val;
