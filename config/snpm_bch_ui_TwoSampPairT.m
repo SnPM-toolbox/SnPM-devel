@@ -28,6 +28,9 @@ DesHelp = {'',...
 % Reuse flexible factorial component of SPM to get the design files and
 % associated conditions
 factorial_design = spm_cfg_factorial_design();
+if isa(factorial_design.val,'function_handle')
+    factorial_design.val = feval(factorial_design.val);
+end
 sub_files = factorial_design.val{2}.values{end}.val{2}.val{1};
 
 % We expect exactly two files per subject
