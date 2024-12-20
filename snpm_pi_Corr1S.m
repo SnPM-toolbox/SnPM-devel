@@ -132,12 +132,12 @@ if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
             dnames = job.cov(i).cname;
     %         dnames = [str,'ConfCov#',int2str(nGcs+1)];
     %         for j = nGcs+1:nGcs+size(d,1)
-    %             dnames = str2mat(dnames,['ConfCov#',int2str(j)]); 
+    %             dnames = char(dnames,['ConfCov#',int2str(j)]); 
     %         end
-            Gcnames = str2mat(Gcnames,dnames);
+            Gcnames = char(Gcnames,dnames);
         end 
     end
-    %-Strip off blank line from str2mat concatenations
+    %-Strip off blank line from char concatenations
     if size(Gc,2)
         Gcnames(1,:)=[]; 
     end
@@ -151,7 +151,7 @@ Gnames = Gcnames;
 tmp      = nScan./[nScan:-1:1];
 Xblk     = tmp( floor(tmp)==ceil(tmp) & tmp>1 );
 tmp      = int2str(Xblk(1));
-for i=2:length(Xblk), tmp=str2mat(tmp,int2str(Xblk(i))); end
+for i=2:length(Xblk), tmp=char(tmp,int2str(Xblk(i))); end
 if length(Xblk)>1
   Xblk     = job.xblock;%spm_input('Size of exchangability block','+0','b',tmp,Xblk);
 end

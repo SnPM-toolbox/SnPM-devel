@@ -163,10 +163,10 @@ for i = 1:g
         end
         G = [G, d];
         dnames = job.cov(i).cname;
-        Gcnames = str2mat(Gcnames,dnames);
+        Gcnames = char(Gcnames,dnames);
     end
 end
-%-Strip off blank line from str2mat concatenations
+%-Strip off blank line from char concatenations
 if size(Gc,2), Gcnames(1,:)=[]; end
 %-Since no FxC interactions these are the same
 Gnames = Gcnames;

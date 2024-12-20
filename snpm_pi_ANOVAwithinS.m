@@ -139,7 +139,7 @@ iRepl = [];
 iSubj = [];
 for subj=1:nSubj
     %tmp = ['Subject ',int2str(subj),': Select scans in time order'];
-    P = str2mat(P, str2mat(job.fsubject(subj).scans)); %str2mat(P,spm_select(nRepl,'image',tmp));
+    P = char(P, char(job.fsubject(subj).scans)); %char(P,spm_select(nRepl,'image',tmp));
     iRepl = [iRepl, 1:nRepl];
     iSubj = [iSubj, subj*ones(1,nRepl)];
 end
@@ -167,10 +167,10 @@ if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
             d  = d - ones(q,1)*mean(d); str='';
             G = [G, d];
             dnames = job.cov(i).cname;
-            Gcnames = str2mat(Gcnames,dnames);
+            Gcnames = char(Gcnames,dnames);
         end
     end
-    %-Strip off blank line from str2mat concatenations
+    %-Strip off blank line from char concatenations
     if size(Gc,2)
         Gcnames(1,:)=[];
     end

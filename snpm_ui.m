@@ -193,7 +193,7 @@ end
   
 %-Definitions & Design parameters
 %=======================================================================
-sDesigns=str2mat(...
+sDesigns=char(...
 	'SingleSub: Two Sample T test; 2 conditions',...
 	'SingleSub: Simple Regression; 1 covariate of interest',...
 	'MultiSub: One Sample T test on differences; 1 condition',...
@@ -207,7 +207,7 @@ sDesigns=str2mat(...
         'User Specified PlugIn',...
 	'keyboard');
 
-sDesFile=str2mat(...
+sDesFile=char(...
         'snpm_pi_TwoSampTss', ...
 	'snpm_pi_Corr1S', ...
 	'snpm_pi_OneSampT', ...     
@@ -228,7 +228,7 @@ sDesFile=str2mat(...
 %%%
 
 %-Global normalization                                    (GloNorm)
-sGloNorm=str2mat(... 
+sGloNorm=char(... 
 	'<no global normalisation>',...				%-1
 	'proportional scaling',...				%-2
 	'AnCova',...						%-3
@@ -236,13 +236,13 @@ sGloNorm=str2mat(...
 	'AnCova {study-specific}');				%-5
 
 %-Global calculation options                               (GXcalc)
-sGXcalc  = str2mat(...
+sGXcalc  = char(...
     'omit',...							%-1
     'user specified',...					%-2
     'mean voxel value (within per image fullmean/8 mask)');	%-3
 
 %-Grand mean scaling options                                (GMsca)
-sGMsca = str2mat(...
+sGMsca = char(...
     '<no grand Mean scaling>',...				%-1
     'scaling of overall grand mean');				%-2
 
@@ -517,7 +517,7 @@ end
 %=======================================================================
 Gc    = [Gc,GX];
 if isempty(Gcnames), Gcnames = 'Global';
-else, Gcnames = str2mat(Gcnames,'Global'); end
+else, Gcnames = char(Gcnames,'Global'); end
 
 if iGloNorm == 1				%-No global adjustment
 %-----------------------------------------------------------------------
@@ -533,21 +533,21 @@ elseif iGloNorm == 3				%-AnCova
 %-----------------------------------------------------------------------
    G = [G,(GX - mean(GX))];
    if isempty(Gnames), Gnames = 'Global'; 
-   else, Gnames = str2mat(Gnames,'Global'); end
+   else, Gnames = char(Gnames,'Global'); end
 
 elseif iGloNorm == 4				%-AnCova by subject
 %-----------------------------------------------------------------------
     [GL,GLnames] = spm_DesMtx([iSUBJ',GX-mean(GX)],'FxC',['SUBJ  ';'Global']);
     G = [G,GL];
     if isempty(Gnames), Gnames = GLnames;
-    else, Gnames = str2mat(Gnames,GLnames); end
+    else, Gnames = char(Gnames,GLnames); end
 
 elseif iGloNorm == 5				%-AnCova by study
 %-----------------------------------------------------------------------
     [GL,GLnames] = spm_DesMtx([iStud',GX-mean(GX)],'FxC',['Stud  ';'Global']);
     G = [G,GL];
     if isempty(Gnames), Gnames = GLnames; 
-    else, Gnames = str2mat(Gnames,GLnames); end
+    else, Gnames = char(Gnames,GLnames); end
 else
 %-----------------------------------------------------------------------
     error('SnPM:InvalidiGloNorm', sprintf('%cError: invalid iGloNorm option\n',7))

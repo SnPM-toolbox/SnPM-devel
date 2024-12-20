@@ -142,7 +142,7 @@ iSubjC= [];
 iRepl = [];
 for subj=1:nSubj
     tmp = ['Subject ',int2str(subj),': Select scans in time order'];
-    P = str2mat(P, str2mat(job.fsubject(subj).scans)); %str2mat(P,spm_select(nCond*nRepl,'image',tmp));
+    P = char(P, char(job.fsubject(subj).scans)); %char(P,spm_select(nCond*nRepl,'image',tmp));
     Cond=[];
     while(isempty(Cond))
 %         tmp=['Enter conditions index: (A/B) [',int2str(nCond*nRepl),']'];
@@ -308,7 +308,7 @@ sHCform    = 'spm_DesMtx(PiCond(perm,:),''-'',''Cond'')';
 [H] = spm_DesMtx(iCond,'-','Cond');
 Hnames=[];
 for i=1:nCond
-    Hnames=str2mat(Hnames,['Cond_',sCond(i)]); end
+    Hnames=char(Hnames,['Cond_',sCond(i)]); end
 Hnames(1,:) = [];    
 %-Contrast of condition effects
 % (spm_DesMtx puts condition effects in index order)

@@ -102,7 +102,7 @@ end
 tmp      = nRepl./[nRepl:-1:1];
 Xblk     = nCond * tmp(floor(tmp)==ceil(tmp));
 tmp      = int2str(Xblk(1));
-for i=2:length(Xblk), tmp=str2mat(tmp,int2str(Xblk(i))); end
+for i=2:length(Xblk), tmp=char(tmp,int2str(Xblk(i))); end
 Xblk     = job.TwosampTss_Block; %spm_input('Size of exchangability block','+1','b',tmp,Xblk);
 nXblk    = nCond*nRepl/Xblk;
 iXblk    = meshgrid(1:nXblk,1:Xblk); iXblk = iXblk(:)';
