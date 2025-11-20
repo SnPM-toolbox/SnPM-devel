@@ -135,12 +135,12 @@ if numel(job.cov) > 0 %isfield(job.covariate,'cov_Val')
             dnames = job.cov(i).cname;
     %         dnames = [str,'ConfCov#',int2str(nGcs+1)];
     %         for j = nGcs+1:nGcs+size(d,1)
-    %             dnames = str2mat(dnames,['ConfCov#',int2str(j)]); 
+    %             dnames = char(dnames,['ConfCov#',int2str(j)]); 
     %         end
-            Gcnames = str2mat(Gcnames,dnames);
+            Gcnames = char(Gcnames,dnames);
         end 
     end
-    %-Strip off blank line from str2mat concatenations
+    %-Strip off blank line from char concatenations
     if size(Gc,2)
         Gcnames(1,:)=[]; 
     end

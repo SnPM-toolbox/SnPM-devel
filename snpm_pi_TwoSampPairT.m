@@ -147,7 +147,7 @@ for stud=1:nStud
     tmpCond = job.(['scans' num2str(stud)]).fsubject(subj).scindex;%
     tmpCond = tmpCond-min(tmpCond);
     Cond = -(tmpCond/max([1,tmpCond])*2-1);
-	P = str2mat(P,str2mat(tP));
+	P = char(P,char(tP));
 	% update indicators	
 	iCond = [iCond, Cond];
 	iSubj = [iSubj, subj*ones(1,nCond)];
@@ -183,13 +183,13 @@ for i = 1:g
     G = [G, d];
     dnames = job.cov(i).cname; %[str,'ConfCov#',int2str(nGcs+1)];
 %     for j = nGcs+1:nGcs+size(d,1)
-%       dnames = str2mat(dnames,job.cov(j).cname);%str2mat(dnames,['ConfCov#',int2str(i)]); 
+%       dnames = char(dnames,job.cov(j).cname);%char(dnames,['ConfCov#',int2str(i)]); 
 %     end
-    Gcnames = str2mat(Gcnames,dnames);
+    Gcnames = char(Gcnames,dnames);
   end
 %end
 end
-%-Strip off blank line from str2mat concatenations
+%-Strip off blank line from char concatenations
 if size(Gc,2), Gcnames(1,:)=[]; end
 %-Since no FxC interactions these are the same
 Gnames = Gcnames;
